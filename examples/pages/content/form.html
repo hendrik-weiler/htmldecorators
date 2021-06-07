@@ -1,0 +1,21 @@
+@Submit(handler=formSubmit)
+@Size(width=250px)
+@Background(color=white)
+@Padding(value=20px)
+@Margin(top=20px)
+<form action="javascript:" name="form">
+  <label>Name</label>
+  @todoDec.Input
+  <input type="text" name="name" required><br/>
+  <label>Age</label>
+  @todoDec.Input
+  <input type="text" name="name" required><br/>
+  @todoDec.Button
+  <button type="submit">Send</button>
+</form>
+@Script
+<script>
+  HTMLDecorators.Handler(function formSubmit() {
+    console.log('form submit');
+  });
+</script>

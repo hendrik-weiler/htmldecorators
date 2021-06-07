@@ -1,0 +1,91 @@
+body {
+    margin: 0;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body.body .loading {
+    display: none;
+}
+
+div.body {
+    display: flex;
+    flex-flow: column;
+    width: 100%;
+    height: 100vh;
+}
+
+.error {
+    padding: 15px;
+    border: 1px solid red;
+    margin-top: 10px;
+}
+
+.page {
+    display: none;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+}
+
+.page.show {
+    display: flex;
+    flex-flow: column;
+}
+
+.page form {
+    gap: 0;
+    flex-flow: column;
+}
+
+.page form label {
+    padding: 15px 0;
+}
+
+.login {
+    justify-content: center;
+    align-items: center;
+}
+
+.login .login-container {
+    width: 100%;
+    max-width: 600px;
+    background: white;
+    padding: 30px;
+}
+
+.page.app {
+    flex-flow: row;
+}
+
+.page.app aside {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+    width: 200px;
+    background: #fff;
+}
+
+.page.app aside a {
+    padding: 10px;
+    display: block;
+    text-decoration: none;
+    color: black;
+}
+
+.page.app aside a.active,
+.page.app aside a:hover {
+    background: #cccccc;
+}
+
+.page.app aside > div {
+    flex-grow: 1;
+}
+
+.page.app main {
+    flex-grow: 1;
+    overflow: auto;
+    padding: 40px;
+}

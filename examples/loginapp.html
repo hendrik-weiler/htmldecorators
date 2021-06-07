@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+  <link rel="stylesheet" href="todoapp.css">
+  <link rel="stylesheet" href="loginapp.css">
+  <script src="../lib/htmldecorators.js"></script>
+  <script src="../lib/stdDecorators/event.js"></script>
+  <script src="../lib/stdDecorators/visible.js"></script>
+  <script src="../lib/stdDecorators/navigation.js"></script>
+  <script src="../lib/stdDecorators/style.js"></script>
+  <script src="../lib/stdDecorators/core.js"></script>
+  <script src="../lib/stdDecorators/init.js"></script>
+  <script src="app/login.js"></script>
+  <script src="app/todo.js"></script>
+  <script src="app/pageLoader.js"></script>
+  <script>
+
+    async function applyPage(filename) {
+      var data = await loadPage(filename),
+          body = document.querySelector('.body'),
+          page = document.createElement('div');
+      page.classList.add('page');
+      page.innerHTML = data.html;
+      body.appendChild(page);
+
+      pages[filename.replace('.html','')] = page;
+
+      applyDecs(null,data);
+    }
+
+    // apply decorator handler example
+    function applyDecs(e,data) {
+      console.log(data.decs);
+      HTMLDecorators.ApplyDecorators(data.decs);
+      HTMLDecorators.ApplyDecorators(data.decs, todoDec, 'todoDec');
+      HTMLDecorators.ApplyDecorators(data.decs, loginDec, 'loginDec');
+    }
+
+    ///////////////////////////////////////////////
+    /// Interactions
+    ///////////////////////////////////////////////
+
+    function login() {
+      var form = document.forms.login,
+          dec;
+      if(dec = HTMLDecorators.FindById('error')) {
+        dec.hide();
+        if(form.username.value == 'test'
+                && form.pwd.value == 'abc123') {
+          location.hash = 'app/home';
+          HTMLDecorators.FindById('nav').setActive('home');
+        } else {
+          dec.show();
+        }
+      }
+    }
+
+    function navHashChange(decorator) {
+      var hash = location.hash.replace('#','');
+      hash = hash.split('/');
+      hash = hash.pop();
+      HTMLDecorators.FindById('nav').setActive(hash);
+    }
+
+    function logout(e) {
+      e.preventDefault();
+      location.hash = 'login';
+    }
+
+    ///////////////////////////////////////////////
+
+    window.onload = async function () {
+      pageInit = 'login';
+      //HTMLDecorators.EvaluateHTMLDecs(applyDecs);
+      HTMLDecorators.EvaluateHTMLDecs();
+      await applyPage('login.html');
+      await applyPage('app.html');
+      document.body.classList.add('body');
+      route();
+    }
+
+    window.addEventListener('hashchange', route, false);
+  </script>
+</head>
+<body>
+  <template data-htmldec>
+    @Init(
+      includeDec0=todoDec,
+      includeDec1=loginDec
+    )
+  </template>
+  <div class="loading">Loading...</div>
+  <div class="body"></div>
+</body>
+</html>

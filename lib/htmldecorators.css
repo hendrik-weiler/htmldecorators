@@ -1,0 +1,7 @@
+[data-htmldec] {
+    display: none;
+}
+
+[data-htmldec="rendered"] {
+    display: inherit;
+}

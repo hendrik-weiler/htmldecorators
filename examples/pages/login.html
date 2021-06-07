@@ -1,0 +1,18 @@
+<div class="login-container">
+  @Submit(handler=login)
+  <form action="javascript:" name="login">
+    <label for="username">Username</label>
+    @todoDec.Input
+    <input id="username" type="text" name="username" value="test" required>
+    <label for="pwd">Password</label>
+    @todoDec.Input
+    <input id="pwd" type="password" name="pwd" value="abc123" required>
+    <br/>
+    @todoDec.Button
+    <button type="submit">Login</button>
+    @Hide(id=error)
+    <div class="error">
+      The username or password is invalid
+    </div>
+  </form>
+</div>

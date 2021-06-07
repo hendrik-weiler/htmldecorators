@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../lib/htmldecorators.js"></script>
+    <script>
+        async function loadFile(filename) {
+            var test1 = await fetch('pages/' + filename),
+                test1html = await test1.text();
+
+            console.log('Content to parse:');
+            console.log(test1html);
+            var parser = new HTMLDecorators.Parser();
+            console.log(parser.parse(test1html));
+            console.log('DecoratorMap:');
+            console.log(parser.DecoratorList);
+        }
+
+        async function init() {
+            console.log('------------------------------------');
+            console.log('-------- Non parameterized test -------- ');
+            console.log('------------------------------------');
+            await loadFile('test1.html');
+            console.log('------------------------------------');
+            console.log('-------- Parameterized test -------- ');
+            console.log('------------------------------------');
+            await loadFile('test2.html');
+            console.log('------------------------------------');
+            console.log('-------- Advanced tests -------- ');
+            console.log('------------------------------------');
+            await loadFile('test3.html');
+        }
+
+        init();
+    </script>
+</head>
+<body>
+
+</body>
+</html>
