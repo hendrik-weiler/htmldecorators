@@ -1,7 +1,7 @@
 <?php
 
 //// CONFIG
-$version = '0.1';
+$version = '0.1.1';
 $buildTime = date('Y-m-d H:i:s',time());
 ///
 

@@ -7,15 +7,14 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Version: 0.1
+Version: 0.1.1
 
-Build: 2021-06-07 18:22:29
+Build: 2021-06-08 16:56:36
 */
 /**
  * The htmldecorators namespace
  *
- * Contains:
- * - Parser
+ * Contains the Parser and various helper functions
  *
  * @type object
  */
@@ -85,6 +84,48 @@ var HTMLDecorators = (function(document,window) {
     }
 
     /**
+     * Finds the loaded script tag
+     *
+     * @return {HTMLScriptElement}
+     * @constructor
+     */
+    function FindMainJSScriptTag() {
+        var scripts = document.getElementsByTagName('script'),
+            i = 0,
+            script,
+            src;
+        for(i; i < scripts.length; ++i) {
+            script = scripts[i];
+            src = script.getAttribute('src');
+            if(new RegExp('htmldecorators\.js$').test(src)) {
+                break;
+            }
+        }
+        return script;
+    }
+
+    /**
+     * Executes code based on main script tag attributes
+     *
+     * @constructor
+     */
+    function ExecuteScriptParams() {
+        var scriptTag = FindMainJSScriptTag(),
+            params = {
+                evaluateDecsTags : false
+            };
+        if(scriptTag.getAttribute('data-evalhtmldec')!=null) {
+            params.evaluateDecsTags = true;
+        }
+
+        if(params.evaluateDecsTags) {
+            window.addEventListener('load', function () {
+                EvaluateHTMLDecs();
+            });
+        }
+    }
+
+    /**
      * Evaluates all tags with data-htmldec attribute contents
      *
      * Callback signature:
@@ -135,7 +176,7 @@ var HTMLDecorators = (function(document,window) {
                 };
 
             tag.innerHTML = result.html;
-            tag.setAttribute('data-htmldec','rendered');
+            tag.removeAttribute('data-htmldec');
             cb(window,result);
 
         } else {
@@ -205,6 +246,8 @@ var HTMLDecorators = (function(document,window) {
                 if(decorator.config.id) {
                     IdMap[decorator.config.id] = decorator;
                 }
+            } else {
+                console.log('Decorator "' + decoratorName + '" not found.');
             }
         }
     }
@@ -246,14 +289,22 @@ var HTMLDecorators = (function(document,window) {
     /**
      * Parse the html and returns the html
      *
+     * Variables example:
+     * In HTML ${variableName}
+     *
+     * How to skip a decorator definition:
+     * You add two @@
+     * Example:
+     * When you write <p>@@Bold</p> the output will be <p>@Bold</p>
+     *
      * @param value The html string
+     * @param variables A key,value object
      * @return {string}
      */
-    Parser.prototype.parse = function (value) {
+    Parser.prototype.parse = function (value, variables) {
+        if(!variables) variables = {};
         // reset list
         this.DecoratorList = [];
-        delete this.GeneratedIdMap;
-        this.GeneratedIdMap = {};
         // init vars
         var i = 0,
             j,
@@ -261,7 +312,6 @@ var HTMLDecorators = (function(document,window) {
             ch2,
             len = value.length,
             afterParseValue = '',
-            decorators = [],
             currentDecorator,
             currentDecoratorName = '',
             currentDecoratorParameterKey = '',
@@ -269,6 +319,7 @@ var HTMLDecorators = (function(document,window) {
             currentDecoratorId,
             afterCloseTag = true,
             inDectoratorbeforeName = false,
+            inDecoratorInNameCounter = 0,
             inParameterDefinition = false,
             inParameterKey = false,
             inParameterValue = false,
@@ -277,10 +328,29 @@ var HTMLDecorators = (function(document,window) {
             afterDecoratorNodeConnection = false,
             afterDecoratorNodeOpenTag = false,
             atFollowingClosingTag = false,
-            atFollowingOpeningTag = false;
+            atFollowingOpeningTag = false,
+            inVariableDefinition = false,
+            inVariableName = '';
         for(i; i < len; ++i) {
             ch = value[i];
-            if(!afterCloseTag && !afterDecoratorNodeConnection) {
+            if(inVariableDefinition) {
+                if(ch == '}') {
+                    if(typeof variables[inVariableName] != 'undefined') {
+                        afterParseValue += variables[inVariableName];
+                    } else {
+                        afterParseValue += '${' + inVariableName + ':not found' + '}';
+                    }
+                    inVariableDefinition = false;
+                } else {
+                    inVariableName += ch;
+                }
+            } else if(!inVariableDefinition && ch == '$' && i+1 < len && value[i+1] == '{') {
+                if(value[i-1] != '$') {
+                    inVariableDefinition = true;
+                    inVariableName = '';
+                    i+=1;
+                }
+            } else if(!afterCloseTag && !afterDecoratorNodeConnection) {
                 if(ch == '@') {
                     afterCloseTag = true;
                     i-=1;
@@ -290,8 +360,7 @@ var HTMLDecorators = (function(document,window) {
                 if(i+1 < len && ch == '<' && value[i+1] == '/') {
                     afterCloseTag = true;
                 }
-            } else
-            if(afterDecoratorNodeConnection && afterDecoratorNodeOpenTag) {
+            } else if(afterDecoratorNodeConnection && afterDecoratorNodeOpenTag) {
                 if(ch == ' ' || ch == '>') {
                     afterParseValue += ' data-dec-id="' + currentDecoratorId + '" ';
                     currentDecorator.setId(currentDecoratorId);
@@ -375,7 +444,11 @@ var HTMLDecorators = (function(document,window) {
                     currentDecoratorParameterKey = ch;
                 }
             } else if(afterCloseTag && inDectoratorbeforeName) {
-                if(ch == '@') {
+                // if theres two @@ skip this decorator
+                if(inDecoratorInNameCounter == 0 && ch == '@') {
+                    afterParseValue += ch;
+                    inDectoratorbeforeName = false;
+                } else if(ch == '@' || i == len-1) {
                     // set name, id and add it to the list
                     currentDecorator.setName(currentDecoratorName);
                     currentDecorator.setId(currentDecoratorId);
@@ -409,6 +482,7 @@ var HTMLDecorators = (function(document,window) {
                 } else {
                     if(ch!="\n" && ch != "\r") {
                         currentDecoratorName += ch;
+                        ++inDecoratorInNameCounter;
                     }
                 }
             } else if(afterCloseTag && !inDectoratorbeforeName && ch == '@') {
@@ -438,6 +512,7 @@ var HTMLDecorators = (function(document,window) {
                 inDectoratorbeforeName = true;
                 inParameterKey = false;
                 inParameterValue = false;
+                inDecoratorInNameCounter = 0;
             } else {
                 afterParseValue += ch;
             }
@@ -657,7 +732,10 @@ var HTMLDecorators = (function(document,window) {
      *
      * @return void
      */
-    Decorator.prototype.render = function () {}
+    Decorator.prototype.render = function () {};
+
+    // execute if attributes were set
+    ExecuteScriptParams();
 
     return {
         Parser : Parser,

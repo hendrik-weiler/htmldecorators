@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ForEach</title>
+    <script data-evalhtmldec src="../lib/htmldecorators.js"></script>
+    <script src="../lib/stdDecorators/core.js"></script>
+    <script src="../lib/stdDecorators/init.js"></script>
+    <script src="../lib/stdDecorators/style.js"></script>
+    <link rel="stylesheet" href="../lib/htmldecorators.css">
+</head>
+<body>
+    <template data-htmldec>
+        @Init
+    </template>
+    <ul data-htmldec>
+        @ForEach(id=menu)
+        <ul>
+            <li>
+                @@Bold @@Underline @@Italic
+                <a href="$${link}">$${label} $${index}</a>
+            </li>
+        </ul>
+    </ul>
+    <script>
+        window.onload = function () {
+            var menu = decById('menu');
+            menu.update([
+                {link:'Test',label:'Link 1'},
+                {link:'Test',label:'Link 2'},
+                {link:'Test',label:'Link 3'}
+            ]);
+        }
+    </script>
+</body>
+</html>

@@ -14,6 +14,23 @@ The files to include
 There are several examples in the ```examples``` folder.
 You can use the ```examples/build.html``` can be used as base.
 
+**Include to your html file**
+```
+<script data-evalhtmldec src="../build/htmldecorators.js"></script>
+<script src="../build/htmldecorators-std.js"></script>
+<link rel="stylesheet" href="../build/htmldecorators.css">
+```
+Notice that "data-evalhtmldec" was added as attribute to the script tag for ```htmldecorators.js```. With this
+all elements with the "data-htmldec" attribute will be parsed.
+If you remove this attribute you have to add this to your page:
+```
+<script>
+window.onload = function () {
+    HTMLDecorators.EvaluateHTMLDecs();
+}
+</script>
+```
+
 **Basic usage**
 ```
 <!-- Format tags using decorators -->
@@ -35,6 +52,37 @@ HTMLDecorators.Handler(function hello() {
     alert('hello');
 });
 </script>
+
+<!-- ref -->
+@Ref(id=paragraph)
+<p></p>
+<script>
+// get the decorator instance
+var p = decById('paragraph');
+p.element.innerHTML = 'Content';
+</script>
+
+<!-- foreach -->
+<ul data-htmldec>
+    @ForEach(id=menu)
+    <ul>
+        <li>
+            @@Bold @@Underline @@Italic
+            <a href="$${link}">$${label} $${index}</a>
+        </li>
+    </ul>
+</ul>
+<script>
+    window.onload = function () {
+        // decById is an alias to HTMLDecorators.FindById
+        var menu = decById('menu');
+        menu.update([
+            {link:'Test',label:'Link 1'},
+            {link:'Test',label:'Link 2'},
+            {link:'Test',label:'Link 3'}
+        ]);
+    }
+</script>
 ```
 
 **Extending with own decorators**
@@ -47,7 +95,10 @@ There are examples for creating own decorators in
 // After you include examples/app/todo.js to your html file
 // you can initialize your application. Put this code inside your body tag
 <template data-htmldec>
-@Init(includeDec0=todoDec)
+@Init(
+    includeDec0=todoDec,
+    includeDec1=loginDec
+)
 </template>
 // Now let the application read the data-htmldec tags 
 <script>

@@ -1,0 +1,99 @@
+body {
+    margin: 0;
+    font-family: Arial;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+.error {
+    background: #dc3545;
+    color: white;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cccccc;
+    outline: none;
+}
+
+.entry {
+    margin-bottom: 10px;
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+
+.entry > div:first-child {
+    width: 100px;
+}
+
+.entry > input {
+    flex-grow: 1;
+}
+
+.entry > div:last-child {
+    width: 100px;
+    padding-left: 10px;
+}
+
+.button,
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.button,
+button:hover {
+    background: #0069d9;
+}
+
+.app {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+}
+
+.app form {
+    width: 100%;
+    max-width: 600px;
+    background: #efefef;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+}
+
+table tr th {
+    border-bottom: 1px solid #fff;
+    text-align: left;
+}
+
+table tr td,
+table tr th {
+    padding: 10px;
+}
+
+.options {
+    border-top: 1px solid white;
+    margin: 10px 0;
+    padding: 10px 0;
+    text-align: center;
+}
+
+.options .button {
+    display: inline-block;
+}

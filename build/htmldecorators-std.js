@@ -7,9 +7,9 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Version: 0.1
+Version: 0.1.1
 
-Build: 2021-06-07 18:22:29
+Build: 2021-06-08 16:56:36
 */
 HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
 
@@ -22,14 +22,14 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
      * Params:
      * string path - The path to load
      * string id - The id to the @Navigations a[data-id] attribute
-     * string cb - The callback when the load finished
+     * string applyHandler - The decoration applier function
      *
      * @constructor
      */
     function LoadHTML() {
         HTMLDecorators.Decorator.call(this,{
             putInElement : 'true',
-            cb : ''
+            applyHandler : ''
         });
     }
     HTMLDecorators.ExtendsClass(LoadHTML, HTMLDecorators.Decorator);
@@ -51,8 +51,8 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
                 this.element.innerHTML = parsedHTML;
             }
             // use internal cb property
-            if(this.config.cb != '') {
-                this.callFunction(this.config.cb, obj);
+            if(this.config.applyHandler != '') {
+                this.callFunction(this.config.applyHandler, obj);
             } else {
                 var dec;
                 // if init was defined
@@ -64,6 +64,8 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
                         // use internal apply decorator handler
                         dec.internalApplyDecoration(null, obj);
                     }
+                } else {
+                    this.log('No decoration applier found');
                 }
             }
         } else {
@@ -97,6 +99,155 @@ HTMLDecorators.StdDecorators.Script = (function (document, window) {
     }
 
     return Script;
+
+})(document, window);
+
+HTMLDecorators.StdDecorators.Ref = (function (document, window) {
+
+    /**
+     * Gets a decorator
+     *
+     * @param id The id of the reference
+     * @return {null|HTMLDecorators.Decorator}
+     */
+    window.decById = function (id) {
+        return HTMLDecorators.FindById(id);
+    }
+
+    /**
+     * Gets the element of the decorator
+     *
+     * @param id The id of the reference
+     * @return {null|HTMLElement}
+     */
+    window.decElmById = function (id) {
+        var ref;
+        if(ref = decById(id)) {
+            return ref.element;
+        }
+        return null;
+    }
+
+    /**
+     * Sets a reference
+     *
+     * Params:
+     * string id - The id
+     *
+     * @constructor
+     */
+    function Ref() {
+        HTMLDecorators.Decorator.call(this);
+    }
+    HTMLDecorators.ExtendsClass(Ref, HTMLDecorators.Decorator);
+
+    return Ref;
+
+})(document, window);
+
+HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
+
+    /**
+     * Sets a reference
+     *
+     * Params:
+     * string id - The id
+     * string applyHandler - The decoration applier function
+     *
+     * @constructor
+     */
+    function ForEach() {
+        HTMLDecorators.Decorator.call(this,{
+            applyHandler : ''
+        });
+
+        /**
+         * Returns the template for iteration
+         *
+         * @type {string}
+         */
+        this.template = '';
+
+        this.iterationHTMLSum = '';
+
+        this.decoratorsSum = [];
+    }
+    HTMLDecorators.ExtendsClass(ForEach, HTMLDecorators.Decorator);
+    /**
+     * A single iteration
+     *
+     * @param data A key,value object
+     */
+    ForEach.prototype.iteration = function (index, data) {
+        var parser = new HTMLDecorators.Parser(),
+            parsedHTML = parser.parse(this.template, Object.assign({
+                index : index
+            },data)),
+            i = 0,
+            len = parser.DecoratorList.length;
+
+        this.iterationHTMLSum += parsedHTML;
+
+        for(i; i < len; ++i) {
+            this.decoratorsSum.push(parser.DecoratorList[i]);
+        }
+
+    }
+    /**
+     * Updates the element
+     *
+     * @param list A list of objects
+     */
+    ForEach.prototype.update = function (list) {
+        // reset
+        this.element.innerHTML = '';
+        this.iterationHTMLSum = '';
+        this.decoratorsSum = [];
+
+        var i = 0,
+            len = list.length,
+            data;
+        for (i; i < len; ++i) {
+            data = list[i];
+            // iterate over all data
+            this.iteration(i,data);
+        }
+
+        var obj = {
+            html : this.iterationHTMLSum,
+            decs : this.decoratorsSum
+        }
+
+        this.element.innerHTML = obj.html;
+
+        // use internal cb property
+        if(this.config.applyHandler != '') {
+            this.callFunction(this.config.applyHandler, obj);
+        } else {
+            var dec;
+            // if init was defined
+            if(dec = this.findById('stdInit')) {
+                // if a custom apply decorator handler was defined
+                if(dec.config.applyDecorationsHandler != '') {
+                    this.callFunction(dec.config.applyDecorationsHandler, obj);
+                } else {
+                    // use internal apply decorator handler
+                    dec.internalApplyDecoration(null, obj);
+                }
+            } else {
+                this.log('No decoration applier found');
+            }
+        }
+    }
+    /**
+     * Renders the decorator
+     */
+    ForEach.prototype.render = function () {
+        this.template = (' ' + this.element.innerHTML).slice(1);
+        this.element.innerHTML = '';
+    }
+
+    return ForEach;
 
 })(document, window);HTMLDecorators.StdDecorators.Event = (function (document, window) {
 

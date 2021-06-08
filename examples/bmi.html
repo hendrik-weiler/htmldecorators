@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BMI Calculator</title>
+    <script data-evalhtmldec src="../build/htmldecorators.js"></script>
+    <script src="../build/htmldecorators-std.js"></script>
+    <link rel="stylesheet" href="../build/htmldecorators.css">
+    <link rel="stylesheet" href="bmi.css">
+</head>
+<body>
+    <div class="app" data-htmldec>
+        @Submit(handler=calculate)
+        <form name="bmi" action="javascript:">
+            @Show(id=form)
+            <div>
+                <h1>Calculate your BMI now!</h1>
+                <div class="entry">
+                    <div>Height</div>
+                    <input autocomplete="off" type="text" name="height">
+                    <div>Cm</div>
+                </div>
+                @Hide(id=age_height)
+                <div class="error">
+                    Height must be a number and not empty.
+                </div>
+                <div class="entry">
+                    <div>Weight</div>
+                    <input autocomplete="off" type="text" name="weight">
+                    <div>Kg</div>
+                </div>
+                @Hide(id=age_weight)
+                <div class="error">
+                    Weight must be a number and not empty.
+                </div>
+                <button type="submit">Calculate BMI</button>
+            </div>
+            @Hide(id=result)
+            <div class="result">
+                <h1>Your BMI is
+                    @Ref(id=bmiresult)
+                    <span></span>
+                </h1>
+                <table>
+                    <tr>
+                        <th>Categories</th>
+                        <th>BMI</th>
+                    </tr>
+                    <tr>
+                        <td>Underweight</td>
+                        <td>&lt; 18.5</td>
+                    </tr>
+                    <tr>
+                        <td>Normalweight</td>
+                        <td>18.5 - 24.9</td>
+                    </tr>
+                    <tr>
+                        <td>Overweight</td>
+                        <td>&gt; 25,0</td>
+                    </tr>
+                    <tr>
+                        <td>Präadipositas</td>
+                        <td>25.0 - 29.9</td>
+                    </tr>
+                    <tr>
+                        <td>Adipositas Grad 1</td>
+                        <td>30.0 - 34.9</td>
+                    </tr>
+                    <tr>
+                        <td>Adipositas Grad 2</td>
+                        <td>35.0 - 39.9</td>
+                    </tr>
+                    <tr>
+                        <td>Adipositas Grad 3</td>
+                        <td>40.0</td>
+                    </tr>
+                </table>
+                <div class="options">
+                    @Click(handler=reset)
+                    <a class="button" href="#">New calculation</a>
+                </div>
+            </div>
+        </form>
+        @Script
+        <script>
+            HTMLDecorators.Handler(function reset() {
+                var formVisibility = decById('form'),
+                    resultVisibility = decById('result');
+                formVisibility.show();
+                resultVisibility.hide();
+            });
+
+            HTMLDecorators.Handler(function calculate() {
+                var form = document.forms.bmi,
+                    height = form.height,
+                    weight = form.weight,
+                    heightError = decById('age_height'),
+                    weightError = decById('age_weight'),
+                    formVisibility = decById('form'),
+                    resultVisibility = decById('result'),
+                    bmiresult = decElmById('bmiresult'),
+                    validation = true;
+
+                heightError.hide();
+                if(height.value == '') {
+                    heightError.show();
+                    validation = false;
+                }
+                if(!/[0-9\.]+/.test(height.value)) {
+                    heightError.show();
+                    validation = false;
+                }
+                weightError.hide();
+                if(weight.value == '') {
+                    weightError.show();
+                    validation = false;
+                }
+                if(!/[0-9\.]+/.test(weight.value)) {
+                    weightError.show();
+                    validation = false;
+                }
+                if(!validation) return;
+
+                formVisibility.hide();
+                resultVisibility.show();
+                bmiresult.innerText = Math.round(((weight.value/(height.value * height.value))*10000).toFixed(2));
+            });
+        </script>
+    </div>
+</body>
+</html>
