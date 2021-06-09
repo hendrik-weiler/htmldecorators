@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Components</title>
+    <script data-evalhtmldec src="../lib/htmldecorators.js"></script>
+    <script src="../lib/stdDecorators/core.js"></script>
+    <script src="../lib/stdDecorators/event.js"></script>
+    <link rel="stylesheet" href="../lib/htmldecorators.css">
+</head>
+<body>
+  <div id="app" data-htmldec-render>
+    @Init
+    @LoadHTML(path=components/imageBox.html,data=${box})
+    <div class="boxes"></div>
+    @ForEach(data="${boxes}")
+    <div class="boxes">
+          @@LoadHTML(path=components/imageBox.html,data=$${__entry__})
+          <span></span>
+    </div>
+      <br><br>
+      @LoadHTML(path=components/fileSelect.html)
+      <span></span>
+      <br>
+      @LoadHTML(path=components/fileSelect.html)
+      <span></span>
+  </div>
+  <script>
+    window.onload = function () {
+      decEvalTag(document.querySelector('#app'),{
+        box : {
+          src : 'http://finalfantasyradio.co/wp-content/uploads/2020/10/IMG_0331-768x1662.png',
+          text : 'Lorem ipsum manum'
+        },
+          boxes : [
+              {
+                  src : 'http://finalfantasyradio.co/wp-content/uploads/2020/10/IMG_0331-768x1662.png',
+                  text : 'Lorem ipsum manum'
+              },
+              {
+                  src : 'https://www.google.de/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png',
+                  text : 'Manum ipsum lorem'
+              }
+          ]
+      });
+    }
+  </script>
+</body>
+</html>

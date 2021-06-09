@@ -12,9 +12,21 @@
   <input type="text" name="name" required><br/>
   @todoDec.Button
   <button type="submit">Send</button>
+  @ForEach(id=test2)
+  <div>
+    <a href="#">$${label}</a>
+  </div>
 </form>
 @Script
 <script>
+
+  var menu = decById('test2');
+  menu.update([
+    {link:'Test',label:'Link 1'},
+    {link:'Test',label:'Link 2'},
+    {link:'Test',label:'Link 3'}
+  ]);
+
   HTMLDecorators.Handler(function formSubmit() {
     console.log('form submit');
   });

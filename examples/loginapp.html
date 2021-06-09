@@ -11,7 +11,6 @@
   <script src="../lib/stdDecorators/navigation.js"></script>
   <script src="../lib/stdDecorators/style.js"></script>
   <script src="../lib/stdDecorators/core.js"></script>
-  <script src="../lib/stdDecorators/init.js"></script>
   <script src="app/login.js"></script>
   <script src="app/todo.js"></script>
   <script src="app/pageLoader.js"></script>
@@ -34,8 +33,6 @@
     function applyDecs(e,data) {
       console.log(data.decs);
       HTMLDecorators.ApplyDecorators(data.decs);
-      HTMLDecorators.ApplyDecorators(data.decs, todoDec, 'todoDec');
-      HTMLDecorators.ApplyDecorators(data.decs, loginDec, 'loginDec');
     }
 
     ///////////////////////////////////////////////
@@ -86,10 +83,7 @@
 </head>
 <body>
   <template data-htmldec>
-    @Init(
-      includeDec0=todoDec,
-      includeDec1=loginDec
-    )
+    @Init
   </template>
   <div class="loading">Loading...</div>
   <div class="body"></div>

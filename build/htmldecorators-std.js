@@ -7,10 +7,89 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Version: 0.1.1
+Version: 0.1.2
 
-Build: 2021-06-08 16:56:36
+Build: 2021-06-09 18:32:33
 */
+HTMLDecorators.StdDecorators.Init = (function (document, window) {
+
+    /**
+     * Sets a handler
+     *
+     * Note: The function must have a name
+     * Note: Alias to HTMLDecorators.Handler
+     *
+     * @param func The handler function
+     * @param uid (optional) A unique identifier for the handler
+     */
+    window.decHandler = function (func, uid) {
+        HTMLDecorators.Handler(func, uid);
+    }
+
+    /**
+     * Evaluates all tags with the "data-htmldec" attribute
+     *
+     * @param data (optional) A key,value object
+     * @param cb (optional) The decorator applier handler
+     */
+    window.decHTMLEval = function (data, cb) {
+        HTMLDecorators.EvaluateHTMLDecs(data, cb);
+    }
+
+    /**
+     * Evaluates a tag
+     *
+     * @param tag The HTMLElement
+     * @param data (optional) A key,value object
+     * @param cb (optional) The decorator applier handler
+     */
+    window.decEvalTag = function (tag, data, cb) {
+        HTMLDecorators.EvaluateTag(tag, data, cb);
+    }
+
+    /**
+     * Handles initialization
+     *
+     * Params:
+     * string applyDecorationsHandler - The callback for applying decorators
+     * string includeDec0-XX - A list of to namespaces to apply
+     *
+     * Note:
+     * includeDec0=namespaceDec
+     * Will try to use window.namespaceDec as object
+     *
+     * @constructor
+     */
+    function Init() {
+        HTMLDecorators.Decorator.call(this,{
+            applyDecorationsHandler : '',
+            id : 'stdInit',
+            decimalSeperator : '.',
+            decimalFixed : 10
+        });
+    }
+    HTMLDecorators.ExtendsClass(Init, HTMLDecorators.Decorator);
+    /**
+     * Applies decorators set through configuration
+     *
+     * @param e The event
+     * @param data The data
+     */
+    Init.prototype.internalApplyDecoration = function (e, data) {
+        // apply decorators
+        HTMLDecorators.ApplyDecorators(data.decs);
+    }
+    /**
+     * Renders the decorator
+     */
+    Init.prototype.render = function () {}
+
+    return Init;
+
+})(document, window);
+
+
+
 HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
 
     /**
@@ -34,6 +113,52 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
     }
     HTMLDecorators.ExtendsClass(LoadHTML, HTMLDecorators.Decorator);
     /**
+     * Applies the decorators
+     *
+     * @param html
+     */
+    LoadHTML.prototype.applyDecs = function (html) {
+        var data = {};
+        data.__uid__ = HTMLDecorators.RegisterUniqueId();
+        if(this.paramExist('data')) {
+            data = Object.assign(data,this.config.data);
+            if(typeof data == 'object' && typeof data.length != 'undefined') {
+                data['__array__'] = data;
+            }
+        }
+        var parser = new HTMLDecorators.Parser(),
+            parsedHTML = parser.parse(html, data),
+            obj = {
+                html : parsedHTML,
+                decs : parser.DecoratorList
+            };
+
+        if(this.config.putInElement == 'true') {
+            this.element.innerHTML = parsedHTML;
+        }
+
+        //console.log(html,parsedHTML)
+
+        // use internal cb property
+        if(this.config.applyHandler != '') {
+            this.callFunction(this.config.applyHandler, obj);
+        } else {
+            var dec;
+            // if init was defined
+            if(dec = this.findById('stdInit')) {
+                // if a custom apply decorator handler was defined
+                if(dec.config.applyDecorationsHandler != '') {
+                    this.callFunction(dec.config.applyDecorationsHandler, obj);
+                } else {
+                    // use internal apply decorator handler
+                    dec.internalApplyDecoration(null, obj);
+                }
+            } else {
+                this.log('No decoration applier found');
+            }
+        }
+    }
+    /**
      * Renders the decorator
      */
     LoadHTML.prototype.render = async function () {
@@ -41,35 +166,15 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
             var load = await fetch(this.config.path),
                 loadHTML = await load.text();
 
-            var parser = new HTMLDecorators.Parser(),
-                parsedHTML = parser.parse(loadHTML),
-                obj = {
-                    html : parsedHTML,
-                    decs : parser.DecoratorList
-                };
-            if(this.config.putInElement == 'true') {
-                this.element.innerHTML = parsedHTML;
-            }
-            // use internal cb property
-            if(this.config.applyHandler != '') {
-                this.callFunction(this.config.applyHandler, obj);
+            this.applyDecs(loadHTML);
+        }
+        if(this.paramExist('selector')) {
+            var selectedElm = document.querySelector(this.config.selector);
+            if(selectedElm) {
+                this.applyDecs(selectedElm.innerHTML);
             } else {
-                var dec;
-                // if init was defined
-                if(dec = this.findById('stdInit')) {
-                    // if a custom apply decorator handler was defined
-                    if(dec.config.applyDecorationsHandler != '') {
-                        this.callFunction(dec.config.applyDecorationsHandler, obj);
-                    } else {
-                        // use internal apply decorator handler
-                        dec.internalApplyDecoration(null, obj);
-                    }
-                } else {
-                    this.log('No decoration applier found');
-                }
+                this.log('Could not select element with "' + this.config.selector + '"');
             }
-        } else {
-            this.log('"Path" needs to be defined.');
         }
     }
 
@@ -153,6 +258,7 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
      * Params:
      * string id - The id
      * string applyHandler - The decoration applier function
+     * array data - A list of array<object>
      *
      * @constructor
      */
@@ -179,10 +285,19 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
      * @param data A key,value object
      */
     ForEach.prototype.iteration = function (index, data) {
+        if(typeof data == 'object') {
+            var obj = Object.assign({
+                    __index__ : index
+                },data);
+            obj.__entry__ = obj;
+        } else {
+            var obj = {
+                __index__ : index,
+                __entry__ : data
+            };
+        }
         var parser = new HTMLDecorators.Parser(),
-            parsedHTML = parser.parse(this.template, Object.assign({
-                index : index
-            },data)),
+            parsedHTML = parser.parse(this.template, obj),
             i = 0,
             len = parser.DecoratorList.length;
 
@@ -203,7 +318,6 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
         this.element.innerHTML = '';
         this.iterationHTMLSum = '';
         this.decoratorsSum = [];
-
         var i = 0,
             len = list.length,
             data;
@@ -217,7 +331,6 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
             html : this.iterationHTMLSum,
             decs : this.decoratorsSum
         }
-
         this.element.innerHTML = obj.html;
 
         // use internal cb property
@@ -245,9 +358,84 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
     ForEach.prototype.render = function () {
         this.template = (' ' + this.element.innerHTML).slice(1);
         this.element.innerHTML = '';
+        if(this.paramExist('data')) {
+            this.update(this.config.data);
+        }
     }
 
     return ForEach;
+
+})(document, window);
+
+HTMLDecorators.StdDecorators.NumberFormat = (function (document, window) {
+
+    /**
+     * Sets a reference
+     *
+     * Params:
+     * string id - The id
+     * string applyHandler - The decoration applier function
+     * array data - A list of array<object>
+     *
+     * @constructor
+     */
+    function NumberFormat() {
+        HTMLDecorators.Decorator.call(this);
+
+        /**
+         * Returns the decimal seperator
+         *
+         * @type {string}
+         */
+        this.decimalSeperator = '.';
+
+        /**
+         * Returns the decimal numbers size
+         *
+         * @type {number}
+         */
+        this.decimalFixed = 10;
+    }
+    HTMLDecorators.ExtendsClass(NumberFormat, HTMLDecorators.Decorator);
+    /**
+     * Formats the number
+     *
+     * @return {string}
+     */
+    NumberFormat.prototype.format = function (decimalSeperator, decimalFixed) {
+        var value = parseFloat(this.element.innerHTML);
+        value = value.toFixed(decimalFixed).toString();
+        value = value.replace('.', decimalSeperator);
+        return value;
+    }
+    /**
+     * Renders the decorator
+     */
+    NumberFormat.prototype.render = function () {
+        var dec = this.findById('stdInit');
+        if(this.paramExist('decimalSeperator') || this.paramExist('decimalFixed')) {
+            var dS = this.decimalSeperator,
+                dF = this.decimalFixed;
+            if(this.paramExist('decimalSeperator')) {
+                dS = this.config.decimalSeperator;
+            }
+            if(this.paramExist('decimalFixed')) {
+                dF = this.config.decimalFixed;
+            }
+            this.element.innerText = this.format(dS,dF);
+        } else {
+            if(dec) {
+                this.element.innerText = this.format(
+                    dec.config.decimalSeperator,
+                    dec.config.decimalFixed
+                );
+            } else {
+                this.log('No @Init set.');
+            }
+        }
+    }
+
+    return NumberFormat;
 
 })(document, window);HTMLDecorators.StdDecorators.Event = (function (document, window) {
 
@@ -447,72 +635,6 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
     }
 
     return KeyPress;
-
-})(document, window);HTMLDecorators.StdDecorators.Init = (function (document, window) {
-
-    /**
-     * Handles initialization
-     *
-     * Params:
-     * string applyDecorationsHandler - The callback for applying decorators
-     * string includeDec0-XX - A list of to namespaces to apply
-     *
-     * Note:
-     * includeDec0=namespaceDec
-     * Will try to use window.namespaceDec as object
-     *
-     * @constructor
-     */
-    function Init() {
-        HTMLDecorators.Decorator.call(this,{
-            applyDecorationsHandler : '',
-            id : 'stdInit'
-        });
-
-        this.includeDecs = [];
-    }
-    HTMLDecorators.ExtendsClass(Init, HTMLDecorators.Decorator);
-    /**
-     * Applies decorators set through configuration
-     *
-     * @param e The event
-     * @param data The data
-     */
-    Init.prototype.internalApplyDecoration = function (e, data) {
-        this.log('Apply internal');
-        var i = 0,
-            len = this.includeDecs.length,
-            decsName;
-        // apply std decorators
-        HTMLDecorators.ApplyDecorators(data.decs);
-        for (i; i < len; ++i) {
-            decsName = this.includeDecs[i];
-            if(window[decsName]) {
-                HTMLDecorators.ApplyDecorators(data.decs, window[decsName], decsName);
-            } else {
-                this.log('"' + decsName + '" is not a valid namespace to include.');
-            }
-        }
-    }
-    /**
-     * Renders the decorator
-     */
-    Init.prototype.render = async function () {
-        if(this.config.applyDecorationsHandler == '') {
-            this.includeDecs = [];
-            var i = 0,
-                len = 100,
-                index;
-            for (i; i < len; ++i) {
-                index = 'includeDec'+ i;
-                if(this.config[index]) {
-                    this.includeDecs.push(this.config[index]);
-                }
-            }
-        }
-    }
-
-    return Init;
 
 })(document, window);HTMLDecorators.StdDecorators.Navigation = (function (document, window) {
 
@@ -924,6 +1046,61 @@ HTMLDecorators.StdDecorators.Margin = (function (document, window) {
 
     return Margin;
 
+})(document, window);
+
+HTMLDecorators.StdDecorators.Cursor = (function (document, window) {
+
+    /**
+     * Set the cursor for an element
+     *
+     * Params:
+     * string id - The id of the decorator
+     * string value - The value
+     *
+     * @constructor
+     */
+    function Cursor() {
+        HTMLDecorators.Decorator.call(this);
+    }
+    HTMLDecorators.ExtendsClass(Cursor, HTMLDecorators.Decorator);
+    /**
+     * Renders the decorator
+     */
+    Cursor.prototype.render = function () {
+        if(this.paramExist('value')) {
+            this.element.style.cursor = this.config.value;
+        }
+    }
+
+    return Cursor;
+
+})(document, window);
+
+HTMLDecorators.StdDecorators.Pointer = (function (document, window) {
+
+    /**
+     * Set the cursor for an element
+     *
+     * Params:
+     * string id - The id of the decorator
+     * string value - The value
+     *
+     * @constructor
+     */
+    function Pointer() {
+        HTMLDecorators.Decorator.call(this);
+    }
+    HTMLDecorators.ExtendsClass(Pointer, HTMLDecorators.StdDecorators.Cursor);
+    /**
+     * Renders the decorator
+     */
+    Pointer.prototype.render = function () {
+        this.config.value = 'pointer';
+        HTMLDecorators.StdDecorators.Cursor.prototype.render.call(this);
+    }
+
+    return Pointer;
+
 })(document, window);HTMLDecorators.StdDecorators.Visible = (function (document, window) {
 
     /**
@@ -963,6 +1140,14 @@ HTMLDecorators.StdDecorators.Margin = (function (document, window) {
                 this.hide();
             }
         }
+        if(this.paramExist('if')) {
+            console.log(this.config.if)
+            if(this.config.if == 'true') {
+                this.show();
+            } else {
+                this.hide();
+            }
+        }
     }
 
     return Visible;
@@ -988,6 +1173,7 @@ HTMLDecorators.StdDecorators.Hide = (function (document, window) {
      */
     Hide.prototype.render = function () {
         this.hide();
+        HTMLDecorators.StdDecorators.Visible.prototype.render.call(this);
     }
 
     return Hide;
@@ -1013,6 +1199,7 @@ HTMLDecorators.StdDecorators.Show = (function (document, window) {
      */
     Show.prototype.render = function () {
         this.show();
+        HTMLDecorators.StdDecorators.Visible.prototype.render.call(this);
     }
 
     return Show;

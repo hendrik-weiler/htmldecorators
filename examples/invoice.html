@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice</title>
+    <script data-evalhtmldec src="../build/htmldecorators.js"></script>
+    <script src="../build/htmldecorators-std.js"></script>
+    <link rel="stylesheet" href="../build/htmldecorators.css">
+  <link rel="stylesheet" href="invoice.css">
+  <script>
+    var invoiceDec = {};
+    class Sum extends HTMLDecorators.Decorator {
+      render() {
+        if(this.paramExist('data')) {
+          var sum = 0,
+              i = 0,
+              positions = this.config.data,
+              len = positions.length,
+              posPrice = 0;
+
+          for (i; i < len; ++i) {
+            posPrice = positions[i].price * positions[i].amount;
+            if(!this.paramExist('onlyTax')) {
+              sum += posPrice;
+            } else {
+              sum += (posPrice * (positions[i].tax/100));
+            }
+            if(this.paramExist('inclTax')) {
+              sum += (posPrice * (positions[i].tax/100));
+            }
+          }
+          this.element.innerText = sum;
+        } else {
+          this.log('"data" is missing.');
+        }
+      }
+    }
+    invoiceDec.Sum = Sum;
+  </script>
+</head>
+<body>
+
+  <template data-htmldec>
+    @Init(
+      decimalFixed=2,
+      decimalSeperator=","
+    )
+  </template>
+
+  <script id="positions" type="template">
+      <table>
+        <thead>
+          <tr>
+            <th>Pos</th>
+            <th>Art-Nr.</th>
+            <th>Description</th>
+            <th class="right">Price</th>
+            <th>Amount</th>
+            <th>Tax</th>
+            <th class="right">Summary</th>
+          </tr>
+        </thead>
+        @ForEach(data=${__array__})
+        <tbody>
+          <tr>
+            <td>$${__index__ + 1}</td>
+            <td>$${number}</td>
+            <td>
+              $${name}
+              @@Show(if=$${description.length > 0})
+              <div>$${description}</div>
+            </td>
+            <td class="right">
+              @@NumberFormat
+              <span>$${price}</span> €
+            </td>
+            <td>$${amount}</td>
+            <td>
+              @@NumberFormat
+              <span>$${tax}</span> %
+            </td>
+            <td class="right">
+              @@NumberFormat
+              <span>$${price * amount}</span> €
+            </td>
+          </tr>
+        </tbody>
+        @Show(if=${__array__.length == 0})
+        <tfoot>
+          <td colspan="7">No Positions available.</td>
+        </tfoot>
+      </table>
+  </script>
+
+  <script id="summary" type="template">
+    <table>
+      <tr>
+        <td>&nbsp;</td>
+        <td class="right">Summary Positions</td>
+        <td class="right">
+          @invoiceDec.Sum(data=${__array__})
+          @NumberFormat
+          <span></span> €
+        </td>
+      </tr>
+      <tr>
+        <td>&nbsp;</td>
+        <td class="right">Tax</td>
+        <td class="right">
+          @invoiceDec.Sum(data=${__array__},onlyTax=1)
+          @NumberFormat
+          <span></span> €
+        </td>
+      </tr>
+      <tr>
+        <td style="width: 50%">&nbsp;</td>
+        <td class="right total">Summary Total</td>
+        <td class="right total">
+          @invoiceDec.Sum(data=${__array__},inclTax=1)
+          @NumberFormat
+          <span></span> €
+        </td>
+      </tr>
+    </table>
+  </script>
+
+  <script id="adress" type="template">
+    <div class="adress-seller">
+      <span>${buyer.company}</span> &bull;
+      <span>${buyer.street}</span> &bull;
+      <span>${buyer.zipcode}</span> <span>${buyer.city}</span> &bull;
+      <span>${buyer.country}</span>
+    </div>
+    <span>${seller.company}</span><br>
+    <span>${seller.street}</span><br>
+    <span>${seller.zipcode}</span> <span>${seller.city}</span><br>
+    <span>${seller.country}</span><br>
+  </script>
+
+  <div data-htmldec-render id="invoice">
+    @LoadHTML(selector=#adress,data=${adress})
+    <div class="adress"></div>
+    <h2>Invoice: ${invoiceNumber}</h2>
+    @LoadHTML(selector=#positions,data=${positions})
+    <div class="positions"></div>
+    @LoadHTML(selector=#summary,data=${positions})
+    <div class="summary"></div>
+    @Size(height=300px)
+    <div></div>
+  </div>
+
+  <script>
+    window.onload = function () {
+      HTMLDecorators.EvaluateTag(document.querySelector('#invoice'), {
+        adress : {
+          seller : {
+            company : 'Company Ltd',
+            street : 'Examplestreet 11',
+            zipcode : '12345',
+            city : 'Examplecity',
+            country : 'Germany'
+          },
+          buyer : {
+            company : 'Buyer Company Ltd',
+            street : 'Examplestreet 9',
+            zipcode : '54321',
+            city : 'Examplecity',
+            country : 'Germany'
+          }
+        },
+        invoiceNumber : 'RE-10002',
+        positions : [
+          {number:'ART1',name:'Article 1',description:'Notice of Article 1', amount:1,price:5.99,tax:19},
+          {number:'ART2',name:'Article 2',description:'', amount:5,price:15.99,tax:19}
+        ]
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<div id="fselect${__uid__}" class="fileSelect">
+  <label for="fselectInput${__uid__}">
+    Select file
+    @Change(handler="fSelectChange${__uid__}")
+    <input id="fselectInput${__uid__}" type="file">
+  </label>
+  <span></span>
+</div>
+
+@Script
+<script>
+  var  fSelect = document.getElementById('fselect${__uid__}'),
+       fileNameElm = fSelect.querySelector('span'),
+       noFileText = 'Please choose a file.';
+  fileNameElm.innerText = noFileText;
+  decHandler(function fSelectChange(e) {
+    if(e.currentTarget.files.length == 0) {
+      return;
+    }
+    var file = e.currentTarget.files[0];
+    fileNameElm.innerText = file.name;
+  },'${__uid__}');
+</script>
+
+<style>
+
+  .fileSelect {
+    border: 1px solid #cecece;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+  }
+
+  .fileSelect span {
+    padding-left: 10px;
+  }
+
+  .fileSelect label {
+    background: #0069d9;
+    border-radius: 5px;
+    padding: 10px 20px;
+    color: white;
+    display: inline-block;
+    font-family: Arial;
+    cursor: pointer;
+  }
+
+  .fileSelect label:hover {
+    background: #007bff;
+  }
+
+  .fileSelect input {
+    position: absolute;
+    left: -10000px;
+  }
+</style>

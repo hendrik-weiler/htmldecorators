@@ -1,0 +1,36 @@
+<div id="${__uid__}" class="imageBox">
+  <img src="ajax-loader.gif" />
+  <p>${text}</p>
+</div>
+
+@Script
+<script>
+  var box = document.getElementById('${__uid__}'),
+      img = box.querySelector('img'),
+      src = '${src}',
+      imgPreload = new Image;
+  imgPreload.onload = function (e) {
+    img.src = e.target.src;
+  }
+  imgPreload.src = src;
+</script>
+
+<style>
+  .imageBox {
+    display: inline-block;
+    border: 1px solid #cecece;
+    padding: 20px 10px;
+    text-align: center;
+    font-family: Arial;
+    box-shadow: 0 0 10px rgba(0,0,0,0.25);
+  }
+
+  .imageBox img {
+    width: 120px;
+  }
+
+  .imageBox p {
+    padding-left: 10px;
+    margin-bottom: 0;
+  }
+</style>

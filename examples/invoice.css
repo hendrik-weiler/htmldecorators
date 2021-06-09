@@ -1,0 +1,48 @@
+#invoice {
+    font-family: Arial;
+}
+
+#invoice .right {
+    text-align: right;
+}
+
+#invoice {
+    background: white;
+    padding: 50px;
+    border: 1px solid #cccccc;
+    width: 100%;
+    max-width: 800px;
+}
+
+#invoice .adress {
+    font-size: 12px;
+    margin: 100px 0;
+}
+
+#invoice .summary {
+    border-top: 1px solid #cccccc;
+}
+
+#invoice .total {
+    border-top: 2px solid #cccccc;
+}
+
+#invoice .adress-seller {
+    font-size: 8px;
+}
+
+#invoice table {
+    width: 100%;
+    border-spacing: 0;
+}
+
+#invoice table th {
+    border-bottom: 1px solid #cccccc;
+    text-align: left;
+}
+
+#invoice table th,
+#invoice table td {
+    padding: 10px;
+    vertical-align: top;
+}

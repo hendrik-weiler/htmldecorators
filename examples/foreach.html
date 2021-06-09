@@ -5,23 +5,127 @@
     <title>ForEach</title>
     <script data-evalhtmldec src="../lib/htmldecorators.js"></script>
     <script src="../lib/stdDecorators/core.js"></script>
-    <script src="../lib/stdDecorators/init.js"></script>
     <script src="../lib/stdDecorators/style.js"></script>
+    <script src="../lib/stdDecorators/event.js"></script>
+    <script src="../lib/stdDecorators/visible.js"></script>
     <link rel="stylesheet" href="../lib/htmldecorators.css">
+    <script>
+        var TestDec = {};
+        function Test() {
+            HTMLDecorators.Decorator.call(this);
+        }
+        HTMLDecorators.ExtendsClass(Test, HTMLDecorators.Decorator);
+        Test.prototype.render = function () {
+            console.log('rendered',this.config.index);
+        }
+
+        TestDec.Test = Test;
+    </script>
+    <style>
+        body {
+            font-family: Arial;
+            line-height: 1.4;
+        }
+        .person {
+            border:1px solid #cecece;
+            border-radius: 10px;
+            margin: 10px 0;
+            padding: 10px;
+        }
+
+        .person table {
+            border-spacing: 0;
+        }
+
+        .person th {
+            border-bottom: 1px solid #cecece;
+        }
+        .person th,
+        .person td {
+            padding: 10px;
+        }
+    </style>
 </head>
 <body>
     <template data-htmldec>
         @Init
     </template>
+
+    <script type="template" id="stack2">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Age</th>
+        </tr>
+        </thead>
+        @ForEach(id=stack1,data="${children}")
+        <tbody>
+            <tr>
+                <td>$${name}</td>
+                <td>$${age}</td>
+            </tr>
+        </tbody>
+        @Show(if="${children.length == 0}")
+        <tfoot>
+            <tr>
+                <td colspan="2">
+                    @Bold
+                    <span>No children</span>
+                </td>
+            </tr>
+        </tfoot>
+    </script>
+
+    <script type="template" id="stack1">
+        @Bold
+        @Click(handler=getName)
+        @Pointer
+        <div data-name="${name}">Name: ${name}</div>
+        <div>Age: ${age}</div>
+        <div>Children:</div>
+        @LoadHTML(selector=body #stack2,data="${__entry__}")
+        <table>
+        </table>
+        @Script
+        <script>
+            decHandler(function getName(e) {
+                console.log(e.currentTarget.dataset.name);
+            });
+        </script>
+    </script>
+
     <ul data-htmldec>
+        <!-- basic foreach -->
         @ForEach(id=menu)
         <ul>
             <li>
                 @@Bold @@Underline @@Italic
-                <a href="$${link}">$${label} $${index}</a>
+                <a href="$${link}">$${label} $${__index__}</a>
             </li>
         </ul>
+        <!-- loading external html with foreach decorators -->
+        @ForEach(id=stacktest)
+        <div>
+            <div class="person">
+                @@Underline
+                <span>Person $${__index__ + 1}</span>
+                @@LoadHTML(
+                    data=$${__entry__},
+                    selector=body #stack1
+                )
+                <div></div>
+            </div>
+        </div>
     </ul>
+
+    <ul id="arrayTest" data-htmldec-render>
+        <span>${__array__}</span>
+        @ForEach(data=${__array__})
+        <ul>
+            <li>$${__entry__} = $${__index__}</li>
+        </ul>
+    </ul>
+
     <script>
         window.onload = function () {
             var menu = decById('menu');
@@ -29,6 +133,16 @@
                 {link:'Test',label:'Link 1'},
                 {link:'Test',label:'Link 2'},
                 {link:'Test',label:'Link 3'}
+            ]);
+            var stacktest = decById('stacktest');
+            stacktest.update([
+                {name:'Petra',age:'44',children:[{name:'Philipp',age:10}]},
+                {name:'Max',age:'32',children: [{name:'Paula',age:8},{name:'Felix',age:3}]},
+                {name:'Hans',age:'11',children: []}
+            ]);
+
+            HTMLDecorators.EvaluateTag(document.querySelector('#arrayTest'),[
+               'Item 1', 'Item 2', 'Item 3'
             ]);
         }
     </script>
