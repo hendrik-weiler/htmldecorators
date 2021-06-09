@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Version: 0.1.2
 
-Build: 2021-06-09 18:32:33
+Build: 2021-06-09 18:59:02
 */
 HTMLDecorators.StdDecorators.Init = (function (document, window) {
 
@@ -121,9 +121,10 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
         var data = {};
         data.__uid__ = HTMLDecorators.RegisterUniqueId();
         if(this.paramExist('data')) {
-            data = Object.assign(data,this.config.data);
-            if(typeof data == 'object' && typeof data.length != 'undefined') {
-                data['__array__'] = data;
+            if(typeof this.config.data == 'object' && typeof this.config.data.length != 'undefined') {
+                data.__array__ = this.config.data;
+            } else {
+                data = Object.assign(data,this.config.data);
             }
         }
         var parser = new HTMLDecorators.Parser(),
