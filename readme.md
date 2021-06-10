@@ -12,7 +12,7 @@ The files to include
 ### Examples
 
 There are several examples in the ```examples``` folder.
-You can use the ```examples/build.html``` can be used as base.
+You can use the ```examples/starter.html``` for testing.
 
 **Include to your html file**
 ```

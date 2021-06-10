@@ -1,7 +1,8 @@
 <?php
 
 //// CONFIG
-$version = '0.1.2';
+$config = json_decode(file_get_contents('build.json'),true);
+$version = $config['version'];
 $buildTime = date('Y-m-d H:i:s',time());
 ///
 

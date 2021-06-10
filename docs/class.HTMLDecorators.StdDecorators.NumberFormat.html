@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Documentation</title>
+    <meta charset="utf-8">
+    <style>
+        :root {
+            --font-color-light: #cecece;
+            --font-color: #333;
+            --border-color: #efefef;
+        }
+        body {
+            margin: 0;
+            color: var(--font-color);
+            font-family: Arial;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            flex-flow: column;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .container .header {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .container .content {
+            flex-grow: 1;
+            overflow: auto;
+        }
+
+        .container .footer {
+            padding: 10px;
+            text-align: center;
+            color: var(--font-color-light);
+            font-size: 12px;
+        }
+
+        .container .content-inner {
+            margin: auto;
+            width: 100%;
+            max-width: 1280px;
+        }
+
+        .container table {
+            border-spacing: 0;
+            width: 100%;
+            border: 1px solid var(--border-color);
+        }
+
+        .container table tr td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .container table tr td a {
+            color: var(--font-color);
+        }
+
+        .container table tr td .entry-attr {
+            color: var(--font-color-light);
+        }
+
+        .container table tr.tr-head {
+            background: var(--border-color);
+        }
+
+        .container .class-attr {
+            color: var(--font-color-light);
+            font-size: 18px;
+        }
+
+        .container .class-name {
+            font-size: 26px;
+        }
+
+        .container a.class-extends {
+            font-size: 18px;
+            color: var(--font-color);
+            text-decoration: underline;
+        }
+
+        .container .decorator-preview {
+            border-left: 3px solid var(--font-color-light);
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>htmldecorators Documentation v0.1.2</h1>
+        </div>
+        <div class="content">
+            <div class="content-inner">
+                <p class="description">
+    Sets a reference            <h6>Decorator</h6>
+        <pre class="decorator-preview">@NumberFormat(
+	id="string",
+	applyHandler="string",
+	data="array"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>applyHandler</td>
+                        <td>The decoration applier function</td>
+                    </tr><tr>
+                        <td>array</td>
+                        <td>data</td>
+                        <td>A list of objects</td>
+                    </tr></table>    </p>
+<h4>
+    <span class="class-attr">public class</span>
+    <span class="class-name">HTMLDecorators.StdDecorators.NumberFormat</span>
+            <span class="class-attr">extends</span>
+        <a class="class-extends" href="class.HTMLDecorators.Decorator.html">HTMLDecorators.Decorator</a>
+    </h4>
+<table>
+    <tr>
+        <td>
+                            <span class="entry-attr">public {string}</span> decimalSeperator                    </td>
+        <td>Returns the decimal seperator</td>
+    </tr>
+    <tr>
+        <td>
+                            <span class="entry-attr">public {number}</span> decimalFixed                    </td>
+        <td>Returns the decimal numbers size</td>
+    </tr>
+    <tr>
+        <td>
+            <span class="entry-attr">public function</span>
+            <a href="class.HTMLDecorators.StdDecorators.NumberFormat.format.html">
+                format            </a>
+        </td>
+        <td>Formats the number...</td>
+    </tr>
+    <tr>
+        <td>
+            <span class="entry-attr">public function</span>
+            <a href="class.HTMLDecorators.StdDecorators.NumberFormat.render.html">
+                render            </a>
+        </td>
+        <td>Renders the decorator...</td>
+    </tr>
+</table>            </div>
+        </div>
+        <div class="footer">
+           2021 © Hendrik Weiler | 2021/10/06 20:19:22        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Documentation</title>
+    <meta charset="utf-8">
+    <style>
+        :root {
+            --font-color-light: #cecece;
+            --font-color: #333;
+            --border-color: #efefef;
+        }
+        body {
+            margin: 0;
+            color: var(--font-color);
+            font-family: Arial;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .container {
+            display: flex;
+            flex-flow: column;
+            width: 100%;
+            height: 100vh;
+        }
+
+        .container .header {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .container .content {
+            flex-grow: 1;
+            overflow: auto;
+        }
+
+        .container .footer {
+            padding: 10px;
+            text-align: center;
+            color: var(--font-color-light);
+            font-size: 12px;
+        }
+
+        .container .content-inner {
+            margin: auto;
+            width: 100%;
+            max-width: 1280px;
+        }
+
+        .container table {
+            border-spacing: 0;
+            width: 100%;
+            border: 1px solid var(--border-color);
+        }
+
+        .container table tr td {
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .container table tr td a {
+            color: var(--font-color);
+        }
+
+        .container table tr td .entry-attr {
+            color: var(--font-color-light);
+        }
+
+        .container table tr.tr-head {
+            background: var(--border-color);
+        }
+
+        .container .class-attr {
+            color: var(--font-color-light);
+            font-size: 18px;
+        }
+
+        .container .class-name {
+            font-size: 26px;
+        }
+
+        .container a.class-extends {
+            font-size: 18px;
+            color: var(--font-color);
+            text-decoration: underline;
+        }
+
+        .container .decorator-preview {
+            border-left: 3px solid var(--font-color-light);
+            padding-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>htmldecorators Documentation v0.1.2</h1>
+        </div>
+        <div class="content">
+            <div class="content-inner">
+                <h2>Classes</h2>
+<table>
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.html">HTMLDecorators</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.Parser.html">HTMLDecorators.Parser</a></td>
+            </tr>
+        
+    
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.Decorator.html">HTMLDecorators.Decorator</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Init.html">HTMLDecorators.StdDecorators.Init</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.LoadHTML.html">HTMLDecorators.StdDecorators.LoadHTML</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Script.html">HTMLDecorators.StdDecorators.Script</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.ForEach.html">HTMLDecorators.StdDecorators.ForEach</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.NumberFormat.html">HTMLDecorators.StdDecorators.NumberFormat</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Event.html">HTMLDecorators.StdDecorators.Event</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Submit.html">HTMLDecorators.StdDecorators.Submit</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Change.html">HTMLDecorators.StdDecorators.Change</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.KeyUp.html">HTMLDecorators.StdDecorators.KeyUp</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.KeyDown.html">HTMLDecorators.StdDecorators.KeyDown</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.KeyPress.html">HTMLDecorators.StdDecorators.KeyPress</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Navigation.html">HTMLDecorators.StdDecorators.Navigation</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Content.html">HTMLDecorators.StdDecorators.Content</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Bold.html">HTMLDecorators.StdDecorators.Bold</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Italic.html">HTMLDecorators.StdDecorators.Italic</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Underline.html">HTMLDecorators.StdDecorators.Underline</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Color.html">HTMLDecorators.StdDecorators.Color</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.TAlign.html">HTMLDecorators.StdDecorators.TAlign</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Size.html">HTMLDecorators.StdDecorators.Size</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Background.html">HTMLDecorators.StdDecorators.Background</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Padding.html">HTMLDecorators.StdDecorators.Padding</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Margin.html">HTMLDecorators.StdDecorators.Margin</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Cursor.html">HTMLDecorators.StdDecorators.Cursor</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Pointer.html">HTMLDecorators.StdDecorators.Pointer</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Visible.html">HTMLDecorators.StdDecorators.Visible</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Hide.html">HTMLDecorators.StdDecorators.Hide</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Show.html">HTMLDecorators.StdDecorators.Show</a></td>
+            </tr>
+        
+    </table>
+<h2>Functions</h2>
+<table>
+    <tr>
+        <td>
+            <a href="function.decHandler.html">decHandler</a>
+        </td>
+        <td>
+            Sets a handler        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="function.decHTMLEval.html">decHTMLEval</a>
+        </td>
+        <td>
+            Evaluates all tags with the "data-htmldec" attribute        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="function.decEvalTag.html">decEvalTag</a>
+        </td>
+        <td>
+            Evaluates a tag        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="function.decById.html">decById</a>
+        </td>
+        <td>
+            Gets the element of the decorator        </td>
+    </tr>
+</table>
+<h2>Decorators</h2>
+    <h4>std</h4>
+    <table>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Init.html">Init</a>
+                <br>
+                <pre class="decorator-preview">@Init(
+	applyDecorationsHandler="string",
+	decimalSeperator="string",
+	decimalFixed="number"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>applyDecorationsHandler</td>
+                        <td>The callback for applying decorators</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>decimalSeperator</td>
+                        <td>The seperator for decimal values</td>
+                    </tr><tr>
+                        <td>number</td>
+                        <td>decimalFixed</td>
+                        <td>The set number of decimals of a value</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.LoadHTML.html">LoadHTML</a>
+                <br>
+                <pre class="decorator-preview">@LoadHTML(
+	path="string",
+	id="string",
+	applyHandler="string",
+	selector="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>path</td>
+                        <td>The path to load</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id to the @Navigations a[data-id] attribute</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>applyHandler</td>
+                        <td>The decoration applier function</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>selector</td>
+                        <td>The css selector to pull data from tag</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Script.html">Script</a>
+                <br>
+                <pre class="decorator-preview">@Script</pre>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.ForEach.html">ForEach</a>
+                <br>
+                <pre class="decorator-preview">@ForEach(
+	id="string",
+	applyHandler="string",
+	data="array"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>applyHandler</td>
+                        <td>The decoration applier function</td>
+                    </tr><tr>
+                        <td>array</td>
+                        <td>data</td>
+                        <td>A list of objects</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.NumberFormat.html">NumberFormat</a>
+                <br>
+                <pre class="decorator-preview">@NumberFormat(
+	id="string",
+	applyHandler="string",
+	data="array"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>applyHandler</td>
+                        <td>The decoration applier function</td>
+                    </tr><tr>
+                        <td>array</td>
+                        <td>data</td>
+                        <td>A list of objects</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Event.html">Event</a>
+                <br>
+                <pre class="decorator-preview">@Event(
+	id="string",
+	type="string",
+	handler="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>type</td>
+                        <td>The event type e.g. 'click','submit' ...</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>handler</td>
+                        <td>The handler function name</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Submit.html">Submit</a>
+                <br>
+                <pre class="decorator-preview">@Submit(
+	id="string",
+	handler="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>handler</td>
+                        <td>The handler function name</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Change.html">Change</a>
+                <br>
+                <pre class="decorator-preview">@Change(
+	id="string",
+	handler="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>handler</td>
+                        <td>The handler function name</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.KeyUp.html">KeyUp</a>
+                <br>
+                <pre class="decorator-preview">@KeyUp(
+	id="string",
+	handler="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>handler</td>
+                        <td>The handler function name</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.KeyDown.html">KeyDown</a>
+                <br>
+                <pre class="decorator-preview">@KeyDown(
+	id="string",
+	handler="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>handler</td>
+                        <td>The handler function name</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.KeyPress.html">KeyPress</a>
+                <br>
+                <pre class="decorator-preview">@KeyPress(
+	id="string",
+	handler="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>handler</td>
+                        <td>The handler function name</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Navigation.html">Navigation</a>
+                <br>
+                <pre class="decorator-preview">@Navigation(
+	id="string",
+	activeClass="string",
+	hashHandler="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>activeClass</td>
+                        <td>The active classname for the links</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>hashHandler</td>
+                        <td>The handler function for hash detection</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Content.html">Content</a>
+                <br>
+                <pre class="decorator-preview">@Content(
+	nav="string",
+	id="string",
+	visible="bool"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>nav</td>
+                        <td>The id of the @Navigation decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id to the @Navigations a[data-id] attribute</td>
+                    </tr><tr>
+                        <td>bool</td>
+                        <td>visible</td>
+                        <td>If the content should be displayed or not</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Bold.html">Bold</a>
+                <br>
+                <pre class="decorator-preview">@Bold(
+	id="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Italic.html">Italic</a>
+                <br>
+                <pre class="decorator-preview">@Italic(
+	id="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Underline.html">Underline</a>
+                <br>
+                <pre class="decorator-preview">@Underline(
+	id="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Color.html">Color</a>
+                <br>
+                <pre class="decorator-preview">@Color(
+	id="string",
+	value="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>value</td>
+                        <td>The hexadecimal or any other value</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.TAlign.html">TAlign</a>
+                <br>
+                <pre class="decorator-preview">@TAlign(
+	id="string",
+	pos="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>pos</td>
+                        <td>The position left,center,right</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Size.html">Size</a>
+                <br>
+                <pre class="decorator-preview">@Size(
+	id="string",
+	width="string",
+	height="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>width</td>
+                        <td>The width</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>height</td>
+                        <td>The height</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Background.html">Background</a>
+                <br>
+                <pre class="decorator-preview">@Background(
+	id="string",
+	color="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>color</td>
+                        <td>The color</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Padding.html">Padding</a>
+                <br>
+                <pre class="decorator-preview">@Padding(
+	id="string",
+	value="string",
+	top="string",
+	left="string",
+	bottom="string",
+	right="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>value</td>
+                        <td>The value</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>top</td>
+                        <td>The top value</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>left</td>
+                        <td>The left value</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>bottom</td>
+                        <td>The bottom value</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>right</td>
+                        <td>The right value</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Margin.html">Margin</a>
+                <br>
+                <pre class="decorator-preview">@Margin(
+	id="string",
+	value="string",
+	top="string",
+	left="string",
+	bottom="string",
+	right="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>value</td>
+                        <td>The value</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>top</td>
+                        <td>The top value</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>left</td>
+                        <td>The left value</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>bottom</td>
+                        <td>The bottom value</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>right</td>
+                        <td>The right value</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Cursor.html">Cursor</a>
+                <br>
+                <pre class="decorator-preview">@Cursor(
+	id="string",
+	value="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>value</td>
+                        <td>The value</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Pointer.html">Pointer</a>
+                <br>
+                <pre class="decorator-preview">@Pointer(
+	id="string",
+	value="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>value</td>
+                        <td>The cursor value</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Visible.html">Visible</a>
+                <br>
+                <pre class="decorator-preview">@Visible(
+	id="string",
+	state="string",
+	if="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>state</td>
+                        <td>'show' or 'hide'</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>if</td>
+                        <td>When if is 'true' show will be executed else hide</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Hide.html">Hide</a>
+                <br>
+                <pre class="decorator-preview">@Hide(
+	id="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Show.html">Show</a>
+                <br>
+                <pre class="decorator-preview">@Show(
+	id="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr></table>            </td>
+        </tr>
+        </table>
+            </div>
+        </div>
+        <div class="footer">
+           2021 © Hendrik Weiler | 2021/10/06 20:19:22        </div>
+    </div>
+</body>
+</html>
