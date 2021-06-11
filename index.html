@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>htmldecorators</title>
-
+    <script src="build/htmldecorators.js"></script>
+    <script src="build/htmldecorators-std.js"></script>
+    <link rel="stylesheet" href="build/htmldecorators.css">
     <style>
         body {
             margin: 0;
             font-family: Arial;
         }
+
+        * {
+            box-sizing: border-box;
+        }
+
         .container {
             margin: auto;
             max-width: 1024px;
@@ -20,7 +27,72 @@
             flex-flow: column;
             padding: 0 20px;
         }
+
+        form .preview-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        form .preview-container textarea, form .output {
+            width: 50%;
+
+        }
+
+        form .preview-container .output {
+            border: 1px solid black;
+        }
     </style>
+    <script>
+
+        var sampleData = {
+            greeting : 'Hello World!',
+            list : [
+                'entry 1',
+                'entry 2',
+                'entry 3'
+            ]
+        }
+
+        async function loadBuildJSON() {
+            var res = await fetch('build.json'),
+                data = await res.json();
+
+            return data;
+        }
+
+        async function loadExample(name) {
+            var res = await fetch('example-preview/' + name),
+                text = await res.text();
+
+            return text;
+        }
+
+        window.onload = async function () {
+
+            var versionElm = document.getElementById('version');
+            var data = await loadBuildJSON();
+            versionElm.innerText = data.version;
+
+            var dataExposer = document.querySelector('#sampleDataExposer');
+            dataExposer.onclick = function (e) {
+                e.preventDefault();
+                console.log(sampleData);
+            }
+
+            document.forms.preview.examples.onchange = async function () {
+                var text = await loadExample(this.value + '.txt');
+                document.forms.preview.input.value = text;
+                document.forms.preview.input.onkeyup();
+            }
+            document.forms.preview.examples.onchange();
+
+            document.forms.preview.input.onkeyup = function () {
+                var outputTag = document.querySelector('.output');
+                outputTag.innerHTML = this.value;
+                decEvalTag(outputTag,sampleData);
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -28,6 +100,26 @@
         <p>This library parses html and adds decorators to html tags.</p>
         <a href="docs">Documentation</a><br>
         <a href="https://github.com/hendrik-weiler/htmldecorators">Github</a>
+        <br><br><br>
+        <h4>Preview (v<span id="version"></span>)</h4>
+        <form action="javascript:" name="preview">
+            Example: <select name="examples">
+                <option value="styling">Styling</option>
+                <option value="variables">Variables</option>
+            </select> <a id="sampleDataExposer" href="#">Expose sample data to console</a>
+            <br><br>
+            <div class="preview-container">
+                <textarea name="input" cols="30" rows="10"></textarea>
+                <div class="output"></div>
+            </div>
+        </form>
+        <br><br><br>
+        <h4>Examples</h4>
+        <ul>
+            <li><a href="examples/bmi.html">BMI Calculator</a></li>
+            <li><a href="examples/invoice.html">Invoice</a></li>
+            <li><a href="examples/todoapp.html">Todo-App</a></li>
+        </ul>
     </div>
 </body>
 </html>

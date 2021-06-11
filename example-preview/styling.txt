@@ -1,0 +1,9 @@
+<h1>Hello guest!</h1>
+@Background(color=#cecece)
+@Size(width=400px)
+@Padding(bottom=10px,top=10px,left=10px,right=10px)
+@Margin(top=10px,bottom=10px) @TAlign(pos=center)
+<div>
+@Underline @Bold @Italic @Color(value=black)
+<a href="docs">To the documentation</a>
+</div>

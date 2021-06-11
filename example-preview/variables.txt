@@ -1,0 +1,5 @@
+<h1>${greeting}</h1>
+@ForEach(data=${list})
+<ul>
+    <li>$${__index__ + 1}. $${__entry__}</li>
+</ul>
