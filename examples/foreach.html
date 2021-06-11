@@ -51,11 +51,21 @@
         @Init
     </template>
 
+    <script type="template" id="stack3">
+        @ForEach(data=${__array__})
+        <ul>
+            <li>$${__entry__}</li>
+        </ul>
+        @Show(if=${__array__.length == 0})
+        <span>There are no toys.</span>
+    </script>
+
     <script type="template" id="stack2">
         <thead>
         <tr>
             <th>Name</th>
             <th>Age</th>
+            <th>Others</th>
         </tr>
         </thead>
         @ForEach(id=stack1,data="${children}")
@@ -63,12 +73,17 @@
             <tr>
                 <td>$${name}</td>
                 <td>$${age}</td>
+                <td>
+                    <strong>Toys</strong>
+                    @@LoadHTML(data=$${toys},selector=body #stack3)
+                    <span></span>
+                </td>
             </tr>
         </tbody>
         @Show(if="${children.length == 0}")
         <tfoot>
             <tr>
-                <td colspan="2">
+                <td colspan="3" align="center">
                     @Bold
                     <span>No children</span>
                 </td>
@@ -136,9 +151,25 @@
             ]);
             var stacktest = decById('stacktest');
             stacktest.update([
-                {name:'Petra',age:'44',children:[{name:'Philipp',age:10}]},
-                {name:'Max',age:'32',children: [{name:'Paula',age:8},{name:'Felix',age:3}]},
-                {name:'Hans',age:'11',children: []}
+                {
+                    name:'Petra',age:'44',children:
+                        [
+                            {name:'Philipp',age:10,toys:['Lego','Toy car']}
+                        ]
+                },
+                {
+                    name:'Max',age:'32',children:
+                        [
+                            {name:'Paula',age:8,toys:[]},
+                            {name:'Felix',age:3,toys:[]}
+                        ]
+                },
+                {
+                    name:'Hans',age:'11',children:
+                        [
+
+                        ]
+                }
             ]);
 
             HTMLDecorators.EvaluateTag(document.querySelector('#arrayTest'),[

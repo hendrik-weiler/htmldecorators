@@ -9,14 +9,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Version: 0.1.2
 
-Build: 2021-06-09 18:59:02
+Build: 2021-06-11 16:14:18
 */
 /**
  * The htmldecorators namespace
  *
  * Contains the Parser and various helper functions
  *
+ * @class HTMLDecorators
  * @type object
+ * @constructor
  */
 var HTMLDecorators = (function(document,window) {
 
@@ -24,21 +26,29 @@ var HTMLDecorators = (function(document,window) {
      * Returns the namespace for the stsandard decorators
      *
      * @var StdDecorators
+     * @memberOf HTMLDecorators
      * @type object
+     * @public
      */
     var StdDecorators = {};
 
     /**
      * Returns a map for decorators
      *
+     * @var IdMap
+     * @memberOf HTMLDecorators
      * @type object
+     * @public
      */
     var IdMap = {};
 
     /**
      * Returns a map of generated ids
      *
+     * @var GeneratedIdMap
+     * @memberOf HTMLDecorators
      * @type object
+     * @private
      */
     var GeneratedIdMap = {};
 
@@ -47,7 +57,8 @@ var HTMLDecorators = (function(document,window) {
      *
      * @param theClass The base class
      * @param classToInherit The class to inherit
-     * @constructor
+     * @memberOf HTMLDecorators
+     * @public
      */
     function ExtendsClass(theClass, classToInherit) {
         theClass.prototype = Object.create(classToInherit.prototype);
@@ -61,7 +72,9 @@ var HTMLDecorators = (function(document,window) {
      *
      * @param func The function
      * @param uid (optional) A unique identifier for the handler
-     * @constructor
+     * @memberOf HTMLDecorators
+     * @method Handler
+     * @public
      */
     function Handler(func, uid) {
         if(!uid) uid = '';
@@ -89,7 +102,9 @@ var HTMLDecorators = (function(document,window) {
      * Finds the loaded script tag
      *
      * @return {HTMLScriptElement}
-     * @constructor
+     * @private
+     * @memberOf HTMLDecorators
+     * @method FindMainJSScriptTag
      */
     function FindMainJSScriptTag() {
         var scripts = document.getElementsByTagName('script'),
@@ -109,7 +124,9 @@ var HTMLDecorators = (function(document,window) {
     /**
      * Executes code based on main script tag attributes
      *
-     * @constructor
+     * @memberOf HTMLDecorators
+     * @private
+     * @method ExecuteScriptParams
      */
     function ExecuteScriptParams() {
         var scriptTag = FindMainJSScriptTag(),
@@ -134,7 +151,9 @@ var HTMLDecorators = (function(document,window) {
      * void cb(html:string,decs:array<DecoratorDef>)
      *
      * @param cb The callback function
-     * @constructor
+     * @public
+     * @memberOf HTMLDecorators
+     * @method EvaluateHTMLDecs
      */
     function EvaluateHTMLDecs(data, cb) {
         if(!data) data = {};
@@ -149,7 +168,15 @@ var HTMLDecorators = (function(document,window) {
             htmldecsNode;
         for (i; i < len; ++i) {
             htmldecsNode = htmldecsNodes[i];
-            EvaluateTag(htmldecsNode,data,cb);
+            // if the inject attribute is set
+            if(htmldecsNode.dataset.inject) {
+                // override data with a custom value
+                var injectedData = new Function('window,document','return '
+                    + htmldecsNode.dataset.inject)(window,document);
+                EvaluateTag(htmldecsNode,injectedData,cb);
+            } else {
+                EvaluateTag(htmldecsNode,data,cb);
+            }
         }
     }
 
@@ -157,7 +184,9 @@ var HTMLDecorators = (function(document,window) {
      * Generates and registers an unique id
      *
      * @return {string}
-     * @constructor
+     * @memberOf HTMLDecorators
+     * @private
+     * @method RegisterUniqueId
      */
     function RegisterUniqueId() {
         var parser = new Parser(),
@@ -173,7 +202,9 @@ var HTMLDecorators = (function(document,window) {
      *
      * @param tag The node
      * @param cb The callback function
-     * @constructor
+     * @memberOf HTMLDecorators
+     * @public
+     * @method EvaluateTag
      */
     function EvaluateTag(tag, data, cb) {
         if(!data) data = {};
@@ -206,6 +237,9 @@ var HTMLDecorators = (function(document,window) {
      *
      * @param id The id of the decorator
      * @return {null|Decorator}
+     * @memberOf HTMLDecorators
+     * @public
+     * @method FindById
      */
     function FindById(id) {
         if(IdMap[id]) {
@@ -217,13 +251,12 @@ var HTMLDecorators = (function(document,window) {
     /**
      * Applies the decorators to the nodes
      *
-     * The decoratorNS is when not defined HTMLDecorators.StdDecorators
      *
      * @param decoratorList A list of decorator definitions
-     * @param decoratorNS (optional) The decorator namespace
-     * @param decoratorNSName (optional but required with decoratorNS) The decorator namespace name
-     * @constructor
+     * @public
      * @return void
+     * @memberOf HTMLDecorators
+     * @method ApplyDecorators
      */
     function ApplyDecorators(decoratorList) {
         var i = 0,
@@ -270,7 +303,10 @@ var HTMLDecorators = (function(document,window) {
     /**
      * The parser to parse the html data
      *
-     * @constructor
+     * @class HTMLDecorators.Parser
+     * @memberOf HTMLDecorators
+     * @var Parser
+     * @type Parser
      */
     function Parser() {
 
@@ -278,6 +314,7 @@ var HTMLDecorators = (function(document,window) {
          * Returns a list of decorators
          *
          * @type Array<Decorator>
+         * @public
          */
         this.DecoratorList = [];
     }
@@ -285,7 +322,10 @@ var HTMLDecorators = (function(document,window) {
     /**
      * Generates a random id for the elements
      *
+     * @public
+     * @memberOf HTMLDecorators.Parser
      * @return {string}
+     * @method generateId
      */
     Parser.prototype.generateId = function () {
         var id;
@@ -303,9 +343,12 @@ var HTMLDecorators = (function(document,window) {
     /**
      * Evaluates a variable expression
      *
+     * @public
      * @param variables The variable object
      * @param variableContent The variable string to evaluate
      * @return string
+     * @memberOf HTMLDecorators.Parser
+     * @method evaluateVariable
      */
     Parser.prototype.evaluateVariable = function (variables, variableContent) {
         if(typeof variables != 'object') return variables;
@@ -337,9 +380,12 @@ var HTMLDecorators = (function(document,window) {
      * Example:
      * When you write <p>@@Bold</p> the output will be <p>@Bold</p>
      *
+     * @public
      * @param value The html string
      * @param variables A key,value object
      * @return {string}
+     * @memberOf HTMLDecorators.Parser
+     * @method parse
      */
     Parser.prototype.parse = function (value, variables) {
         if(!variables) variables = {};
@@ -599,7 +645,11 @@ var HTMLDecorators = (function(document,window) {
      * string id The id for the element after the decorator
      *
      * @param config The config object
-     * @constructor
+     * @class HTMLDecorators.DecoratorDef
+     * @memberOf HTMLDecorators
+     * @var DecoratorDef
+     * @type DecoratorDef
+     * @private
      */
     function DecoratorDef(config) {
 
@@ -607,6 +657,9 @@ var HTMLDecorators = (function(document,window) {
          * Returns the config
          *
          * @type object
+         * @var config
+         * @memberOf HTMLDecorators.DecoratorDef
+         * @private
          */
         var config = Object.assign({
             name : 'Undefined',
@@ -619,6 +672,8 @@ var HTMLDecorators = (function(document,window) {
          *
          * @var name
          * @type string
+         * @public
+         * @memberOf HTMLDecorators.DecoratorDef
          */
         this.name = config.name;
 
@@ -627,6 +682,8 @@ var HTMLDecorators = (function(document,window) {
          *
          * @var params
          * @type object
+         * @public
+         * @memberOf HTMLDecorators.DecoratorDef
          */
         this.params = config.params;
 
@@ -635,6 +692,8 @@ var HTMLDecorators = (function(document,window) {
          *
          * @var id
          * @type string
+         * @public
+         * @memberOf HTMLDecorators.DecoratorDef
          */
         this.id = config.id;
     }
@@ -643,6 +702,8 @@ var HTMLDecorators = (function(document,window) {
      *
      * @param id An unique id
      * @return void
+     * @public
+     * @memberOf HTMLDecorators.DecoratorDef
      */
     DecoratorDef.prototype.setId = function (id) {
         this.id = id;
@@ -652,6 +713,9 @@ var HTMLDecorators = (function(document,window) {
      *
      * @param name The name
      * @return void
+     * @public
+     * @memberOf HTMLDecorators.DecoratorDef
+     * @method setName
      */
     DecoratorDef.prototype.setName = function (name) {
         this.name = name.trim();
@@ -661,6 +725,9 @@ var HTMLDecorators = (function(document,window) {
      *
      * @param key
      * @return {boolean}
+     * @public
+     * @memberOf HTMLDecorators.DecoratorDef
+     * @method paramExist
      */
     DecoratorDef.prototype.paramExist = function (key) {
         key = key.replace(/\n|\r| /g,'').trim();
@@ -672,6 +739,9 @@ var HTMLDecorators = (function(document,window) {
      * @param key The label
      * @param value The value
      * @return void
+     * @public
+     * @memberOf HTMLDecorators.DecoratorDef
+     * @method setParameter
      */
     DecoratorDef.prototype.setParameter = function (key, value) {
         key = key.replace(/\n|\r| /g,'').trim();
@@ -685,7 +755,10 @@ var HTMLDecorators = (function(document,window) {
     /**
      * The decorator class
      *
-     * @constructor
+     * @class HTMLDecorators.Decorator
+     * @memberOf HTMLDecorators
+     * @var Decorator
+     * @type Decorator
      */
     function Decorator(config) {
         if(!config) config = {};
@@ -695,6 +768,8 @@ var HTMLDecorators = (function(document,window) {
          *
          * @var config
          * @type object
+         * @public
+         * @memberOf HTMLDecorators.Decorator
          */
         this.config = Object.assign({}, config);
 
@@ -702,6 +777,8 @@ var HTMLDecorators = (function(document,window) {
          * Returns the element
          *
          * @type {null/HTMLElement}
+         * @public
+         * @memberOf HTMLDecorators.Decorator
          */
         this.element = null;
 
@@ -709,6 +786,8 @@ var HTMLDecorators = (function(document,window) {
          * Returns the name of the decorator
          *
          * @type {string}
+         * @public
+         * @memberOf HTMLDecorators.Decorator
          */
         this.name = '';
 
@@ -716,6 +795,8 @@ var HTMLDecorators = (function(document,window) {
          * Returns the unique element id
          *
          * @type {string}
+         * @public
+         * @memberOf HTMLDecorators.Decorator
          */
         this.id = '';
     }
@@ -725,6 +806,9 @@ var HTMLDecorators = (function(document,window) {
      *
      * @param id The id of the decorator
      * @return {null|Decorator}
+     * @public
+     * @memberOf HTMLDecorators.Decorator
+     * @method findById
      */
     Decorator.prototype.findById = function (id) {
         return FindById(id);
@@ -736,6 +820,9 @@ var HTMLDecorators = (function(document,window) {
      * @param classObj The class obj
      * @param config The config object
      * @return HTMLDecorators.Decorator
+     * @public
+     * @memberOf HTMLDecorators.Decorator
+     * @method createDecorator
      */
     Decorator.prototype.createDecorator = function (className, classObj, config) {
         if(!config) config = {};
@@ -757,6 +844,9 @@ var HTMLDecorators = (function(document,window) {
      * @param obj The object
      * @param cb The callback function
      * @return string
+     * @public
+     * @memberOf HTMLDecorators.Decorator
+     * @method callFunction
      */
     Decorator.prototype.callFunction = function (expression, obj, cb) {
         if(!obj) obj = {};
@@ -764,6 +854,7 @@ var HTMLDecorators = (function(document,window) {
         var args = 'decorator, obj',
             body = 'return ' + expression + '(decorator, obj)',
             result;
+        // calls the function after all decorators are rendered
         setTimeout(function () {
             result = new Function(args, body)(this,obj);
             cb(result);
@@ -773,6 +864,9 @@ var HTMLDecorators = (function(document,window) {
      * Gets called when the define was called
      *
      * @return void
+     * @public
+     * @memberOf HTMLDecorators.Decorator
+     * @method initialized
      */
     Decorator.prototype.initialized = function () {}
     /**
@@ -780,6 +874,9 @@ var HTMLDecorators = (function(document,window) {
      *
      * @param definition The DecoratorDef instance
      * @return void
+     * @public
+     * @memberOf HTMLDecorators.Decorator
+     * @method define
      */
     Decorator.prototype.define = function (definition) {
         this.config = Object.assign(this.config, definition.params);
@@ -796,6 +893,9 @@ var HTMLDecorators = (function(document,window) {
      * Logs a message
      *
      * @param value A value to log
+     * @public
+     * @memberOf HTMLDecorators.Decorator
+     * @method log
      */
     Decorator.prototype.log = function (value) {
         console.log(this.name + ': ', value);
@@ -805,6 +905,9 @@ var HTMLDecorators = (function(document,window) {
      *
      * @param name The parameter name
      * @return {boolean}
+     * @public
+     * @memberOf HTMLDecorators.Decorator
+     * @method paramExist
      */
     Decorator.prototype.paramExist = function(name) {
         return typeof this.config[name] != 'undefined';
@@ -813,6 +916,9 @@ var HTMLDecorators = (function(document,window) {
      * Renders the decorator
      *
      * @return void
+     * @public
+     * @memberOf HTMLDecorators.Decorator
+     * @method render
      */
     Decorator.prototype.render = function () {};
 

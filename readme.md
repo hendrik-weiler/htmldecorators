@@ -63,22 +63,22 @@ p.element.innerHTML = 'Content';
 </script>
 
 <!-- foreach -->
-<ul data-htmldec>
+<div data-htmldec>
     @ForEach(id=menu)
     <ul>
         <li>
             @@Bold @@Underline @@Italic
-            <a href="$${link}">$${label} $${index}</a>
+            <a href="$${link}">$${label} $${__index__}</a>
         </li>
     </ul>
-</ul>
-<ul id="arrayTest" data-htmldec-render>
+</div>
+<div id="arrayTest" data-htmldec-render>
     <span>${__array__}</span>
     @ForEach(data=${__array__})
     <ul>
         <li>$${__entry__} = $${__index__}</li>
     </ul>
-</ul>
+</div>
 <script>
     window.onload = function () {
         // decById is an alias to HTMLDecorators.FindById
@@ -183,3 +183,8 @@ For example at the table tag between td and tr.
 Inside of the decorated tag you need to write
 for decorators with @@ and variables with $$.
 Its possible that it dont work if theres just one @ or $.
+
+###### No decoration applier found
+
+If this message was shown in the log its possible
+you have to add @Init somewhere to enable internal decoration rendering.

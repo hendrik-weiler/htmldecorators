@@ -1,5 +1,7 @@
 <?php
 
+require_once 'lib/parsedown/Parsedown.php';
+
 /**
  * Creates a documentation for htmldecorator
  *
@@ -50,6 +52,20 @@ class DecJSDoc
     public $functionMap = array();
 
     /**
+     * Returns a map of pages
+     *
+     * @var array
+     */
+    public $pagesMap = array();
+
+    /**
+     * Returns a map of examples
+     *
+     * @var array
+     */
+    public $examplesMap = array();
+
+    /**
      * Returns the build directory path
      *
      * @var string
@@ -78,6 +94,27 @@ class DecJSDoc
     private $tmplDir = 'doccreator/tmpl';
 
     /**
+     * Returns the directory path to the examples folder
+     *
+     * @var string
+     */
+    private $examplesDir = 'doccreator/examples';
+
+    /**
+     * Returns the directory path to the pages folder
+     *
+     * @var string
+     */
+    private $pagesDir = 'doccreator/pages';
+
+    /**
+     * Returns the parsedown instance
+     *
+     * @var Parsedown
+     */
+    private $parsedown;
+
+    /**
      * Gets the first line of the description and returns it
      *
      * @param string $description The description string
@@ -103,6 +140,28 @@ class DecJSDoc
             }
         }
         return $result;
+    }
+
+    /**
+     * Prints examples if available
+     *
+     * @param $obj The class,method,property obj
+     * @return string
+     */
+    private function printExamples($obj) {
+        $returnHTML = '';
+        if(count($obj['examples']) > 0) {
+            foreach ($obj['examples'] as $example) {
+                $returnHTML .= '<div class="example">';
+                if(isset($this->examplesMap[$example])) {
+                    $returnHTML .= $this->examplesMap[$example];
+                } else {
+                    $returnHTML .= 'Example "' . $example . '" not found.';
+                }
+                $returnHTML .= '</div>';
+            }
+        }
+        return $returnHTML;
     }
 
     /**
@@ -148,16 +207,22 @@ class DecJSDoc
     /**
      * DecJSDoc constructor.
      *
+     * Config options:
+     * string $sourceDir The source dir to search in
+     * string $buildDir The build dir to save the files to
+     * int $version The applications version
      *
-     * @param string $sourceDir The source dir to search in
-     * @param string $buildDir The build dir to save the files to
-     * @param int $version The applications version
+     * @param array $config The configuration object
      */
-    public function __construct($sourceDir='lib',$buildDir='docs', $version=0)
+    public function __construct($config=array())
     {
-        $this->buildDir = $buildDir;
-        $this->sourceDir = $sourceDir;
-        $this->version = $version;
+        $this->buildDir = isset($config['buildDir']) ? $config['buildDir'] : $this->buildDir;
+        $this->sourceDir = isset($config['sourceDir']) ? $config['sourceDir'] : $this->sourceDir;
+        $this->version = isset($config['version']) ? $config['version'] : $this->version;
+        $this->pagesDir = isset($config['pagesDir']) ? $config['pagesDir'] : $this->pagesDir;
+        $this->examplesDir = isset($config['examplesDir']) ? $config['examplesDir'] : $this->examplesDir;
+
+        $this->parsedown = new Parsedown();
     }
 
     /**
@@ -165,9 +230,10 @@ class DecJSDoc
      *
      * @param string $templateName The name of the template file
      * @param array $data The data for the inside of the template
+     * @param string $breadcrumbnav The breadcrumb navigation html
      * @return string
      */
-    public function createFromTemplate($templateName, $data) {
+    public function createFromTemplate($templateName, $data, $breadcrumbnav='') {
 
         ob_start();
         include($this->tmplDir . '/' . $templateName);
@@ -179,6 +245,27 @@ class DecJSDoc
         $resultContent = ob_get_contents();
         ob_end_clean();
         return $resultContent;
+    }
+
+    public function printBreadcrumbNav($class, $type, $method='') {
+        $resultHTML = '<div class="breadcrumb-nav">';
+        $points = array();
+        $points[] = '<a href="index.html">Main</a>';
+        $typeName = $type;
+        switch($type) {
+            case 'class':
+            case 'method':
+                $typeName = 'class';
+        }
+        if($method != '') {
+            $points[] = '<a href="' . $typeName . '.' . $class['name'] . '.html">' . $class['name'] . '</a>';
+            $points[] = $method['name'];
+        } else {
+            $points[] = $class['name'];
+        }
+        $resultHTML .= implode(' \ ', $points);
+        $resultHTML .= '</div>';
+        return $resultHTML;
     }
 
     /**
@@ -194,8 +281,10 @@ class DecJSDoc
             $fContent = file_get_contents($file);
             $this->parse($fContent);
         }
+        $this->buildExamplesMap();
         $this->buildClassMap();
         $this->buildDecoratorMap();
+        $this->buildPagesMap();
         // reset build dir
         if(file_exists($this->buildDir)) {
             foreach (glob($this->buildDir.'/*') as $file) {
@@ -204,24 +293,48 @@ class DecJSDoc
         } else {
             mkdir($this->buildDir);
         }
+
+        $searchList = array();
+
         $indexHTML = $this->createFromTemplate('tmpl.index.php', array(
             'classes' => $this->classMap,
             'decorators' => $this->decoratorMap,
-            'functions' => $this->functionMap
+            'functions' => $this->functionMap,
+            'pages' => $this->pagesMap
         ));
         file_put_contents($this->buildDir . '/index.html', $indexHTML);
         foreach ($this->classMap as $class) {
-            $classHTML = $this->createFromTemplate('tmpl.class.php', $class);
-            file_put_contents($this->buildDir . '/class.' . $class['name'] . '.html', $classHTML);
+            $classFileName = 'class.' . $class['name'] . '.html';
+            $searchList[] = array('name' => $class['name'], 'desc' => $class['description'],'file'=>$classFileName,'type'=>'class');
+            $classHTML = $this->createFromTemplate('tmpl.class.php', $class, $this->printBreadcrumbNav($class,'class'));
+            file_put_contents($this->buildDir . '/' . $classFileName, $classHTML);
+            foreach ($class['properties'] as $property) {
+                $searchList[] = array('name' => $property['name'], 'desc' => $property['description'],'file'=>$classFileName,'type'=>'property');
+            }
             foreach ($class['methods'] as $method) {
-                $methodHTML = $this->createFromTemplate('tmpl.method.php', $method);
-                file_put_contents($this->buildDir . '/class.' . $class['name'] . '.' . $method['name'] . '.html', $methodHTML);
+                $methodFileName = 'class.' . $class['name'] . '.' . $method['name'] . '.html';
+                $searchList[] = array('name' => $method['name'], 'desc' => $method['description'],'file'=>$methodFileName,'type'=>'method');
+                $methodHTML = $this->createFromTemplate('tmpl.method.php', $method, $this->printBreadcrumbNav($class,'method', $method));
+                file_put_contents($this->buildDir . '/' . $methodFileName, $methodHTML);
             }
         }
         foreach ($this->functionMap as $function) {
-            $functionHTML = $this->createFromTemplate('tmpl.function.php', $function);
-            file_put_contents($this->buildDir . '/function.'. $function['name'] . '.html', $functionHTML);
+            $functionFileName = 'function.'. $function['name'] . '.html';
+            $searchList[] = array('name' => $class['name'], 'desc' => $class['description'],'file'=>$functionFileName,'type'=>'function');
+            $functionHTML = $this->createFromTemplate('tmpl.function.php', $function, $this->printBreadcrumbNav($function,'function'));
+            file_put_contents($this->buildDir . '/' . $functionFileName, $functionHTML);
         }
+        foreach ($this->pagesMap as $name => $pagesText) {
+            $data = array(
+                'name' => $name,
+                'text' => $pagesText
+            );
+            $pagesHTML = $this->createFromTemplate('tmpl.page.php',$data,$this->printBreadcrumbNav($data,'page'));
+            $pageFileName = 'page.'. $name . '.html';
+            $searchList[] = array('name' => $name, 'desc' => '','file'=>$pageFileName,'type'=>'page');
+            file_put_contents($this->buildDir . '/' . $pageFileName, $pagesHTML);
+        }
+        file_put_contents($this->buildDir . '/search.data.js', "fillSearchData('" . base64_encode(json_encode($searchList)) . "')");
     }
 
     /**
@@ -258,7 +371,8 @@ class DecJSDoc
                     'extends' => $def['extends'],
                     'decorator' => $def['decorator'],
                     'decNamespace' => $def['decNamespace'],
-                    'decParams' => $def['decParams']
+                    'decParams' => $def['decParams'],
+                    'examples' => $def['examples']
                 );
                 if(strlen($def['access']) > 0) {
                     $this->classMap[$def['class']]['access'] = $def['access'];
@@ -270,7 +384,8 @@ class DecJSDoc
                     'params' => $def['params'],
                     'return' => $def['return'],
                     'description' => $def['description'],
-                    'description_fl' => $this->getFirstLineOfDescription($def['description'])
+                    'description_fl' => $this->getFirstLineOfDescription($def['description']),
+                    'examples' => $def['examples']
                 );
             }
             if(strlen($def['memberOf']) > 0 && isset($this->classMap[$def['memberOf']])) {
@@ -280,7 +395,8 @@ class DecJSDoc
                         'type' => $def['type'],
                         'access' => $def['access'],
                         'description' => $def['description'],
-                        'class' => $def['class']
+                        'class' => $def['class'],
+                        'examples' => $def['examples']
                     );
                 }
                 if(strlen($def['method']) > 0) {
@@ -291,7 +407,8 @@ class DecJSDoc
                         'description' => $def['description'],
                         'description_fl' => $this->getFirstLineOfDescription($def['description']),
                         'params' => $def['params'],
-                        'return' => $def['return']
+                        'return' => $def['return'],
+                        'examples' => $def['examples']
                     );
                 }
             }
@@ -318,7 +435,8 @@ class DecJSDoc
             'decorator' => '',
             'decNamespace' => '',
             'decParams' => array(),
-            'function' => ''
+            'function' => '',
+            'examples' => array()
         );
         foreach(explode("\n", $comment) as $line) {
             $line = trim($line);
@@ -346,6 +464,9 @@ class DecJSDoc
                 } else if($tagName == 'function') {
                     $functionName = implode(' ', $split);
                     $def['function'] = $functionName;
+                }else if($tagName == 'example') {
+                    $exampleName = implode(' ', $split);
+                    $def['examples'][] = $exampleName;
                 } else if($tagName == 'return') {
                     $def['return'] = implode(' ',$split);
                 } else if($tagName == 'decorator') {
@@ -430,6 +551,34 @@ class DecJSDoc
 
         foreach ($this->comments as $index => $comment) {
             $this->parseComment($comment, $index);
+        }
+    }
+
+    /**
+     * Builds the pages map
+     */
+    private function buildPagesMap()
+    {
+        foreach(glob($this->pagesDir . '/*.md') as $file) {
+            $fContent = file_get_contents($file);
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            $fileName = ucfirst(basename($file,".".$ext));
+            $parsedContent = $this->parsedown->text($fContent);
+            $this->pagesMap[$fileName] = $parsedContent;
+        }
+    }
+
+    /**
+     * Builds the map for the examples
+     */
+    private function buildExamplesMap()
+    {
+        foreach(glob($this->examplesDir . '/*.md') as $file) {
+            $fContent = file_get_contents($file);
+            $ext = pathinfo($file, PATHINFO_EXTENSION);
+            $fileName = basename($file,".".$ext);
+            $parsedContent = $this->parsedown->text($fContent);
+            $this->examplesMap[$fileName] = $parsedContent;
         }
     }
 }

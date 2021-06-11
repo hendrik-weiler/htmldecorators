@@ -1,3 +1,13 @@
+<h2>Pages</h2>
+<table>
+    <?php foreach($data['pages'] as $name => $text): ?>
+
+        <tr>
+            <td><a href="page.<?php print $name; ?>.html"><?php print $name; ?></a></td>
+        </tr>
+
+    <?php endforeach; ?>
+</table>
 <h2>Classes</h2>
 <table>
     <?php foreach($data['classes'] as $class): ?>
@@ -30,7 +40,14 @@
     <?php foreach($decorators as $decorator): ?>
         <tr>
             <td>
-                <a href="class.<?php print $decorator['class']['name'] ?>.html"><?php print $decorator['decorator'] ?></a>
+                <a href="class.<?php print $decorator['class']['name'] ?>.html">
+                    <?php print $decorator['decorator'] ?>
+                    <?php
+                    $exampleCount = count($decorator['class']['examples']);
+                    if($exampleCount > 0): ?>
+                        [<?php print $exampleCount ?> example(s)]
+                    <?php endif; ?>
+                </a>
                 <br>
                 <?php print $this->printDecorator($decorator['class'],true) ?>
             </td>

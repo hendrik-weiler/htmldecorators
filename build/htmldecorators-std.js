@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Version: 0.1.2
 
-Build: 2021-06-09 18:59:02
+Build: 2021-06-11 16:14:18
 */
 HTMLDecorators.StdDecorators.Init = (function (document, window) {
 
@@ -19,8 +19,10 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
      * Note: The function must have a name
      * Note: Alias to HTMLDecorators.Handler
      *
+     * @function decHandler
      * @param func The handler function
      * @param uid (optional) A unique identifier for the handler
+     * @return void
      */
     window.decHandler = function (func, uid) {
         HTMLDecorators.Handler(func, uid);
@@ -31,6 +33,8 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
      *
      * @param data (optional) A key,value object
      * @param cb (optional) The decorator applier handler
+     * @function decHTMLEval
+     * @return void
      */
     window.decHTMLEval = function (data, cb) {
         HTMLDecorators.EvaluateHTMLDecs(data, cb);
@@ -42,6 +46,8 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
      * @param tag The HTMLElement
      * @param data (optional) A key,value object
      * @param cb (optional) The decorator applier handler
+     * @function decEvalTag
+     * @return void
      */
     window.decEvalTag = function (tag, data, cb) {
         HTMLDecorators.EvaluateTag(tag, data, cb);
@@ -50,15 +56,15 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
     /**
      * Handles initialization
      *
-     * Params:
-     * string applyDecorationsHandler - The callback for applying decorators
-     * string includeDec0-XX - A list of to namespaces to apply
-     *
-     * Note:
-     * includeDec0=namespaceDec
-     * Will try to use window.namespaceDec as object
+     * @decorator Init
+     * @decNamespace std
+     * @decParam string applyDecorationsHandler The callback for applying decorators
+     * @decParam string decimalSeperator The seperator for decimal values
+     * @decParam number decimalFixed The set number of decimals of a value
      *
      * @constructor
+     * @class HTMLDecorators.StdDecorators.Init
+     * @extends HTMLDecorators.Decorator
      */
     function Init() {
         HTMLDecorators.Decorator.call(this,{
@@ -74,6 +80,9 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
      *
      * @param e The event
      * @param data The data
+     * @memberOf HTMLDecorators.StdDecorators.Init
+     * @method internalApplyDecoration
+     * @return void
      */
     Init.prototype.internalApplyDecoration = function (e, data) {
         // apply decorators
@@ -95,15 +104,19 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
     /**
      * Handles content of a navigation
      *
-     * Signature of cb
-     * void cb(e, result:{html:string,decs:array<HTMLDecorators.DecoratorDef>})
+     * Signature of applyHandler
+     * void applyHandler(e, result:{html:string,decs:array<HTMLDecorators.DecoratorDef>})
      *
-     * Params:
-     * string path - The path to load
-     * string id - The id to the @Navigations a[data-id] attribute
-     * string applyHandler - The decoration applier function
+     * @decorator LoadHTML
+     * @decNamespace std
+     * @decParam string path The path to load
+     * @decParam string id The id to the @Navigations a[data-id] attribute
+     * @decParam string applyHandler The decoration applier function
+     * @decParam string selector The css selector to pull data from tag
      *
      * @constructor
+     * @class HTMLDecorators.StdDecorators.LoadHTML
+     * @extends HTMLDecorators.Decorator
      */
     function LoadHTML() {
         HTMLDecorators.Decorator.call(this,{
@@ -115,7 +128,10 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
     /**
      * Applies the decorators
      *
-     * @param html
+     * @memberOf HTMLDecorators.StdDecorators.LoadHTML
+     * @method applyDecs
+     * @param html The html to parse and apply decorators
+     * @return void
      */
     LoadHTML.prototype.applyDecs = function (html) {
         var data = {};
@@ -161,6 +177,10 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
     }
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.LoadHTML
+     * @method render
+     * @return void
      */
     LoadHTML.prototype.render = async function () {
         if(this.paramExist('path')) {
@@ -188,7 +208,12 @@ HTMLDecorators.StdDecorators.Script = (function (document, window) {
     /**
      * Executes a script
      *
+     * @decorator Script
+     * @decNamespace std
+     *
+     * @class HTMLDecorators.StdDecorators.Script
      * @constructor
+     * @extends HTMLDecorators.Decorator
      */
     function Script() {
         HTMLDecorators.Decorator.call(this,{
@@ -199,6 +224,10 @@ HTMLDecorators.StdDecorators.Script = (function (document, window) {
     HTMLDecorators.ExtendsClass(Script, HTMLDecorators.Decorator);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Script
+     * @method render
+     * @return void
      */
     Script.prototype.render = async function () {
         new Function('window,document',this.element.innerHTML).apply(window,[window,document]);
@@ -211,20 +240,22 @@ HTMLDecorators.StdDecorators.Script = (function (document, window) {
 HTMLDecorators.StdDecorators.Ref = (function (document, window) {
 
     /**
-     * Gets a decorator
+     * Gets a decorator or returns null
      *
      * @param id The id of the reference
-     * @return {null|HTMLDecorators.Decorator}
+     * @function decById
+     * @return HTMLDecorators.Decorator
      */
     window.decById = function (id) {
         return HTMLDecorators.FindById(id);
     }
 
     /**
-     * Gets the element of the decorator
+     * Gets the element of the decorator or returns null
      *
      * @param id The id of the reference
-     * @return {null|HTMLElement}
+     * @function decElmById
+     * @return HTMLElement
      */
     window.decElmById = function (id) {
         var ref;
@@ -237,9 +268,12 @@ HTMLDecorators.StdDecorators.Ref = (function (document, window) {
     /**
      * Sets a reference
      *
-     * Params:
-     * string id - The id
+     * @decorator
+     * @decNamespace std
+     * @decParam string id The id
      *
+     * @class HTMLDecorators.StdDecorators.Ref
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Ref() {
@@ -254,14 +288,20 @@ HTMLDecorators.StdDecorators.Ref = (function (document, window) {
 HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
 
     /**
-     * Sets a reference
+     * Loops data from an object or array
      *
-     * Params:
-     * string id - The id
-     * string applyHandler - The decoration applier function
-     * array data - A list of array<object>
+     * @decorator ForEach
+     * @decNamespace std
+     * @decParam string id The id
+     * @decParam string applyHandler The decoration applier function
+     * @decParam array data A list of objects
      *
+     * @example foreach-id
+     * @example foreach-data
+     *
+     * @class HTMLDecorators.StdDecorators.ForEach
      * @constructor
+     * @extends HTMLDecorators.Decorator
      */
     function ForEach() {
         HTMLDecorators.Decorator.call(this,{
@@ -284,6 +324,9 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
      * A single iteration
      *
      * @param data A key,value object
+     * @memberOf HTMLDecorators.StdDecorators.ForEach
+     * @method iteration
+     * @return void
      */
     ForEach.prototype.iteration = function (index, data) {
         if(typeof data == 'object') {
@@ -313,6 +356,9 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
      * Updates the element
      *
      * @param list A list of objects
+     * @memberOf HTMLDecorators.StdDecorators.ForEach
+     * @method update
+     * @return void
      */
     ForEach.prototype.update = function (list) {
         // reset
@@ -355,6 +401,10 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
     }
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.ForEach
+     * @method render
+     * @return void
      */
     ForEach.prototype.render = function () {
         this.template = (' ' + this.element.innerHTML).slice(1);
@@ -373,12 +423,17 @@ HTMLDecorators.StdDecorators.NumberFormat = (function (document, window) {
     /**
      * Sets a reference
      *
-     * Params:
-     * string id - The id
-     * string applyHandler - The decoration applier function
-     * array data - A list of array<object>
+     * @decorator NumberFormat
+     * @decNamespace std
+     * @decParam string id The id
+     * @decParam string decimalSeperator The seperator for decimal values
+     * @decParam number decimalFixed The set number of decimals of a value
      *
+     * @example numberformat
+     *
+     * @class HTMLDecorators.StdDecorators.NumberFormat
      * @constructor
+     * @extends HTMLDecorators.Decorator
      */
     function NumberFormat() {
         HTMLDecorators.Decorator.call(this);
@@ -386,6 +441,8 @@ HTMLDecorators.StdDecorators.NumberFormat = (function (document, window) {
         /**
          * Returns the decimal seperator
          *
+         * @memberOf HTMLDecorators.StdDecorators.NumberFormat
+         * @var decimalSeperator
          * @type {string}
          */
         this.decimalSeperator = '.';
@@ -393,6 +450,8 @@ HTMLDecorators.StdDecorators.NumberFormat = (function (document, window) {
         /**
          * Returns the decimal numbers size
          *
+         * @memberOf HTMLDecorators.StdDecorators.NumberFormat
+         * @var decimalFixed
          * @type {number}
          */
         this.decimalFixed = 10;
@@ -401,6 +460,10 @@ HTMLDecorators.StdDecorators.NumberFormat = (function (document, window) {
     /**
      * Formats the number
      *
+     * @memberOf HTMLDecorators.StdDecorators.NumberFormat
+     * @method format
+     * @param decimalSeperator The seperator for float
+     * @param decimalFixed The decimal places number
      * @return {string}
      */
     NumberFormat.prototype.format = function (decimalSeperator, decimalFixed) {
@@ -411,6 +474,10 @@ HTMLDecorators.StdDecorators.NumberFormat = (function (document, window) {
     }
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.NumberFormat
+     * @method render
+     * @return void
      */
     NumberFormat.prototype.render = function () {
         var dec = this.findById('stdInit');
@@ -443,12 +510,17 @@ HTMLDecorators.StdDecorators.NumberFormat = (function (document, window) {
     /**
      * Handles events
      *
-     * Params:
-     * string id - The id of the decorator
-     * string type - The event type e.g. 'click','submit' ...
-     * string handler - The handler function name
+     * @decorator Event
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string type The event type e.g. 'click','submit' ...
+     * @decParam string handler The handler function name
      *
+     * @example event
+     *
+     * @class HTMLDecorators.StdDecorators.Event
      * @constructor
+     * @extends HTMLDecorators.Decorator
      */
     function Event() {
         HTMLDecorators.Decorator.call(this);
@@ -458,6 +530,9 @@ HTMLDecorators.StdDecorators.NumberFormat = (function (document, window) {
      * Handles the event
      *
      * @param e A event
+     * @memberOf HTMLDecorators.StdDecorators.Event
+     * @method eventHandler
+     * @return void
      */
     Event.prototype.eventHandler = function (e) {
         if(!this.paramExist('handler')) {
@@ -470,6 +545,10 @@ HTMLDecorators.StdDecorators.NumberFormat = (function (document, window) {
     }
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Event
+     * @method render
+     * @return void
      */
     Event.prototype.render = function () {
         if(this.paramExist('type')) {
@@ -488,10 +567,15 @@ HTMLDecorators.StdDecorators.Click = (function (document, window) {
     /**
      * Handles the click event
      *
-     * Params:
-     * string id - The id of the decorator
-     * string handler - The handler function name
+     * @decorator Click
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string handler The handler function name
      *
+     * @example click
+     *
+     * @class HTMLDecorators.StdDecorators.Click
+     * @extends HTMLDecorators.StdDecorators.Event
      * @constructor
      */
     function Click() {
@@ -500,6 +584,10 @@ HTMLDecorators.StdDecorators.Click = (function (document, window) {
     HTMLDecorators.ExtendsClass(Click, HTMLDecorators.StdDecorators.Event);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Click
+     * @method render
+     * @return void
      */
     Click.prototype.render = function () {
         this.element.addEventListener('click', this.eventHandler.bind(this));
@@ -514,10 +602,13 @@ HTMLDecorators.StdDecorators.Submit = (function (document, window) {
     /**
      * Handles the submit event
      *
-     * Params:
-     * string id - The id of the decorator
-     * string handler - The handler function name
+     * @decorator Submit
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string handler The handler function name
      *
+     * @class HTMLDecorators.StdDecorators.Submit
+     * @extends HTMLDecorators.StdDecorators.Event
      * @constructor
      */
     function Submit() {
@@ -526,6 +617,10 @@ HTMLDecorators.StdDecorators.Submit = (function (document, window) {
     HTMLDecorators.ExtendsClass(Submit, HTMLDecorators.StdDecorators.Event);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Submit
+     * @method render
+     * @return void
      */
     Submit.prototype.render = function () {
         this.element.addEventListener('submit', this.eventHandler.bind(this));
@@ -540,10 +635,13 @@ HTMLDecorators.StdDecorators.Change = (function (document, window) {
     /**
      * Handles the change event
      *
-     * Params:
-     * string id - The id of the decorator
-     * string handler - The handler function name
+     * @decorator Change
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string handler The handler function name
      *
+     * @class HTMLDecorators.StdDecorators.Change
+     * @extends HTMLDecorators.StdDecorators.Event
      * @constructor
      */
     function Change() {
@@ -552,6 +650,10 @@ HTMLDecorators.StdDecorators.Change = (function (document, window) {
     HTMLDecorators.ExtendsClass(Change, HTMLDecorators.StdDecorators.Event);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Change
+     * @return void
+     * @method render
      */
     Change.prototype.render = function () {
         this.element.addEventListener('change', this.eventHandler.bind(this));
@@ -566,10 +668,13 @@ HTMLDecorators.StdDecorators.KeyUp = (function (document, window) {
     /**
      * Handles the keyup event
      *
-     * Params:
-     * string id - The id of the decorator
-     * string handler - The handler function name
+     * @decorator KeyUp
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string handler The handler function name
      *
+     * @class HTMLDecorators.StdDecorators.KeyUp
+     * @extends HTMLDecorators.StdDecorators.Event
      * @constructor
      */
     function KeyUp() {
@@ -578,6 +683,10 @@ HTMLDecorators.StdDecorators.KeyUp = (function (document, window) {
     HTMLDecorators.ExtendsClass(KeyUp, HTMLDecorators.StdDecorators.Event);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.KeyUp
+     * @method render
+     * @return void
      */
     KeyUp.prototype.render = function () {
         this.element.addEventListener('keyup', this.eventHandler.bind(this));
@@ -592,10 +701,13 @@ HTMLDecorators.StdDecorators.KeyDown = (function (document, window) {
     /**
      * Handles the keyup event
      *
-     * Params:
-     * string id - The id of the decorator
-     * string handler - The handler function name
+     * @decorator KeyDown
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string handler The handler function name
      *
+     * @class HTMLDecorators.StdDecorators.KeyDown
+     * @extends HTMLDecorators.StdDecorators.Event
      * @constructor
      */
     function KeyDown() {
@@ -604,6 +716,10 @@ HTMLDecorators.StdDecorators.KeyDown = (function (document, window) {
     HTMLDecorators.ExtendsClass(KeyDown, HTMLDecorators.StdDecorators.Event);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.KeyDown
+     * @return void
+     * @method render
      */
     KeyDown.prototype.render = function () {
         this.element.addEventListener('keydown', this.eventHandler.bind(this));
@@ -618,10 +734,13 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
     /**
      * Handles the keypress event
      *
-     * Params:
-     * string id - The id of the decorator
-     * string handler - The handler function name
+     * @decorator KeyPress
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string handler The handler function name
      *
+     * @class HTMLDecorators.StdDecorators.KeyPress
+     * @extends HTMLDecorators.StdDecorators.Event
      * @constructor
      */
     function KeyPress() {
@@ -630,6 +749,10 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
     HTMLDecorators.ExtendsClass(KeyPress, HTMLDecorators.StdDecorators.Event);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.KeyPress
+     * @method render
+     * @return void
      */
     KeyPress.prototype.render = function () {
         this.element.addEventListener('keypress', this.eventHandler.bind(this));
@@ -642,11 +765,18 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
     /**
      * Handles navigation
      *
-     * Params:
-     * string id - The id of the decorator
-     * string activeClass - The active classname for the links
-     * string hashHandler - The handler function for hash detection
+     * @decorator Navigation
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string activeClass The active classname for the links
+     * @decParam string hashHandler The handler function for hash detection
+     * @decParam string default The id of a @Content decorator to set active as default
      *
+     * @example navigation-content
+     * @example navigation-hashhandler
+     *
+     * @class HTMLDecorators.StdDecorators.Navigation
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Navigation() {
@@ -654,6 +784,13 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
             activeClass : 'active'
         });
 
+        /**
+         * Returns a list of registered HTMLDecorators.StdDecorators.Content instances
+         *
+         * @var contents
+         * @memberOf HTMLDecorators.StdDecorators.Navigation
+         * @type array
+         */
         this.contents = [];
     }
     HTMLDecorators.ExtendsClass(Navigation, HTMLDecorators.Decorator);
@@ -661,6 +798,9 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
      * Sets a link active
      *
      * @param id The link id
+     * @memberOf HTMLDecorators.StdDecorators.Navigation
+     * @method setActive
+     * @return void
      */
     Navigation.prototype.setActive = function (id) {
         var links = this.element.querySelectorAll('a'),
@@ -686,6 +826,10 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
     }
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Navigation
+     * @method render
+     * @return void
      */
     Navigation.prototype.render = function () {
         var links = this.element.querySelectorAll('a'),
@@ -719,6 +863,17 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
             }.bind(this),false);
             this.callFunction(this.config.hashChangeHandler);
         }
+        if(this.paramExist('default')) {
+            var dec;
+            // timeout to wait till the decators have been rendered
+            setTimeout(function() {
+                if(dec = this.findById(this.config.default)) {
+                    this.setActive(this.config.default);
+                } else {
+                    this.log('Cant find @Content with id "' + this.config.default + '"');
+                }
+            }.bind(this),0);
+        }
     }
 
     return Navigation;
@@ -730,11 +885,15 @@ HTMLDecorators.StdDecorators.Content = (function (document, window) {
     /**
      * Handles content of a navigation
      *
-     * Params:
-     * string nav - The id of the @Navigation decorator
-     * string id - The id to the @Navigations a[data-id] attribute
-     * bool visible - If the content should be displayed or not
+     * @decorator Content
+     * @decNamespace std
+     * @decParam string nav The id of the @Navigation decorator
+     * @decParam string id The id to the @Navigations a[data-id] attribute
      *
+     * @example navigation-content
+     *
+     * @class HTMLDecorators.StdDecorators.Content
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Content() {
@@ -743,12 +902,20 @@ HTMLDecorators.StdDecorators.Content = (function (document, window) {
     HTMLDecorators.ExtendsClass(Content, HTMLDecorators.Decorator);
     /**
      * Initializes the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Content
+     * @method initialized
+     * @return void
      */
     Content.prototype.initialized = function () {
         this.visibility = this.createDecorator('Visible', HTMLDecorators.StdDecorators.Visible);
     }
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Content
+     * @method render
+     * @return void
      */
     Content.prototype.render = function () {
         this.visibility.hide();
@@ -775,9 +942,12 @@ HTMLDecorators.StdDecorators.Content = (function (document, window) {
     /**
      * Renders an element bold
      *
-     * Params:
-     * string id - The id of the decorator
+     * @decorator Bold
+     * @decNamespace std
+     * @decParam string id The id of the decorator
      *
+     * @class HTMLDecorators.StdDecorators.Bold
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Bold() {
@@ -786,6 +956,10 @@ HTMLDecorators.StdDecorators.Content = (function (document, window) {
     HTMLDecorators.ExtendsClass(Bold, HTMLDecorators.Decorator);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Bold
+     * @return void
+     * @method render
      */
     Bold.prototype.render = function () {
         this.element.style.fontWeight = 'bold';
@@ -800,9 +974,12 @@ HTMLDecorators.StdDecorators.Italic = (function (document, window) {
     /**
      * Renders an element cursive
      *
-     * Params:
-     * string id - The id of the decorator
+     * @decorator Italic
+     * @decNamespace std
+     * @decParam string id The id of the decorator
      *
+     * @class HTMLDecorators.StdDecorators.Italic
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Italic() {
@@ -811,6 +988,10 @@ HTMLDecorators.StdDecorators.Italic = (function (document, window) {
     HTMLDecorators.ExtendsClass(Italic, HTMLDecorators.Decorator);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Italic
+     * @method render
+     * @return void
      */
     Italic.prototype.render = function () {
         this.element.style.fontStyle = 'italic';
@@ -825,9 +1006,12 @@ HTMLDecorators.StdDecorators.Underline = (function (document, window) {
     /**
      * Underlines an element
      *
-     * Params:
-     * string id - The id of the decorator
+     * @decorator Underline
+     * @decNamespace std
+     * @decParam string id The id of the decorator
      *
+     * @class HTMLDecorators.StdDecorators.Underline
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Underline() {
@@ -836,6 +1020,10 @@ HTMLDecorators.StdDecorators.Underline = (function (document, window) {
     HTMLDecorators.ExtendsClass(Underline, HTMLDecorators.Decorator);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Underline
+     * @method render
+     * @return void
      */
     Underline.prototype.render = function () {
         this.element.style.textDecoration = 'underline';
@@ -850,10 +1038,13 @@ HTMLDecorators.StdDecorators.Color = (function (document, window) {
     /**
      * Set color of an element
      *
-     * Params:
-     * string id - The id of the decorator
-     * string value - The hexadecimal or any other value
+     * @decorator Color
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string value The hexadecimal or any other value
      *
+     * @class HTMLDecorators.StdDecorators.Color
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Color() {
@@ -862,6 +1053,10 @@ HTMLDecorators.StdDecorators.Color = (function (document, window) {
     HTMLDecorators.ExtendsClass(Color, HTMLDecorators.Decorator);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Color
+     * @method render
+     * @return void
      */
     Color.prototype.render = function () {
         if(this.paramExist('value')) {
@@ -876,12 +1071,15 @@ HTMLDecorators.StdDecorators.Color = (function (document, window) {
 HTMLDecorators.StdDecorators.TAlign = (function (document, window) {
 
     /**
-     * Set the align of the element
+     * Set the align of an element
      *
-     * Params:
-     * string id - The id of the decorator
-     * string pos - The position left,center,right
+     * @decorator TAlign
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string pos The position left,center,right
      *
+     * @class HTMLDecorators.StdDecorators.TAlign
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function TAlign() {
@@ -890,6 +1088,10 @@ HTMLDecorators.StdDecorators.TAlign = (function (document, window) {
     HTMLDecorators.ExtendsClass(TAlign, HTMLDecorators.Decorator);
     /**
      * Renders the decorator
+     *
+     * @method render
+     * @memberOf HTMLDecorators.StdDecorators.TAlign
+     * @return void
      */
     TAlign.prototype.render = function () {
         if(this.paramExist('pos')) {
@@ -906,11 +1108,14 @@ HTMLDecorators.StdDecorators.Size = (function (document, window) {
     /**
      * Set the size of the element
      *
-     * Params:
-     * string id - The id of the decorator
-     * string width - The width
-     * string height - The height
+     * @decorator Size
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string width The width
+     * @decParam string height The height
      *
+     * @class HTMLDecorators.StdDecorators.Size
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Size() {
@@ -919,6 +1124,10 @@ HTMLDecorators.StdDecorators.Size = (function (document, window) {
     HTMLDecorators.ExtendsClass(Size, HTMLDecorators.Decorator);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Size
+     * @method render
+     * @return void
      */
     Size.prototype.render = function () {
         if(this.paramExist('width')) {
@@ -938,10 +1147,13 @@ HTMLDecorators.StdDecorators.Background = (function (document, window) {
     /**
      * Set the background of the element
      *
-     * Params:
-     * string id - The id of the decorator
-     * string color - The color
+     * @decorator Background
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string color The color
      *
+     * @class HTMLDecorators.StdDecorators.Background
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Background() {
@@ -950,6 +1162,10 @@ HTMLDecorators.StdDecorators.Background = (function (document, window) {
     HTMLDecorators.ExtendsClass(Background, HTMLDecorators.Decorator);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Background
+     * @method render
+     * @return void
      */
     Background.prototype.render = function () {
         if(this.paramExist('color')) {
@@ -966,14 +1182,17 @@ HTMLDecorators.StdDecorators.Padding = (function (document, window) {
     /**
      * Set the align of the element
      *
-     * Params:
-     * string id - The id of the decorator
-     * string value - The value
-     * string top - The top value
-     * string left - The left value
-     * string bottom - The bottom value
-     * string right - The right value
+     * @decorator Padding
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string value The value
+     * @decParam string top The top value
+     * @decParam string left The left value
+     * @decParam string bottom The bottom value
+     * @decParam string right The right value
      *
+     * @class HTMLDecorators.StdDecorators.Padding
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Padding() {
@@ -982,6 +1201,10 @@ HTMLDecorators.StdDecorators.Padding = (function (document, window) {
     HTMLDecorators.ExtendsClass(Padding, HTMLDecorators.Decorator);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Padding
+     * @return void
+     * @method render
      */
     Padding.prototype.render = function () {
         if(this.paramExist('value')) {
@@ -1010,14 +1233,17 @@ HTMLDecorators.StdDecorators.Margin = (function (document, window) {
     /**
      * Set the align of the element
      *
-     * Params:
-     * string id - The id of the decorator
-     * string value - The value
-     * string top - The top value
-     * string left - The left value
-     * string bottom - The bottom value
-     * string right - The right value
+     * @decorator Margin
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string value The value
+     * @decParam string top The top value
+     * @decParam string left The left value
+     * @decParam string bottom The bottom value
+     * @decParam string right The right value
      *
+     * @class HTMLDecorators.StdDecorators.Margin
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Margin() {
@@ -1026,6 +1252,10 @@ HTMLDecorators.StdDecorators.Margin = (function (document, window) {
     HTMLDecorators.ExtendsClass(Margin, HTMLDecorators.Decorator);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Margin
+     * @method render
+     * @return void
      */
     Margin.prototype.render = function () {
         if(this.paramExist('value')) {
@@ -1054,10 +1284,13 @@ HTMLDecorators.StdDecorators.Cursor = (function (document, window) {
     /**
      * Set the cursor for an element
      *
-     * Params:
-     * string id - The id of the decorator
-     * string value - The value
+     * @decorator Cursor
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string value The value e.g. pointer, not-allowed etc.
      *
+     * @class HTMLDecorators.StdDecorators.Cursor
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Cursor() {
@@ -1066,6 +1299,10 @@ HTMLDecorators.StdDecorators.Cursor = (function (document, window) {
     HTMLDecorators.ExtendsClass(Cursor, HTMLDecorators.Decorator);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Cursor
+     * @method render
+     * @return void
      */
     Cursor.prototype.render = function () {
         if(this.paramExist('value')) {
@@ -1080,12 +1317,15 @@ HTMLDecorators.StdDecorators.Cursor = (function (document, window) {
 HTMLDecorators.StdDecorators.Pointer = (function (document, window) {
 
     /**
-     * Set the cursor for an element
+     * Set the cursor to pointer
      *
-     * Params:
-     * string id - The id of the decorator
-     * string value - The value
+     * @decorator Pointer
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string value The cursor value
      *
+     * @class HTMLDecorators.StdDecorators.Pointer
+     * @extends HTMLDecorators.StdDecorators.Cursor
      * @constructor
      */
     function Pointer() {
@@ -1094,6 +1334,10 @@ HTMLDecorators.StdDecorators.Pointer = (function (document, window) {
     HTMLDecorators.ExtendsClass(Pointer, HTMLDecorators.StdDecorators.Cursor);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Pointer
+     * @method render
+     * @return void
      */
     Pointer.prototype.render = function () {
         this.config.value = 'pointer';
@@ -1107,10 +1351,16 @@ HTMLDecorators.StdDecorators.Pointer = (function (document, window) {
     /**
      * Handles visibility
      *
-     * Params:
-     * string id - The id of the decorator
-     * string state - 'show' or 'hide'
+     * @decorator Visible
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string state 'show' or 'hide'
+     * @decParam string if When if is 'true' show will be executed else hide
      *
+     * @example visible
+     *
+     * @class HTMLDecorators.StdDecorators.Visible
+     * @extends HTMLDecorators.Decorator
      * @constructor
      */
     function Visible() {
@@ -1119,18 +1369,30 @@ HTMLDecorators.StdDecorators.Pointer = (function (document, window) {
     HTMLDecorators.ExtendsClass(Visible, HTMLDecorators.Decorator);
     /**
      * Shows the element
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Visible
+     * @method show
+     * @return void
      */
     Visible.prototype.show = function () {
         this.element.style.display = '';
     }
     /**
      * Hides the element
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Visible
+     * @method hide
+     * @return void
      */
     Visible.prototype.hide = function () {
         this.element.style.display = 'none';
     }
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Visible
+     * @method render
+     * @return void
      */
     Visible.prototype.render = function () {
         if(this.paramExist('state')) {
@@ -1142,7 +1404,6 @@ HTMLDecorators.StdDecorators.Pointer = (function (document, window) {
             }
         }
         if(this.paramExist('if')) {
-            console.log(this.config.if)
             if(this.config.if == 'true') {
                 this.show();
             } else {
@@ -1160,9 +1421,12 @@ HTMLDecorators.StdDecorators.Hide = (function (document, window) {
     /**
      * Handles hiding
      *
-     * Params:
-     * string id - The id of the decorator
+     * @decorator Hide
+     * @decNamespace std
+     * @decParam string id The id of the decorator
      *
+     * @class HTMLDecorators.StdDecorators.Hide
+     * @extends HTMLDecorators.StdDecorators.Visible
      * @constructor
      */
     function Hide() {
@@ -1171,6 +1435,10 @@ HTMLDecorators.StdDecorators.Hide = (function (document, window) {
     HTMLDecorators.ExtendsClass(Hide, HTMLDecorators.StdDecorators.Visible);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Hide
+     * @method render
+     * @return void
      */
     Hide.prototype.render = function () {
         this.hide();
@@ -1186,9 +1454,12 @@ HTMLDecorators.StdDecorators.Show = (function (document, window) {
     /**
      * Handles hiding
      *
-     * Params:
-     * string id - The id of the decorator
+     * @decorator Show
+     * @decNamespace std
+     * @decParam string id The id of the decorator
      *
+     * @class HTMLDecorators.StdDecorators.Show
+     * @extends HTMLDecorators.StdDecorators.Visible
      * @constructor
      */
     function Show() {
@@ -1197,6 +1468,10 @@ HTMLDecorators.StdDecorators.Show = (function (document, window) {
     HTMLDecorators.ExtendsClass(Show, HTMLDecorators.StdDecorators.Visible);
     /**
      * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Show
+     * @method render
+     * @return void
      */
     Show.prototype.render = function () {
         this.show();

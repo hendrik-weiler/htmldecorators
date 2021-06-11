@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mail App</title>
+    <script data-evalhtmldec src="../lib/htmldecorators.js"></script>
+    <script src="../lib/stdDecorators/event.js"></script>
+    <script src="../lib/stdDecorators/visible.js"></script>
+    <script src="../lib/stdDecorators/navigation.js"></script>
+    <script src="../lib/stdDecorators/style.js"></script>
+    <script src="../lib/stdDecorators/core.js"></script>
+    <link rel="stylesheet" href="../lib/htmldecorators.css">
+</head>
+<body>
+
+    <script>
+        window.data = [];
+        for(var i = 0; i < 100; ++i) {
+            data.push('entry '+ i);
+        }
+    </script>
+
+    <script type="template" id="inbox">
+        @ForEach(data=${window.data})
+        <ul>
+            <li>$${__entry__}</li>
+        </ul>
+    </script>
+
+    <div class="app" data-htmldec data-inject="window.data">
+        @Init
+        <div class="header">
+            <input type="search" placeholder="Search for mails...">
+        </div>
+        <div class="mainarea">
+            @Navigation(id=nav,default=inbox)
+            <nav>
+                <a data-id="inbox" href="">
+                    <span>Inbox</span>
+                    <span>0</span>
+                </a>
+                <a data-id="important" href="">
+                    <span>Important</span>
+                    <span>0</span>
+                </a>
+            </nav>
+            <main>
+                @Content(nav=nav,id=inbox)
+                @LoadHTML(selector=#inbox)
+                <div class="inbox"></div>
+                @Content(nav=nav,id=important)
+                <div class="important">Important</div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

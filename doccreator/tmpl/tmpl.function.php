@@ -1,3 +1,4 @@
+<?php print $breadcrumbnav; ?>
 <p class="description">
     <?php print nl2br($data['description']) ?>
 </p>

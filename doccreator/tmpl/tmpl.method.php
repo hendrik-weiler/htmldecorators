@@ -1,5 +1,7 @@
+<?php print $breadcrumbnav; ?>
 <p class="description">
     <?php print nl2br($data['description']) ?>
+    <?php print $this->printExamples($data); ?>
 </p>
 <h4>
     <span class="class-attr"><?php print $data['access'] ?> function</span>

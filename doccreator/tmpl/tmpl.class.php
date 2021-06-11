@@ -1,9 +1,11 @@
+<?php print $breadcrumbnav; ?>
 <p class="description">
     <?php print nl2br($data['description']) ?>
     <?php if(strlen($data['decorator']) > 0): ?>
         <h6>Decorator</h6>
         <?php print $this->printDecorator($data,true); ?>
     <?php endif; ?>
+    <?php print $this->printExamples($data); ?>
 </p>
 <h4>
     <span class="class-attr"><?php print $data['access'] ?> class</span>

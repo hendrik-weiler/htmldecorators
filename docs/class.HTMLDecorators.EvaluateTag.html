@@ -6,6 +6,7 @@
     <style>
         :root {
             --font-color-light: #cecece;
+            --font-color-lighter: #666;
             --font-color: #333;
             --border-color: #efefef;
         }
@@ -29,6 +30,21 @@
         .container .header {
             padding: 10px;
             border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container .header .col2 {
+            justify-content: flex-end;
+        }
+
+        .container .header .col2 input {
+            border:1px solid var(--border-color);
+            padding: 15px;
+            font-size: 16px;
+            width: 100%;
+            min-width: 500px;
         }
 
         .container .content {
@@ -43,10 +59,23 @@
             font-size: 12px;
         }
 
+        .container .search-results,
         .container .content-inner {
             margin: auto;
             width: 100%;
             max-width: 1280px;
+        }
+
+        body .container .search-results {
+            display: none;
+        }
+
+        body.search .container .search-results {
+            display: block;
+        }
+
+        body.search .container .content-inner {
+            display: none;
         }
 
         .container table {
@@ -87,24 +116,137 @@
             text-decoration: underline;
         }
 
+        .container .example,
         .container .decorator-preview {
             border-left: 3px solid var(--font-color-light);
             padding-left: 10px;
         }
+
+        .container .page pre,
+        .container .example pre {
+            border:1px solid var(--font-color-light);
+            background: var(--border-color);
+            padding: 5px;
+        }
+
+        .container .searchResult {
+            text-decoration: none;
+        }
+
+        .container .searchResult h4 {
+            text-decoration: underline;
+            font-size: 16px;
+            color: var(--font-color);
+        }
+
+        .container .searchResult p {
+            color: var(--font-color-lighter);
+        }
+
+        .container .no-results {
+            padding: 50px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .container .breadcrumb-nav {
+            padding: 5px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin: 50px 0;
+            font-size: 20px;
+        }
+
+        .container .breadcrumb-nav a {
+            color: var(--font-color);
+        }
     </style>
+    <script>
+        /**
+         * Returns a list of search objects
+         *
+         * @var searchData
+         * @type array
+         */
+        var searchData = [];
+
+        /**
+         * Sets the searchData variable with given data
+         *
+         * @param data The base64 encoded, json string
+         */
+        function fillSearchData(data) {
+            searchData = JSON.parse(atob(data));
+        }
+
+        window.onload = function () {
+
+            var search = document.getElementById('search');
+            search.onkeyup = function (e) {
+                if(this.value == '') {
+                    document.body.classList.remove('search');
+                    return;
+                }
+                if(this.value.length < 3) return;
+                document.body.classList.add('search');
+
+                var i = 0,
+                    len = searchData.length,
+                    dataEntry,
+                    searchTerm = this.value,
+                    tmplNode = document.body.querySelector('#searchEntry'),
+                    sR = document.body.querySelector('.search-results'),
+                    tmplHTML,
+                    desc,
+                    resultCounter = 0;
+                sR.innerHTML = '';
+                console.log('---- new search='+searchTerm)
+                for(i; i < len; ++i) {
+                    dataEntry = searchData[i];
+                    if(new RegExp(searchTerm,'i').test(dataEntry.name)
+                        || new RegExp(searchTerm,'i').test(dataEntry.desc)) {
+                        tmplHTML = tmplNode.innerHTML.slice(0);
+                        tmplHTML = tmplHTML.replace('$link', dataEntry.file);
+                        tmplHTML = tmplHTML.replace('$name', dataEntry.name);
+                        desc = dataEntry.desc;
+                        desc = desc.replace(/\n/g,'<br>');
+                        tmplHTML = tmplHTML.replace('$description', desc);
+                        sR.innerHTML += tmplHTML;
+                        ++resultCounter;
+                    }
+                }
+                if(resultCounter==0) {
+                    sR.innerHTML += '<p class="no-results">The search did not yield any results.</p>'
+                }
+            }
+
+        }
+    </script>
+    <script src="search.data.js"></script>
 </head>
 <body>
+    <template id="searchEntry">
+        <a href="$link" class="searchResult">
+            <h4>$name</h4>
+            <p>$description</p>
+        </a>
+    </template>
     <div class="container">
         <div class="header">
-            <h1>htmldecorators Documentation v0.1.2</h1>
+            <div class="col1">
+                <h1>htmldecorators Documentation v0.1.2</h1>
+            </div>
+            <div class="col2">
+                <input id="search" type="search" placeholder="Search for classes,properties,methods and pages...">
+            </div>
         </div>
         <div class="content">
+            <div class="search-results"></div>
             <div class="content-inner">
-                <p class="description">
+                <div class="breadcrumb-nav"><a href="index.html">Main</a> \ <a href="class.HTMLDecorators.html">HTMLDecorators</a> \ EvaluateTag</div><p class="description">
     Evaluates a tags content<br />
 <br />
 Callback signature:<br />
-void cb(html:string,decs:array<DecoratorDef>)</p>
+void cb(html:string,decs:array<DecoratorDef>)    </p>
 <h4>
     <span class="class-attr">public function</span>
     <span class="class-name">EvaluateTag</span>
@@ -133,7 +275,7 @@ void cb(html:string,decs:array<DecoratorDef>)</p>
 </table>            </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/10/06 20:19:22        </div>
+           2021 © Hendrik Weiler | 2021/11/06 16:14:16        </div>
     </div>
 </body>
 </html>

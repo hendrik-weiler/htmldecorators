@@ -6,6 +6,7 @@
     <style>
         :root {
             --font-color-light: #cecece;
+            --font-color-lighter: #666;
             --font-color: #333;
             --border-color: #efefef;
         }
@@ -29,6 +30,21 @@
         .container .header {
             padding: 10px;
             border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container .header .col2 {
+            justify-content: flex-end;
+        }
+
+        .container .header .col2 input {
+            border:1px solid var(--border-color);
+            padding: 15px;
+            font-size: 16px;
+            width: 100%;
+            min-width: 500px;
         }
 
         .container .content {
@@ -43,10 +59,23 @@
             font-size: 12px;
         }
 
+        .container .search-results,
         .container .content-inner {
             margin: auto;
             width: 100%;
             max-width: 1280px;
+        }
+
+        body .container .search-results {
+            display: none;
+        }
+
+        body.search .container .search-results {
+            display: block;
+        }
+
+        body.search .container .content-inner {
+            display: none;
         }
 
         .container table {
@@ -87,20 +116,141 @@
             text-decoration: underline;
         }
 
+        .container .example,
         .container .decorator-preview {
             border-left: 3px solid var(--font-color-light);
             padding-left: 10px;
         }
+
+        .container .page pre,
+        .container .example pre {
+            border:1px solid var(--font-color-light);
+            background: var(--border-color);
+            padding: 5px;
+        }
+
+        .container .searchResult {
+            text-decoration: none;
+        }
+
+        .container .searchResult h4 {
+            text-decoration: underline;
+            font-size: 16px;
+            color: var(--font-color);
+        }
+
+        .container .searchResult p {
+            color: var(--font-color-lighter);
+        }
+
+        .container .no-results {
+            padding: 50px;
+            text-align: center;
+            font-size: 20px;
+        }
+
+        .container .breadcrumb-nav {
+            padding: 5px 0;
+            border-bottom: 1px solid var(--border-color);
+            margin: 50px 0;
+            font-size: 20px;
+        }
+
+        .container .breadcrumb-nav a {
+            color: var(--font-color);
+        }
     </style>
+    <script>
+        /**
+         * Returns a list of search objects
+         *
+         * @var searchData
+         * @type array
+         */
+        var searchData = [];
+
+        /**
+         * Sets the searchData variable with given data
+         *
+         * @param data The base64 encoded, json string
+         */
+        function fillSearchData(data) {
+            searchData = JSON.parse(atob(data));
+        }
+
+        window.onload = function () {
+
+            var search = document.getElementById('search');
+            search.onkeyup = function (e) {
+                if(this.value == '') {
+                    document.body.classList.remove('search');
+                    return;
+                }
+                if(this.value.length < 3) return;
+                document.body.classList.add('search');
+
+                var i = 0,
+                    len = searchData.length,
+                    dataEntry,
+                    searchTerm = this.value,
+                    tmplNode = document.body.querySelector('#searchEntry'),
+                    sR = document.body.querySelector('.search-results'),
+                    tmplHTML,
+                    desc,
+                    resultCounter = 0;
+                sR.innerHTML = '';
+                console.log('---- new search='+searchTerm)
+                for(i; i < len; ++i) {
+                    dataEntry = searchData[i];
+                    if(new RegExp(searchTerm,'i').test(dataEntry.name)
+                        || new RegExp(searchTerm,'i').test(dataEntry.desc)) {
+                        tmplHTML = tmplNode.innerHTML.slice(0);
+                        tmplHTML = tmplHTML.replace('$link', dataEntry.file);
+                        tmplHTML = tmplHTML.replace('$name', dataEntry.name);
+                        desc = dataEntry.desc;
+                        desc = desc.replace(/\n/g,'<br>');
+                        tmplHTML = tmplHTML.replace('$description', desc);
+                        sR.innerHTML += tmplHTML;
+                        ++resultCounter;
+                    }
+                }
+                if(resultCounter==0) {
+                    sR.innerHTML += '<p class="no-results">The search did not yield any results.</p>'
+                }
+            }
+
+        }
+    </script>
+    <script src="search.data.js"></script>
 </head>
 <body>
+    <template id="searchEntry">
+        <a href="$link" class="searchResult">
+            <h4>$name</h4>
+            <p>$description</p>
+        </a>
+    </template>
     <div class="container">
         <div class="header">
-            <h1>htmldecorators Documentation v0.1.2</h1>
+            <div class="col1">
+                <h1>htmldecorators Documentation v0.1.2</h1>
+            </div>
+            <div class="col2">
+                <input id="search" type="search" placeholder="Search for classes,properties,methods and pages...">
+            </div>
         </div>
         <div class="content">
+            <div class="search-results"></div>
             <div class="content-inner">
-                <h2>Classes</h2>
+                <h2>Pages</h2>
+<table>
+    
+        <tr>
+            <td><a href="page.Installation.html">Installation</a></td>
+        </tr>
+
+    </table>
+<h2>Classes</h2>
 <table>
     
                     <tr>
@@ -136,6 +286,11 @@
         
     
                     <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Ref.html">HTMLDecorators.StdDecorators.Ref</a></td>
+            </tr>
+        
+    
+                    <tr>
                 <td><a href="class.HTMLDecorators.StdDecorators.ForEach.html">HTMLDecorators.StdDecorators.ForEach</a></td>
             </tr>
         
@@ -147,6 +302,11 @@
     
                     <tr>
                 <td><a href="class.HTMLDecorators.StdDecorators.Event.html">HTMLDecorators.StdDecorators.Event</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Click.html">HTMLDecorators.StdDecorators.Click</a></td>
             </tr>
         
     
@@ -283,7 +443,14 @@
             <a href="function.decById.html">decById</a>
         </td>
         <td>
-            Gets the element of the decorator        </td>
+            Gets a decorator or returns null        </td>
+    </tr>
+    <tr>
+        <td>
+            <a href="function.decElmById.html">decElmById</a>
+        </td>
+        <td>
+            Gets the element of the decorator or returns null        </td>
     </tr>
 </table>
 <h2>Decorators</h2>
@@ -291,7 +458,8 @@
     <table>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Init.html">Init</a>
+                <a href="class.HTMLDecorators.StdDecorators.Init.html">
+                    Init                                    </a>
                 <br>
                 <pre class="decorator-preview">@Init(
 	applyDecorationsHandler="string",
@@ -314,7 +482,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.LoadHTML.html">LoadHTML</a>
+                <a href="class.HTMLDecorators.StdDecorators.LoadHTML.html">
+                    LoadHTML                                    </a>
                 <br>
                 <pre class="decorator-preview">@LoadHTML(
 	path="string",
@@ -342,13 +511,16 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Script.html">Script</a>
+                <a href="class.HTMLDecorators.StdDecorators.Script.html">
+                    Script                                    </a>
                 <br>
                 <pre class="decorator-preview">@Script</pre>            </td>
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.ForEach.html">ForEach</a>
+                <a href="class.HTMLDecorators.StdDecorators.ForEach.html">
+                    ForEach                                            [2 example(s)]
+                                    </a>
                 <br>
                 <pre class="decorator-preview">@ForEach(
 	id="string",
@@ -371,12 +543,14 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.NumberFormat.html">NumberFormat</a>
+                <a href="class.HTMLDecorators.StdDecorators.NumberFormat.html">
+                    NumberFormat                                            [1 example(s)]
+                                    </a>
                 <br>
                 <pre class="decorator-preview">@NumberFormat(
 	id="string",
-	applyHandler="string",
-	data="array"
+	decimalSeperator="string",
+	decimalFixed="number"
 )
 </pre><table><tr>
                         <td>string</td>
@@ -384,17 +558,19 @@
                         <td>The id</td>
                     </tr><tr>
                         <td>string</td>
-                        <td>applyHandler</td>
-                        <td>The decoration applier function</td>
+                        <td>decimalSeperator</td>
+                        <td>The seperator for decimal values</td>
                     </tr><tr>
-                        <td>array</td>
-                        <td>data</td>
-                        <td>A list of objects</td>
+                        <td>number</td>
+                        <td>decimalFixed</td>
+                        <td>The set number of decimals of a value</td>
                     </tr></table>            </td>
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Event.html">Event</a>
+                <a href="class.HTMLDecorators.StdDecorators.Event.html">
+                    Event                                            [1 example(s)]
+                                    </a>
                 <br>
                 <pre class="decorator-preview">@Event(
 	id="string",
@@ -417,7 +593,28 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Submit.html">Submit</a>
+                <a href="class.HTMLDecorators.StdDecorators.Click.html">
+                    Click                                            [1 example(s)]
+                                    </a>
+                <br>
+                <pre class="decorator-preview">@Click(
+	id="string",
+	handler="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id of the decorator</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>handler</td>
+                        <td>The handler function name</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Submit.html">
+                    Submit                                    </a>
                 <br>
                 <pre class="decorator-preview">@Submit(
 	id="string",
@@ -435,7 +632,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Change.html">Change</a>
+                <a href="class.HTMLDecorators.StdDecorators.Change.html">
+                    Change                                    </a>
                 <br>
                 <pre class="decorator-preview">@Change(
 	id="string",
@@ -453,7 +651,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.KeyUp.html">KeyUp</a>
+                <a href="class.HTMLDecorators.StdDecorators.KeyUp.html">
+                    KeyUp                                    </a>
                 <br>
                 <pre class="decorator-preview">@KeyUp(
 	id="string",
@@ -471,7 +670,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.KeyDown.html">KeyDown</a>
+                <a href="class.HTMLDecorators.StdDecorators.KeyDown.html">
+                    KeyDown                                    </a>
                 <br>
                 <pre class="decorator-preview">@KeyDown(
 	id="string",
@@ -489,7 +689,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.KeyPress.html">KeyPress</a>
+                <a href="class.HTMLDecorators.StdDecorators.KeyPress.html">
+                    KeyPress                                    </a>
                 <br>
                 <pre class="decorator-preview">@KeyPress(
 	id="string",
@@ -507,12 +708,15 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Navigation.html">Navigation</a>
+                <a href="class.HTMLDecorators.StdDecorators.Navigation.html">
+                    Navigation                                            [2 example(s)]
+                                    </a>
                 <br>
                 <pre class="decorator-preview">@Navigation(
 	id="string",
 	activeClass="string",
-	hashHandler="string"
+	hashHandler="string",
+	default="string"
 )
 </pre><table><tr>
                         <td>string</td>
@@ -526,16 +730,21 @@
                         <td>string</td>
                         <td>hashHandler</td>
                         <td>The handler function for hash detection</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>default</td>
+                        <td>The id of a @Content decorator to set active as default</td>
                     </tr></table>            </td>
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Content.html">Content</a>
+                <a href="class.HTMLDecorators.StdDecorators.Content.html">
+                    Content                                            [1 example(s)]
+                                    </a>
                 <br>
                 <pre class="decorator-preview">@Content(
 	nav="string",
-	id="string",
-	visible="bool"
+	id="string"
 )
 </pre><table><tr>
                         <td>string</td>
@@ -545,15 +754,12 @@
                         <td>string</td>
                         <td>id</td>
                         <td>The id to the @Navigations a[data-id] attribute</td>
-                    </tr><tr>
-                        <td>bool</td>
-                        <td>visible</td>
-                        <td>If the content should be displayed or not</td>
                     </tr></table>            </td>
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Bold.html">Bold</a>
+                <a href="class.HTMLDecorators.StdDecorators.Bold.html">
+                    Bold                                    </a>
                 <br>
                 <pre class="decorator-preview">@Bold(
 	id="string"
@@ -566,7 +772,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Italic.html">Italic</a>
+                <a href="class.HTMLDecorators.StdDecorators.Italic.html">
+                    Italic                                    </a>
                 <br>
                 <pre class="decorator-preview">@Italic(
 	id="string"
@@ -579,7 +786,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Underline.html">Underline</a>
+                <a href="class.HTMLDecorators.StdDecorators.Underline.html">
+                    Underline                                    </a>
                 <br>
                 <pre class="decorator-preview">@Underline(
 	id="string"
@@ -592,7 +800,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Color.html">Color</a>
+                <a href="class.HTMLDecorators.StdDecorators.Color.html">
+                    Color                                    </a>
                 <br>
                 <pre class="decorator-preview">@Color(
 	id="string",
@@ -610,7 +819,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.TAlign.html">TAlign</a>
+                <a href="class.HTMLDecorators.StdDecorators.TAlign.html">
+                    TAlign                                    </a>
                 <br>
                 <pre class="decorator-preview">@TAlign(
 	id="string",
@@ -628,7 +838,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Size.html">Size</a>
+                <a href="class.HTMLDecorators.StdDecorators.Size.html">
+                    Size                                    </a>
                 <br>
                 <pre class="decorator-preview">@Size(
 	id="string",
@@ -651,7 +862,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Background.html">Background</a>
+                <a href="class.HTMLDecorators.StdDecorators.Background.html">
+                    Background                                    </a>
                 <br>
                 <pre class="decorator-preview">@Background(
 	id="string",
@@ -669,7 +881,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Padding.html">Padding</a>
+                <a href="class.HTMLDecorators.StdDecorators.Padding.html">
+                    Padding                                    </a>
                 <br>
                 <pre class="decorator-preview">@Padding(
 	id="string",
@@ -707,7 +920,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Margin.html">Margin</a>
+                <a href="class.HTMLDecorators.StdDecorators.Margin.html">
+                    Margin                                    </a>
                 <br>
                 <pre class="decorator-preview">@Margin(
 	id="string",
@@ -745,7 +959,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Cursor.html">Cursor</a>
+                <a href="class.HTMLDecorators.StdDecorators.Cursor.html">
+                    Cursor                                    </a>
                 <br>
                 <pre class="decorator-preview">@Cursor(
 	id="string",
@@ -758,12 +973,13 @@
                     </tr><tr>
                         <td>string</td>
                         <td>value</td>
-                        <td>The value</td>
+                        <td>The value e.g. pointer, not-allowed etc.</td>
                     </tr></table>            </td>
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Pointer.html">Pointer</a>
+                <a href="class.HTMLDecorators.StdDecorators.Pointer.html">
+                    Pointer                                    </a>
                 <br>
                 <pre class="decorator-preview">@Pointer(
 	id="string",
@@ -781,7 +997,9 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Visible.html">Visible</a>
+                <a href="class.HTMLDecorators.StdDecorators.Visible.html">
+                    Visible                                            [1 example(s)]
+                                    </a>
                 <br>
                 <pre class="decorator-preview">@Visible(
 	id="string",
@@ -804,7 +1022,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Hide.html">Hide</a>
+                <a href="class.HTMLDecorators.StdDecorators.Hide.html">
+                    Hide                                    </a>
                 <br>
                 <pre class="decorator-preview">@Hide(
 	id="string"
@@ -817,7 +1036,8 @@
         </tr>
             <tr>
             <td>
-                <a href="class.HTMLDecorators.StdDecorators.Show.html">Show</a>
+                <a href="class.HTMLDecorators.StdDecorators.Show.html">
+                    Show                                    </a>
                 <br>
                 <pre class="decorator-preview">@Show(
 	id="string"
@@ -832,7 +1052,7 @@
             </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/10/06 20:19:22        </div>
+           2021 © Hendrik Weiler | 2021/11/06 16:14:16        </div>
     </div>
 </body>
 </html>
