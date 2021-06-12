@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Version: 0.1.3
 
-Build: 2021-06-12 12:37:18
+Build: 2021-06-12 12:47:20
 */
 /**
  * The htmldecorators namespace
@@ -173,10 +173,8 @@ var HTMLDecorators = (function(document,window) {
                 // override data with a custom value
                 var injectedData = new Function('window,document','return '
                     + htmldecsNode.dataset.inject)(window,document);
-                injectedData.__entry__ = injectedData;
                 EvaluateTag(htmldecsNode,injectedData,cb);
             } else {
-                data.__entry__ = data;
                 EvaluateTag(htmldecsNode,data,cb);
             }
         }
@@ -216,6 +214,7 @@ var HTMLDecorators = (function(document,window) {
             ApplyDecorators(data.decs);
         };
         if(tag.parentNode) {
+            data.__data__ = data;
             var content = tag.innerHTML,
                 parser = new Parser(),
                 parsedHTML = parser.parse(content,data),

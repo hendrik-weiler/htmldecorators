@@ -11,7 +11,7 @@ window.data = {
 }
 </script>
 <div data-htmldec data-inject="window.data">
-    @LoadHTML(selector=#parseableDomNode,data=${__entry__})
+    @LoadHTML(selector=#parseableDomNode,data=${__data__})
     <div></div>
 </div>
 ````
