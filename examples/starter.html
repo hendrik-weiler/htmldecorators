@@ -17,5 +17,28 @@
             <span>${Math.random()*9999}</span>
         </p>
     </div>
+    <script>
+        var sampleData = {
+            greeting : 'Hello World!',
+            list : [
+                'entry 1',
+                'entry 2',
+                'entry 3'
+            ]
+        }
+    </script>
+    <script type="template" id="test">
+        @Underline
+        <h1>${greeting}</h1>
+    </script>
+    <div data-htmldec data-inject="sampleData">
+        <h1>${__data__.greeting}</h1>
+        @ForEach(data=${list})
+        <ul>
+            <li>$${__index__ + 1}. $${__entry__}</li>
+        </ul>
+        @LoadHTML(selector=#test,data=${__data__})
+        <div></div>
+    </div>
 </body>
 </html>

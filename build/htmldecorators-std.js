@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Version: 0.1.3
 
-Build: 2021-06-12 12:47:20
+Build: 2021-06-12 13:08:54
 */
 HTMLDecorators.StdDecorators.Init = (function (document, window) {
 
@@ -145,6 +145,7 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
             } else {
                 data = Object.assign(data,this.config.data);
             }
+            data.__data__ = this.config.data;
         }
         var parser = new HTMLDecorators.Parser(),
             parsedHTML = parser.parse(html, data),
@@ -314,35 +315,56 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
         /**
          * Returns the template for iteration
          *
+         * @var template
+         * @memberOf HTMLDecorators.StdDecorators.ForEach
          * @type {string}
          */
         this.template = '';
 
+        /**
+         * Returns the complete html after all iterations
+         *
+         * @var iterationHTMLSum
+         * @memberOf HTMLDecorators.StdDecorators.ForEach
+         * @type {string}
+         */
         this.iterationHTMLSum = '';
 
+        /**
+         * Returns the complete list of decorators after all iterations
+         *
+         * @var decoratorsSum
+         * @memberOf HTMLDecorators.StdDecorators.ForEach
+         * @type {array}
+         */
         this.decoratorsSum = [];
     }
     HTMLDecorators.ExtendsClass(ForEach, HTMLDecorators.Decorator);
     /**
      * A single iteration
      *
+     * @param index The iteration index
      * @param data A key,value object
+     * @param initialData The initial data given by the update function
      * @memberOf HTMLDecorators.StdDecorators.ForEach
      * @method iteration
      * @return void
      */
-    ForEach.prototype.iteration = function (index, data) {
+    ForEach.prototype.iteration = function (index, data, initialData) {
         if(typeof data == 'object') {
             var obj = Object.assign({
                     __index__ : index
                 },data);
             obj.__entry__ = obj;
+            obj.__data__ = initialData;
         } else {
             var obj = {
                 __index__ : index,
-                __entry__ : data
+                __entry__ : data,
+                __data__ : initialData
             };
         }
+
         var parser = new HTMLDecorators.Parser(),
             parsedHTML = parser.parse(this.template, obj),
             i = 0,
@@ -374,7 +396,7 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
         for (i; i < len; ++i) {
             data = list[i];
             // iterate over all data
-            this.iteration(i,data);
+            this.iteration(i,data,list);
         }
 
         var obj = {
