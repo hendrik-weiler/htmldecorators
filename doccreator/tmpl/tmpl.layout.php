@@ -236,7 +236,7 @@
                 <h1>htmldecorators Documentation v<?php print $this->version ?></h1>
             </div>
             <div class="col2">
-                <input id="search" type="search" placeholder="Search for classes,properties,methods and pages...">
+                <input id="search" type="search" placeholder="Search for classes, properties, methods and pages...">
             </div>
         </div>
         <div class="content">
