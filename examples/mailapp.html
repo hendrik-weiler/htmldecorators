@@ -9,27 +9,254 @@
     <script src="../lib/stdDecorators/navigation.js"></script>
     <script src="../lib/stdDecorators/style.js"></script>
     <script src="../lib/stdDecorators/core.js"></script>
+    <script src="../lib/stdDecorators/table.js"></script>
     <link rel="stylesheet" href="../lib/htmldecorators.css">
+    <link rel="stylesheet" href="mailapp.css">
+    <script>
+        var mailapp = {};
+        class InboxImportant extends HTMLDecorators.Decorator {
+            constructor() {
+                super();
+
+                decEventOn('InboxImportantUpdate', function () {
+                    this.render();
+                }.bind(this));
+            }
+            render() {
+                if(this.paramExist('data')) {
+                    var dec;
+                    if(dec = this.findById(this.config.data)) {
+                        var data = dec.responseData;
+                        if(this.paramExist('mode')) {
+                            var counter = 0,
+                                i = 0,
+                                len = data.length,
+                                entry;
+                            for(i; i < len; ++i) {
+                                entry = data[i];
+                                if(this.config.mode == 0) {
+                                    if(entry.shown) {
+                                        ++counter;
+                                    }
+                                }
+                                if(this.config.mode == 1) {
+                                    if(entry.isimportant && entry.shown) {
+                                        ++counter;
+                                    }
+                                }
+                            }
+                            this.element.innerText = counter;
+                        }
+                    }
+                }
+            }
+        }
+
+        mailapp.InboxImportant = InboxImportant;
+    </script>
 </head>
 <body>
 
     <script>
-        window.data = [];
-        for(var i = 0; i < 100; ++i) {
-            data.push('entry '+ i);
-        }
+        var mode = 0,
+            term = '';
+        decHandler(function search(e,dec) {
+            term = e.currentTarget.value;
+            if(term.length==0) {
+                if(mode==0 || mode==2) {
+                    decById('nav').setActive('inbox');
+                }
+                if(mode==1) {
+                    decById('nav').setActive('important');
+                }
+            }
+            if(term.length < 3) return;
+            decById('nav').setActive('searchview');
+            var swView = decById('searchviewHTML');
+            swView.render();
+        });
+        decHandler(function searchFilter(elm) {
+            return new RegExp(term,'i').test(elm.name)
+                || new RegExp(term,'i').test(elm.text)
+                || new RegExp(term,'i').test(elm.from)
+                ||  new RegExp(term,'i').test(elm.from_name);
+        });
+        decHandler(function sortDescending(a,b) {
+            return b.received - a.received;
+        });
+        decHandler(function rowClick(e,obj) {
+            mode = obj.tr.dataset.mode;
+            obj.dataEntry.shown = false;
+            decEventTrigger('TableEachRowUpdate','inboxTable');
+            decEventTrigger('InboxImportantUpdate');
+            decById('nav').setActive('mailview');
+            var impView = decById('importantView');
+            impView.render();
+            var swView = decById('searchviewHTML');
+            swView.render();
+            var mvHTML = decById('mailviewHTML');
+            mvHTML.config.data = obj.dataEntry;
+            mvHTML.render();
+        });
+        decHandler(function eachRow(e,obj) {
+            obj.row.classList.remove('shown');
+            if(obj.data.shown) {
+                obj.row.classList.add('shown');
+            }
+        });
+        decHandler(function backToInbox(e) {
+            e.preventDefault();
+            if(mode==0) {
+                decById('nav').setActive('inbox');
+            }
+            if(mode==1) {
+                decById('nav').setActive('important');
+            }
+            if(mode==2) {
+                decById('nav').setActive('searchview');
+            }
+        });
+        decHandler(function filterImportant(element) {
+            return element.isimportant && element.shown;
+        });
+    </script>
+
+    <script type="template" id="mailview">
+        @Click(handler=backToInbox)
+        <a href="#">Back</a>
+        <hr>
+        <h1>${name}</h1>
+        <p>
+            <strong>${from_name}</strong> &lt;${from}&gt;
+        </p>
+        <div class="mail-preview">
+            <div class="mail-preview-inner bg">
+                <div class="head">
+                    ${from_name}
+                </div>
+                <dib class="body">
+                    ${text}
+                </dib>
+            </div>
+            <div class="mail-preview-inner footer">
+                Help Center  |  Privacy Policy  |  FAQ
+                <br><br><br>
+                This message was sent to yourmail@mail.com because you are registered at example.com.
+                If you no longer wish to receive emails, click here to unsubscribe.
+                View online
+            </div>
+        </div>
+    </script>
+
+    <script type="template" id="searchview">
+        <table class="mails">
+            @ForEach(
+                data=${__array__},
+                filterHandler=searchFilter,
+                sortHandler=sortDescending
+            )
+            @Table(
+                id=seachTable,
+                rowClickHandler=rowClick,
+                data=${__array__},
+                eachRowHandler=eachRow,
+                emptyTableSelector=tfoot
+            )
+            <tbody>
+            <tr data-id="$${__entry__.id}" data-mode="2">
+                <td>
+                    @@Show(if=$${__entry__.isimportant})
+                    <span>(!)</span>
+                </td>
+                <td>$${__entry__.from_name} ( $${__entry__.from} )</td>
+                <td>$${__entry__.name}</td>
+                <td>
+                    @@DateFormat
+                    <span>$${__entry__.received}</span>
+                </td>
+            </tr>
+            </tbody>
+            <tfoot>
+            <tr>
+                <td colspan="4">No Mails found.</td>
+            </tr>
+            </tfoot>
+        </table>
     </script>
 
     <script type="template" id="inbox">
-        @ForEach(data=${window.data})
-        <ul>
-            <li>$${__entry__}</li>
-        </ul>
+        <table class="mails">
+            @ForEach(data=${__array__},sortHandler=sortDescending)
+            @Table(
+                id=inboxTable,
+                rowClickHandler=rowClick,
+                data=${__array__},
+                eachRowHandler=eachRow
+            )
+            <tbody>
+                <tr data-id="$${__entry__.id}" data-mode="0">
+                    <td>
+                        @@Show(if=$${__entry__.isimportant})
+                        <span>(!)</span>
+                    </td>
+                    <td>$${__entry__.from_name} ( $${__entry__.from} )</td>
+                    <td>$${__entry__.name}</td>
+                    <td>
+                        @@DateFormat
+                        <span>$${__entry__.received}</span>
+                    </td>
+                </tr>
+            </tbody>
+            @Show(if=${__array__.length==0})
+            <tfoot>
+                <tr>
+                    <td colspan="4">No Mails found.</td>
+                </tr>
+            </tfoot>
+        </table>
+    </script>
+
+    <script type="template" id="important">
+        <table class="mails">
+            @ForEach(
+                data=${__array__},
+                sortHandler=sortDescending,
+                filterHandler=filterImportant
+            )
+            @Table(
+                id=importantTable,
+                rowClickHandler=rowClick,
+                data=${__array__},
+                eachRowHandler=eachRow
+            )
+            <tbody>
+            <tr data-id="$${__entry__.id}" data-mode="1">
+                <td>$${__entry__.from_name} ( $${__entry__.from} )</td>
+                <td>$${__entry__.name}</td>
+                <td>
+                    @@DateFormat
+                    <span>$${__entry__.received}</span>
+                </td>
+            </tr>
+            </tbody>
+            @Show(if=${__array__.length==0})
+            <tfoot>
+            <tr>
+                <td colspan="4">No Mails found.</td>
+            </tr>
+            </tfoot>
+        </table>
     </script>
 
     <div class="app" data-htmldec data-inject="window.data">
-        @Init
+        @Init(dateFormat=d.m.Y H:i)
+        @LoadData(
+            type=json,
+            id=mails,
+            path=mailapp-data.json
+        )
         <div class="header">
+            @KeyUp(handler=search)
             <input type="search" placeholder="Search for mails...">
         </div>
         <div class="mainarea">
@@ -37,19 +264,28 @@
             <nav>
                 <a data-id="inbox" href="">
                     <span>Inbox</span>
+                    @mailapp.InboxImportant(data=mails,mode=0)
                     <span>0</span>
                 </a>
                 <a data-id="important" href="">
                     <span>Important</span>
+                    @mailapp.InboxImportant(data=mails,mode=1)
                     <span>0</span>
                 </a>
             </nav>
             <main>
                 @Content(nav=nav,id=inbox)
-                @LoadHTML(selector=#inbox)
+                @LoadHTML(selector=#inbox,data=mails)
                 <div class="inbox"></div>
                 @Content(nav=nav,id=important)
-                <div class="important">Important</div>
+                @LoadHTML(id=importantView,selector=#important,data=mails)
+                <div class="important"></div>
+                @Content(nav=nav,id=mailview)
+                @LoadHTML(selector=#mailview,id=mailviewHTML,skipRender=true)
+                <div class="mailview"></div>
+                @Content(nav=nav,id=searchview)
+                @LoadHTML(selector=#searchview,id=searchviewHTML,skipRender=true,data=mails)
+                <div class="searchview"></div>
             </main>
         </div>
     </div>

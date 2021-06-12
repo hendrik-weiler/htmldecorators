@@ -7,9 +7,9 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Version: 0.1.3
+Version: 0.1.4
 
-Build: 2021-06-12 13:08:54
+Build: 2021-06-12 19:44:56
 */
 HTMLDecorators.StdDecorators.Init = (function (document, window) {
 
@@ -26,6 +26,41 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
      */
     window.decHandler = function (func, uid) {
         HTMLDecorators.Handler(func, uid);
+    }
+
+    /**
+     * Creates an event
+     *
+     * @function decEventOn
+     * @param eventName The event name
+     * @param callback The event callback
+     * @return void
+     */
+    window.decEventOn = function (eventName, callback) {
+        HTMLDecorators.Event.on(eventName, callback);
+    }
+
+    /**
+     * Removes an event completely
+     *
+     * @function decEventOff
+     * @param eventName The event name
+     * @return void
+     */
+    window.decEventOff = function (eventName) {
+        HTMLDecorators.Event.off(eventName);
+    }
+
+    /**
+     * Triggers an event
+     *
+     * @function decEventTrigger
+     * @param eventName The event name
+     * @param obj Pass data to the event
+     * @return void
+     */
+    window.decEventTrigger = function (eventName, obj) {
+        HTMLDecorators.Event.trigger(eventName, obj);
     }
 
     /**
@@ -61,6 +96,7 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
      * @decParam string applyDecorationsHandler The callback for applying decorators
      * @decParam string decimalSeperator The seperator for decimal values
      * @decParam number decimalFixed The set number of decimals of a value
+     * @decParam string dateFormat Possible pattern Y,m,d,H,i,s
      *
      * @constructor
      * @class HTMLDecorators.StdDecorators.Init
@@ -71,7 +107,8 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
             applyDecorationsHandler : '',
             id : 'stdInit',
             decimalSeperator : '.',
-            decimalFixed : 10
+            decimalFixed : 10,
+            dateFormat : 'Y/m/d H:i:s'
         });
     }
     HTMLDecorators.ExtendsClass(Init, HTMLDecorators.Decorator);
@@ -113,6 +150,8 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
      * @decParam string id The id to the @Navigations a[data-id] attribute
      * @decParam string applyHandler The decoration applier function
      * @decParam string selector The css selector to pull data from tag
+     * @decParam string data The data expression or @LoadData id
+     * @decParam bool skipRender Skips the rendering once if set to true
      *
      * @example loadhtml-path
      * @example loadhtml-selector
@@ -140,6 +179,14 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
         var data = {};
         data.__uid__ = HTMLDecorators.RegisterUniqueId();
         if(this.paramExist('data')) {
+            var loadDataDec;
+            if(loadDataDec = this.findById(this.config.data)) {
+                if(loadDataDec.name == 'LoadData') {
+                    this.config.data = loadDataDec.responseData;
+                } else {
+                    this.log('"data" needs to point a @LoadData decorator');
+                }
+            }
             if(typeof this.config.data == 'object' && typeof this.config.data.length != 'undefined') {
                 data.__array__ = this.config.data;
             } else {
@@ -187,6 +234,11 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
      * @return void
      */
     LoadHTML.prototype.render = async function () {
+        if(this.paramExist('skipRender') && this.config.skipRender == 'true') {
+            // after skipping the rendering remove it
+            delete this.config.skipRender;
+            return;
+        }
         if(this.paramExist('path')) {
             var load = await fetch(this.config.path),
                 loadHTML = await load.text();
@@ -204,6 +256,67 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
     }
 
     return LoadHTML;
+
+})(document, window);
+
+HTMLDecorators.StdDecorators.LoadData = (function (document, window) {
+
+    /**
+     * Handles content of a navigation
+     *
+     * Signature of applyHandler
+     * void applyHandler(e, result:{html:string,decs:array<HTMLDecorators.DecoratorDef>})
+     *
+     * @decorator LoadData
+     * @decNamespace std
+     * @decParam string path The path to load
+     * @decParam string id The id to the @Navigations a[data-id] attribute
+     * @decParam string type The data type e.g json,text
+     *
+     *
+     * @constructor
+     * @class HTMLDecorators.StdDecorators.LoadData
+     * @extends HTMLDecorators.Decorator
+     */
+    function LoadData() {
+        HTMLDecorators.Decorator.call(this);
+
+        /**
+         * Returns the loaded data
+         *
+         * @var responseData
+         * @memberOf HTMLDecorators.StdDecorators.LoadData
+         * @type {null|string}
+         */
+        this.responseData = null;
+    }
+    HTMLDecorators.ExtendsClass(LoadData, HTMLDecorators.Decorator);
+    /**
+     * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.LoadData
+     * @method render
+     * @return void
+     */
+    LoadData.prototype.render = async function () {
+        if(this.paramExist('type') && this.paramExist('path')) {
+            var response = await fetch(this.config.path),
+                output;
+            switch(this.config.type) {
+                case 'json':
+                    output = await response.json();
+                    break;
+                default:
+                    output = await response.text();
+                    break;
+            }
+            this.responseData = output;
+        } else {
+            this.log('"type" and "path" needs to be defined');
+        }
+    }
+
+    return LoadData;
 
 })(document, window);
 
@@ -234,7 +347,14 @@ HTMLDecorators.StdDecorators.Script = (function (document, window) {
      * @return void
      */
     Script.prototype.render = async function () {
-        new Function('window,document',this.element.innerHTML).apply(window,[window,document]);
+        // replace
+        var content = this.element.innerHTML;
+        // if the decorator was applied to other than a script tag replace characters
+        if(this.element.tagName.toLowerCase() != 'script') {
+            content = content.replace(/\&lt;/g,'<');
+            content = content.replace(/\&gt;/g,'>');
+        }
+        new Function('window,document',content).apply(window,[window,document]);
     }
 
     return Script;
@@ -299,9 +419,13 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
      * @decParam string id The id
      * @decParam string applyHandler The decoration applier function
      * @decParam array data A list of objects
+     * @decParam string sortHandler The sort function name
+     * @decParam string filterHandler The filter function
      *
      * @example foreach-id
      * @example foreach-data
+     * @example foreach-sorthandler
+     * @example foreach-filterhandler
      *
      * @class HTMLDecorators.StdDecorators.ForEach
      * @constructor
@@ -338,6 +462,15 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
          * @type {array}
          */
         this.decoratorsSum = [];
+
+        /**
+         * Returns the data after the manipulation through filter or sort has happened
+         *
+         * @var afterManipulationData
+         * @memberOf HTMLDecorators.StdDecorators.ForEach
+         * @type {array}
+         */
+        this.afterManipulationData = null;
     }
     HTMLDecorators.ExtendsClass(ForEach, HTMLDecorators.Decorator);
     /**
@@ -435,7 +568,19 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
         this.template = (' ' + this.element.innerHTML).slice(1);
         this.element.innerHTML = '';
         if(this.paramExist('data')) {
-            this.update(this.config.data);
+            var data = this.config.data.map(function(elm){return elm});
+            if(this.paramExist('filterHandler')) {
+                data = new Function('data','return data.filter(' + this.config.filterHandler + ')')
+                    .apply(this,[data]);
+            }
+            if(this.paramExist('sortHandler')) {
+                data = new Function('data','return data.sort(' + this.config.sortHandler + ')')
+                    .apply(this,[data]);
+            }
+
+            this.afterManipulationData = data;
+
+            this.update(data);
         }
     }
 
@@ -529,6 +674,92 @@ HTMLDecorators.StdDecorators.NumberFormat = (function (document, window) {
     }
 
     return NumberFormat;
+
+})(document, window);
+
+HTMLDecorators.StdDecorators.DateFormat = (function (document, window) {
+
+    /**
+     * Sets a reference
+     *
+     * Pattern:
+     * Y = Full year 2021
+     * d = Day 01-31
+     * m = Month 05
+     * H = Hour 12
+     * i = Minute 23
+     * s = Seconds 58
+     *
+     * @decorator NumberFormat
+     * @decNamespace std
+     * @decParam string id The id
+     * @decParam string format Possible pattern Y,d,m,H,i,s
+     *
+     * @example dateformat
+     *
+     * @class HTMLDecorators.StdDecorators.DateFormat
+     * @constructor
+     * @extends HTMLDecorators.Decorator
+     */
+    function DateFormat() {
+        HTMLDecorators.Decorator.call(this);
+    }
+    HTMLDecorators.ExtendsClass(DateFormat, HTMLDecorators.Decorator);
+    /**
+     * Formats an unix timestamp
+     *
+     * @memberOf HTMLDecorators.StdDecorators.DateFormat
+     * @method format
+     * @param decimalSeperator The seperator for float
+     * @param decimalFixed The decimal places number
+     * @return {string}
+     */
+    DateFormat.prototype.format = function (format) {
+        var timestamp = parseInt(this.element.innerHTML),
+            date = new Date(timestamp),
+            year = date.getFullYear(),
+            month = date.getMonth() + 1,
+            day = date.getDate(),
+            hour = date.getHours(),
+            minute = date.getMinutes(),
+            seconds = date.getSeconds();
+
+        if(month < 10) month = '0' + month;
+        if(day < 10) day = '0' + day;
+        if(hour < 10) hour = '0' + hour;
+        if(minute < 10) minute = '0' + minute;
+        if(seconds < 10) seconds = '0' + seconds;
+
+        format = format.replace(/Y/g,year);
+        format = format.replace(/m/g,month);
+        format = format.replace(/d/g,day);
+        format = format.replace(/H/g,hour);
+        format = format.replace(/i/g,minute);
+        format = format.replace(/s/g,seconds);
+
+        return format;
+    }
+    /**
+     * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.DateFormat
+     * @method render
+     * @return void
+     */
+    DateFormat.prototype.render = function () {
+        var dec = this.findById('stdInit');
+        if(this.paramExist('format')) {
+            this.element.innerText = this.format(this.config.format);
+        } else {
+            if(dec) {
+                this.element.innerText = this.format(dec.config.dateFormat);
+            } else {
+                this.log('No @Init set.');
+            }
+        }
+    }
+
+    return DateFormat;
 
 })(document, window);HTMLDecorators.StdDecorators.Event = (function (document, window) {
 
@@ -1371,6 +1602,134 @@ HTMLDecorators.StdDecorators.Pointer = (function (document, window) {
 
     return Pointer;
 
+})(document, window);HTMLDecorators.StdDecorators.Table = (function (document, window) {
+
+    /**
+     * Set the align of the element
+     *
+     * @decorator Table
+     * @decNamespace std
+     * @decParam string id The id of the decorator
+     * @decParam string rowClickHandler The handler when any td was clicked of a tr
+     * @decParam array data The data array
+     * @decParam string emptyTableSelector The selector of the element if the row is empty starting from this.element
+     *
+     * @class HTMLDecorators.StdDecorators.Table
+     * @extends HTMLDecorators.Decorator
+     * @constructor
+     */
+    function Table() {
+        HTMLDecorators.Decorator.call(this);
+    }
+    HTMLDecorators.ExtendsClass(Table, HTMLDecorators.Decorator);
+    /**
+     * Searches through the data array for a specific id
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Table
+     * @method findEntryFromId
+     * @param id The id to search for
+     * @return {null}
+     */
+    Table.prototype.findEntryFromId = function (id) {
+        var data = this.config.data,
+            i = 0,
+            len = data.length,
+            entry,
+            result = null;
+        for(i; i < len; ++i) {
+            entry = data[i];
+            if(entry.id == id) {
+                result = entry;
+                break;
+            }
+        }
+        return result;
+    }
+    /**
+     * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Table
+     * @method render
+     * @return void
+     */
+    Table.prototype.render = function () {
+        var trs = this.element.querySelectorAll('tr'),
+            i = 0,
+            tr,
+            len = trs.length,
+            dataEntry = null,
+            tds,
+            j,
+            td;
+        for(i; i < len; ++i) {
+            tr = trs[i];
+            tr.dataEntry = dataEntry;
+            if(tr.dataset.id && this.paramExist('data')) {
+                dataEntry = this.findEntryFromId(tr.dataset.id);
+                tr.dataEntry = dataEntry;
+            }
+            if(this.paramExist('eachRowHandler')) {
+                this.callFunction(this.config.eachRowHandler, {
+                    row : tr,
+                    data : tr.dataEntry
+                });
+            }
+            tds = tr.querySelectorAll('td');
+            for(j=0; j < tds.length; ++j) {
+                td = tds[j];
+                if(this.paramExist('rowClickHandler')) {
+                    td.onclick = function (e) {
+                        this.callFunction(this.config.rowClickHandler, {
+                            evt : e,
+                            td : e.currentTarget,
+                            tr : e.currentTarget.parentNode,
+                            dataEntry : e.currentTarget.parentNode.dataEntry
+                        });
+                    }.bind(this);
+                }
+            }
+        }
+        if(this.paramExist('emptyTableSelector')) {
+            var feDec = this.element.decorators['ForEach'],
+                tableElm = this.element;
+                // if its on tbody get the parent table node
+                if(this.element.tagName.toLowerCase() == 'tbody') {
+                    tableElm = tableElm.parentNode;
+                }
+                emptyTableElm = tableElm.querySelector(this.config.emptyTableSelector);
+            if(feDec) {
+                if(feDec.afterManipulationData) {
+                    emptyTableElm.style.display = 'none';
+                    if(feDec.afterManipulationData.length == 0) {
+                        emptyTableElm.style.display = '';
+                    }
+                } else {
+                    this.log('The ForEach decorator has no data.');
+                }
+            } else {
+                this.log('No ForEach decorator found. It must be placed above this decorator.');
+            }
+        }
+        decEventOn('TableEachRowUpdate', function (id) {
+            if(this.config.id != id) return;
+            var trs = this.element.querySelectorAll('tr'),
+                i = 0,
+                tr,
+                len = trs.length;
+            for(i; i < len; ++i) {
+                tr = trs[i];
+                if(this.paramExist('eachRowHandler')) {
+                    this.callFunction(this.config.eachRowHandler, {
+                        row : tr,
+                        data : tr.dataEntry
+                    });
+                }
+            }
+        }.bind(this));
+    }
+
+    return Table;
+
 })(document, window);HTMLDecorators.StdDecorators.Visible = (function (document, window) {
 
     /**
@@ -1381,6 +1740,7 @@ HTMLDecorators.StdDecorators.Pointer = (function (document, window) {
      * @decParam string id The id of the decorator
      * @decParam string state 'show' or 'hide'
      * @decParam string if When if is 'true' show will be executed else hide
+     * @decParam string ifEmpty It compares an array length against 0 based on a @ForEach decorator (id of @ForEach)
      *
      * @example visible
      *
@@ -1433,6 +1793,17 @@ HTMLDecorators.StdDecorators.Pointer = (function (document, window) {
                 this.show();
             } else {
                 this.hide();
+            }
+        }
+        if(this.paramExist('ifEmpty')) {
+            var feDec;
+            if(feDec = this.findById(this.config.ifEmpty)) {
+                this.hide();
+                if(feDec.afterManipulationData.length == 0) {
+                    this.show();
+                }
+            } else {
+                this.log('@ForEach decorator not found with id "' + this.config.ifEmpty + '"');
             }
         }
     }
