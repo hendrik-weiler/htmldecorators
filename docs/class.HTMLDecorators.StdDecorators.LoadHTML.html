@@ -233,7 +233,7 @@
     <div class="container">
         <div class="header">
             <div class="col1">
-                <h1>htmldecorators Documentation v0.1.3</h1>
+                <h1>htmldecorators Documentation v0.1.4</h1>
             </div>
             <div class="col2">
                 <input id="search" type="search" placeholder="Search for classes, properties, methods and pages...">
@@ -251,7 +251,9 @@ void applyHandler(e, result:{html:string,decs:array<HTMLDecorators.DecoratorDef>
 	path="string",
 	id="string",
 	applyHandler="string",
-	selector="string"
+	selector="string",
+	data="string",
+	skipRender="bool"
 )
 </pre><table><tr>
                         <td>string</td>
@@ -269,6 +271,14 @@ void applyHandler(e, result:{html:string,decs:array<HTMLDecorators.DecoratorDef>
                         <td>string</td>
                         <td>selector</td>
                         <td>The css selector to pull data from tag</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>data</td>
+                        <td>The data expression or @LoadData id</td>
+                    </tr><tr>
+                        <td>bool</td>
+                        <td>skipRender</td>
+                        <td>Skips the rendering once if set to true</td>
                     </tr></table>        <div class="example"><h4>LoadHTML with path</h4>
 <p>With the <code>@LoadHTML</code> decorator you can parse external html containing decorators and variables.</p>
 <pre><code>&lt;div data-htmldec&gt;
@@ -316,7 +326,7 @@ window.data = {
 </table>            </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/12/06 13:08:58        </div>
+           2021 © Hendrik Weiler | 2021/12/06 19:44:55        </div>
     </div>
 </body>
 </html>

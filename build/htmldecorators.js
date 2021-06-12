@@ -7,9 +7,9 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Version: 0.1.3
+Version: 0.1.4
 
-Build: 2021-06-12 13:08:54
+Build: 2021-06-12 19:44:56
 */
 /**
  * The htmldecorators namespace
@@ -259,7 +259,7 @@ var HTMLDecorators = (function(document,window) {
      * @memberOf HTMLDecorators
      * @method ApplyDecorators
      */
-    function ApplyDecorators(decoratorList) {
+    async function ApplyDecorators(decoratorList) {
         var i = 0,
             len = decoratorList.length,
             decoratorDef,
@@ -290,13 +290,81 @@ var HTMLDecorators = (function(document,window) {
                 && typeof decoratorNS[decoratorName] != 'undefined') {
                 decorator = new decoratorNS[decoratorName]();
                 decorator.define(decoratorDef);
-                decorator.render();
+                await decorator.render();
 
                 if(decorator.config.id) {
                     IdMap[decorator.config.id] = decorator;
                 }
             } else {
                 console.log('Namespace "' + decoratorNSName + '" is not defined.');
+            }
+        }
+    }
+
+    /**
+     * The class for event handling
+     *
+     * @class HTMLDecorators.Event
+     * @memberOf HTMLDecorators
+     * @var Event
+     * @type Event
+     */
+    function Event() {
+
+        /**
+         * Returns the event objects where all events are registered
+         *
+         * @type object
+         * @public
+         */
+        this.events = {};
+    }
+
+    /**
+     * Removes all eventlisteners of a specific event
+     *
+     * @memberOf HTMLDecorators.Event
+     * @return void
+     * @method off
+     * @param eventName The name of the event
+     */
+    Event.prototype.off = function (eventName) {
+        if(this.events[eventName]) {
+            delete this.events[eventName];
+        }
+    }
+    /**
+     * Registers an event
+     *
+     * @memberOf HTMLDecorators.Event
+     * @return void
+     * @method on
+     * @param eventName The name of the event
+     * @param callback The event callback
+     */
+    Event.prototype.on = function (eventName, callback) {
+        if(!this.events[eventName]) {
+            this.events[eventName] = [];
+        }
+        this.events[eventName].push(callback);
+    }
+    /**
+     * Triggers an event
+     *
+     * @memberOf HTMLDecorators.Event
+     * @return void
+     * @method on
+     * @param eventName The name of the event
+     * @param obj Pass data to the event
+     */
+    Event.prototype.trigger = function (eventName, obj) {
+        if(this.events[eventName]) {
+            var i = 0,
+                len = this.events[eventName].length,
+                evt;
+            for(i ; i < len; ++i) {
+                evt = this.events[eventName][i];
+                evt(obj);
             }
         }
     }
@@ -859,7 +927,7 @@ var HTMLDecorators = (function(document,window) {
         setTimeout(function () {
             result = new Function(args, body)(this,obj);
             cb(result);
-        },0);
+        }.bind(this),0);
     }
     /**
      * Gets called when the define was called
@@ -937,7 +1005,8 @@ var HTMLDecorators = (function(document,window) {
         EvaluateHTMLDecs : EvaluateHTMLDecs,
         EvaluateTag : EvaluateTag,
         Handler : Handler,
-        RegisterUniqueId : RegisterUniqueId
+        RegisterUniqueId : RegisterUniqueId,
+        Event : new Event()
     };
 
 })(document, window);

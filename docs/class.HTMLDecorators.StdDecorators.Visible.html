@@ -233,7 +233,7 @@
     <div class="container">
         <div class="header">
             <div class="col1">
-                <h1>htmldecorators Documentation v0.1.3</h1>
+                <h1>htmldecorators Documentation v0.1.4</h1>
             </div>
             <div class="col2">
                 <input id="search" type="search" placeholder="Search for classes, properties, methods and pages...">
@@ -247,7 +247,8 @@
         <pre class="decorator-preview">@Visible(
 	id="string",
 	state="string",
-	if="string"
+	if="string",
+	ifEmpty="string"
 )
 </pre><table><tr>
                         <td>string</td>
@@ -261,6 +262,10 @@
                         <td>string</td>
                         <td>if</td>
                         <td>When if is 'true' show will be executed else hide</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>ifEmpty</td>
+                        <td>It compares an array length against 0 based on a @ForEach decorator (id of @ForEach)</td>
                     </tr></table>        <div class="example"><h4>Visible with state</h4>
 <pre><code>&lt;div data-htmldec&gt;
     @Visible(state=hide)
@@ -274,10 +279,59 @@
 &lt;/div&gt;
 &lt;script&gt;
 window.onload = function() {
-    decEvalTag(document.querySelector('test',{
+    decEvalTag(document.querySelector('#test'),{
         list : []
     });
 }
+&lt;/script&gt;</code></pre>
+<p>If a list was manipulated through a <code>@ForEach</code> decorators filter parameter above the
+<code>@Visible</code> decorator the value of the list is not changed from the value before the <code>@ForEach</code>.
+So its not possible to compare against 0 entries <code>${list.length == 0}</code>.</p>
+<pre><code>&lt;div id="test2" data-htmldec-render&gt;
+    @ForEach(data=${list}, filterHandler=filter)
+    &lt;ul&gt;
+        &lt;li&gt;$${name}&lt;/li&gt;
+    &lt;/ul&gt;
+    @Visible(if=${list.length == 0})
+    &lt;div&gt;No Persons within that age range found&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+    window.onload = function() {
+        decHandler(function filter(elm) {
+            return elm.age &gt; 25;
+        });
+        decEvalTag(document.querySelector('#test2'),{
+            list : [
+                {id:1,name:'Paul', age: 22},
+                {id:2,name:'Jana', age: 12},
+                {id:1,name:'Hans', age: 15}
+            ]
+        });
+    }
+&lt;/script&gt;</code></pre>
+<p>For that theres the <code>ifEmpty</code> parameter. You give the <code>@ForEach</code> an id
+and set <code>ifEmpty</code> to the id.</p>
+<pre><code>&lt;div id="test2" data-htmldec-render&gt;
+    @ForEach(data=${list}, filterHandler=filter, id=foreach)
+    &lt;ul&gt;
+        &lt;li&gt;$${name}&lt;/li&gt;
+    &lt;/ul&gt;
+    @Visible(ifEmpty=foreach)
+    &lt;div&gt;No Persons within that age range found&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+    window.onload = function() {
+        decHandler(function filter(elm) {
+            return elm.age &gt; 30;
+        });
+        decEvalTag(document.querySelector('#test2'),{
+            list : [
+                {id:1,name:'Paul', age: 22},
+                {id:2,name:'Jana', age: 12},
+                {id:1,name:'Hans', age: 15}
+            ]
+        });
+    }
 &lt;/script&gt;</code></pre></div></p>
 <h4>
     <span class="class-attr">public class</span>
@@ -313,7 +367,7 @@ window.onload = function() {
 </table>            </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/12/06 13:08:58        </div>
+           2021 © Hendrik Weiler | 2021/12/06 19:44:55        </div>
     </div>
 </body>
 </html>
