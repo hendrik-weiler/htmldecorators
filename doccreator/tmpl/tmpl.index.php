@@ -1,9 +1,14 @@
 <h2>Pages</h2>
 <table>
-    <?php foreach($data['pages'] as $name => $text): ?>
+    <?php foreach($data['pages'] as $name => $pageData): ?>
 
         <tr>
-            <td><a href="page.<?php print $name; ?>.html"><?php print $name; ?></a></td>
+            <td>
+                <a href="page.<?php print $name; ?>.html"><?php print $pageData['meta']['title']; ?></a>
+            </td>
+            <td>
+                <?php print $pageData['meta']['description']; ?>
+            </td>
         </tr>
 
     <?php endforeach; ?>

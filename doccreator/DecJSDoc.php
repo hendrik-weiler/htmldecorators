@@ -324,17 +324,105 @@ class DecJSDoc
             $functionHTML = $this->createFromTemplate('tmpl.function.php', $function, $this->printBreadcrumbNav($function,'function'));
             file_put_contents($this->buildDir . '/' . $functionFileName, $functionHTML);
         }
-        foreach ($this->pagesMap as $name => $pagesText) {
+        foreach ($this->pagesMap as $name => $pagesData) {
             $data = array(
-                'name' => $name,
-                'text' => $pagesText
+                'name' => $pagesData['meta']['title'],
+                'label' => $pagesData['meta']['title'],
+                'description' => $pagesData['meta']['description'],
+                'text' => $pagesData['content']
             );
             $pagesHTML = $this->createFromTemplate('tmpl.page.php',$data,$this->printBreadcrumbNav($data,'page'));
+            $pagesHTML = $this->parsePageContent($pagesHTML);
             $pageFileName = 'page.'. $name . '.html';
-            $searchList[] = array('name' => $name, 'desc' => '','file'=>$pageFileName,'type'=>'page');
+            $searchList[] = array('name' => $data['label'], 'desc' => $data['description'],'file'=>$pageFileName,'type'=>'page');
             file_put_contents($this->buildDir . '/' . $pageFileName, $pagesHTML);
         }
         file_put_contents($this->buildDir . '/search.data.js', "fillSearchData('" . base64_encode(json_encode($searchList)) . "')");
+    }
+
+    /**
+     * Parses the page content and search for
+     *
+     * ${action=value}
+     *
+     * Possible actions:
+     * - page=idOfPage
+     * - example=filenameOfExample without extension
+     *
+     * Note: Text of <code> tags will be ignored
+     *
+     * @param $content The page content
+     * @return string
+     */
+    public function parsePageContent($content) {
+        $i = 0;
+        $len = strlen($content);
+        $inVariable = false;
+        $inVariableValue = false;
+        $variableKey = '';
+        $variableValue = '';
+        $afterParseContent = '';
+        $inCodeBlock = false;
+        for($i; $i < $len; ++$i) {
+            $ch = $content[$i];
+            if($inCodeBlock) {
+                $afterParseContent .= $ch;
+                if(substr($afterParseContent, -6) == '</code') {
+                    $inCodeBlock = false;
+                }
+            } else if($inVariable && !$inCodeBlock) {
+                if($inVariableValue) {
+                    if($ch == '}') {
+                        $inVariableValue = false;
+                        $inVariable = false;
+                        // replace the var
+                        switch($variableKey) {
+                            case 'page':
+                                $found = false;
+                                foreach ($this->pagesMap as $name => $pagesData) {
+                                    if(isset($pagesData['meta']['id'])
+                                        && $pagesData['meta']['id'] == $variableValue) {
+                                        $afterParseContent .= 'page.' . $name . '.html';
+                                        $found = true;
+                                        break;
+                                    }
+                                }
+                                if(!$found) {
+                                    $afterParseContent .= '${Page "' . $variableValue . '" not found}';
+                                }
+                                break;
+                            case 'example':
+                                $afterParseContent .= $this->printExamples(array(
+                                    'examples' => array($variableValue)
+                                ));
+                                break;
+                            default:
+                                var_dump($variableKey);
+                                $afterParseContent .= '${"' . $variableKey . '" not found}';
+                                break;
+                        }
+                    } else {
+                        $variableValue .= $ch;
+                    }
+                } else if($ch == '=') {
+                    $inVariableValue = true;
+                } else {
+                    $variableKey .= $ch;
+                }
+            } else if($ch == '$' && $i+1 < $len && $content[$i+1] == '{' && !$inVariable && !$inCodeBlock) {
+                $inVariable = true;
+                $inVariableValue = false;
+                $variableKey = '';
+                $variableValue = '';
+                $i+=1;
+            } else {
+                $afterParseContent .= $ch;
+                if(substr($afterParseContent, -5) == '<code') {
+                    $inCodeBlock = true;
+                }
+            }
+        }
+        return $afterParseContent;
     }
 
     /**
@@ -563,8 +651,41 @@ class DecJSDoc
             $fContent = file_get_contents($file);
             $ext = pathinfo($file, PATHINFO_EXTENSION);
             $fileName = ucfirst(basename($file,".".$ext));
-            $parsedContent = $this->parsedown->text($fContent);
-            $this->pagesMap[$fileName] = $parsedContent;
+
+            $split = explode(PHP_EOL, $fContent);
+            $open = false;
+            $json = '';
+            $shiftCounter = 0;
+            foreach($split as $line) {
+                ++$shiftCounter;
+                if(preg_match('#^}#',$line)) {
+                    $open = false;
+                    $json .= $line;
+                    break;
+                }
+                if(preg_match('#^{#',$line)) {
+                    $open = true;
+                }
+                if($open) {
+                    $json .= $line;
+                }
+            }
+            for($i = 0; $i < $shiftCounter; ++$i) {
+                array_shift($split);
+            }
+
+            $json = json_decode($json,true);
+
+            $text = implode(PHP_EOL, $split);
+
+            $text = $this->parsedown->text($text);
+
+            $fileName = preg_replace('#( )#','_',$fileName);
+
+            $this->pagesMap[$fileName] = array(
+                'meta' => $json,
+                'content' => $text
+            );
         }
     }
 

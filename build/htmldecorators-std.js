@@ -7,9 +7,9 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Version: 0.1.2
+Version: 0.1.3
 
-Build: 2021-06-11 16:14:18
+Build: 2021-06-12 12:37:18
 */
 HTMLDecorators.StdDecorators.Init = (function (document, window) {
 
@@ -113,6 +113,9 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
      * @decParam string id The id to the @Navigations a[data-id] attribute
      * @decParam string applyHandler The decoration applier function
      * @decParam string selector The css selector to pull data from tag
+     *
+     * @example loadhtml-path
+     * @example loadhtml-selector
      *
      * @constructor
      * @class HTMLDecorators.StdDecorators.LoadHTML
