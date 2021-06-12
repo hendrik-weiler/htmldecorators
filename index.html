@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>htmldecorators</title>
-    <script src="build/htmldecorators.js"></script>
+    <script data-evalhtmldec src="build/htmldecorators.js"></script>
     <script src="build/htmldecorators-std.js"></script>
     <meta http-equiv='cache-control' content='no-cache'>
     <meta http-equiv='expires' content='0'>
@@ -17,6 +17,10 @@
 
         * {
             box-sizing: border-box;
+        }
+
+        a {
+            color: black;
         }
 
         .container {
@@ -100,15 +104,21 @@
 <body>
     <div class="container">
         <h1>htmldecorators</h1>
-        <p>This library parses html and adds decorators to html tags.</p>
+        <p>This library parses html with decorators descriptions and executes the code behind them.</p>
         <a href="docs">Documentation</a><br>
         <a href="https://github.com/hendrik-weiler/htmldecorators">Github</a>
         <br><br><br>
+
+        <template data-htmldec>
+            @Init
+        </template>
+
         <h4>Preview (v<span id="version"></span>)</h4>
         <form action="javascript:" name="preview">
             Example: <select name="examples">
                 <option value="styling">Styling</option>
                 <option value="variables">Variables</option>
+                <option value="formatting">Formatting data</option>
             </select> <a id="sampleDataExposer" href="#">Expose sample data to console</a>
             <br><br>
             <div class="preview-container">
@@ -122,6 +132,7 @@
             <li><a href="examples/bmi.html">BMI Calculator</a></li>
             <li><a href="examples/invoice.html">Invoice</a></li>
             <li><a href="examples/todoapp.html">Todo-App</a></li>
+            <li><a href="examples/mailapp.html">Mail-App</a></li>
         </ul>
     </div>
 </body>

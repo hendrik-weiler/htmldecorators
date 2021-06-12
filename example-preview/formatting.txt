@@ -1,0 +1,20 @@
+<div>
+    Standard date formatting:
+    @DateFormat
+    <span>1623343453000</span>
+</div>
+<div>
+    Custom date formatting:
+    @DateFormat(format="d.m.Y H:i:s")
+    <span>1623343453000</span>
+</div>
+<div>
+    Standard number formatting:
+    @NumberFormat
+    <span>2</span>
+</div>
+<div>
+    Custom number formatting:
+    @NumberFormat(decimalFixed=2,decimalSeperator=",")
+    <span>2</span>
+</div>
