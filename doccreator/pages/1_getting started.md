@@ -26,3 +26,5 @@ window.definedData = {
 <h1>${greeting}</h1>
 </div>
 ```
+
+[Next Chapter](${page=components})

@@ -233,7 +233,7 @@
     <div class="container">
         <div class="header">
             <div class="col1">
-                <h1>htmldecorators Documentation v0.1.4</h1>
+                <h1>htmldecorators Documentation v0.1.5</h1>
             </div>
             <div class="col2">
                 <input id="search" type="search" placeholder="Search for classes, properties, methods and pages...">
@@ -312,6 +312,58 @@ fill it with data.</p>
            'Item 1', 'Item 2', 'Item 3'
         ]);
     }
+&lt;/script&gt;</code></pre></div><div class="example"><h4>ForEach with multiple instances</h4>
+<p>You can use <code>@ForEach</code> decorators insides of another <code>@ForEach</code> decorator.</p>
+<pre><code>&lt;!-- example with 3 loops in eachother --&gt;
+&lt;ul id="multipleRenderInOne" data-htmldec-render&gt;
+    &lt;!-- notice one @ and $ --&gt;
+    @ForEach(data=${__array__})
+    &lt;ul class="multipleRenderInOne"&gt;
+        &lt;li&gt;
+            $${name}
+            &lt;!-- notice two @@ and $$ --&gt;
+            @@ForEach(data=$${children})
+            &lt;ul&gt;
+                &lt;li&gt;
+                    &lt;!-- notice two @@@ and $$$ --&gt;
+                    $$${name}
+                    @@@ForEach(data=$$${toys})
+                    &lt;ul&gt;
+                        &lt;!-- notice two @@@@ and $$$$ --&gt;
+                        &lt;li&gt;$$$${__entry__}&lt;/li&gt;
+                    &lt;/ul&gt;
+                &lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/ul&gt;
+&lt;script&gt;
+window.onload = function() {
+    var exampleData = [
+        {
+            name:'Petra',age:'44',children:
+                [
+                    {name:'Philipp',age:10,toys:['Lego','Toy car']}
+                ]
+        },
+        {
+            name:'Max',age:'32',children:
+                [
+                    {name:'Paula',age:8,toys:[]},
+                    {name:'Felix',age:3,toys:[]}
+                ]
+        },
+        {
+            name:'Hans',age:'11',children:
+                [
+
+                ]
+        }
+    ];
+
+    HTMLDecorators.EvaluateTag(document.querySelector('#multipleRenderInOne'),exampleData);
+
+}
 &lt;/script&gt;</code></pre></div><div class="example"><h4>ForEach with sorthandler</h4>
 <p>Use this parameter to sort the input</p>
 <pre><code>&lt;script&gt;
@@ -394,7 +446,7 @@ fill it with data.</p>
 </table>            </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/12/06 19:44:55        </div>
+           2021 © Hendrik Weiler | 2021/13/06 07:53:08        </div>
     </div>
 </body>
 </html>

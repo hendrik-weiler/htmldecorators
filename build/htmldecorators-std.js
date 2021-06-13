@@ -7,9 +7,9 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Version: 0.1.4
+Version: 0.1.5
 
-Build: 2021-06-12 19:44:56
+Build: 2021-06-13 07:53:09
 */
 HTMLDecorators.StdDecorators.Init = (function (document, window) {
 
@@ -139,7 +139,7 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
 HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
 
     /**
-     * Handles content of a navigation
+     * Handles loading of html pages
      *
      * Signature of applyHandler
      * void applyHandler(e, result:{html:string,decs:array<HTMLDecorators.DecoratorDef>})
@@ -152,6 +152,8 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
      * @decParam string selector The css selector to pull data from tag
      * @decParam string data The data expression or @LoadData id
      * @decParam bool skipRender Skips the rendering once if set to true
+     * @decParam string fromStack The @LoadHTMLStack id
+     * @decParam string withId The stack loaded page id
      *
      * @example loadhtml-path
      * @example loadhtml-selector
@@ -165,8 +167,48 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
             putInElement : 'true',
             applyHandler : ''
         });
+
+        /**
+         * Returns the after parsing object
+         *
+         * @memberOf HTMLDecorators.StdDecorators.LoadHTML
+         * @var afterParsingObj
+         * @type {html:string;decs:HTMLDecorators.Decorator[]}
+         */
+        this.afterParsingObj = null;
     }
     HTMLDecorators.ExtendsClass(LoadHTML, HTMLDecorators.Decorator);
+    /**
+     * Calls the dec appliers
+     *
+     * Note:
+     * obj = {html:string;decs:HTMLDecorators.DecoratorDef[]}
+     *
+     * @memberOf HTMLDecorators.StdDecorators.LoadHTML
+     * @method callApplyDecs
+     * @param obj The html and found decorators after parsing
+     * @return void
+     */
+    LoadHTML.prototype.callApplyDecs = function (obj) {
+        // use internal cb property
+        if(this.config.applyHandler != '') {
+            this.callFunction(this.config.applyHandler, obj);
+        } else {
+            var dec;
+            // if init was defined
+            if(dec = this.findById('stdInit')) {
+                // if a custom apply decorator handler was defined
+                if(dec.config.applyDecorationsHandler != '') {
+                    this.callFunction(dec.config.applyDecorationsHandler, obj);
+                } else {
+                    // use internal apply decorator handler
+                    dec.internalApplyDecoration(null, obj);
+                }
+            } else {
+                this.log('No decoration applier found');
+            }
+        }
+    }
     /**
      * Applies the decorators
      *
@@ -203,28 +245,12 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
 
         if(this.config.putInElement == 'true') {
             this.element.innerHTML = parsedHTML;
-        }
 
-        //console.log(html,parsedHTML)
-
-        // use internal cb property
-        if(this.config.applyHandler != '') {
-            this.callFunction(this.config.applyHandler, obj);
+            this.callApplyDecs(obj);
         } else {
-            var dec;
-            // if init was defined
-            if(dec = this.findById('stdInit')) {
-                // if a custom apply decorator handler was defined
-                if(dec.config.applyDecorationsHandler != '') {
-                    this.callFunction(dec.config.applyDecorationsHandler, obj);
-                } else {
-                    // use internal apply decorator handler
-                    dec.internalApplyDecoration(null, obj);
-                }
-            } else {
-                this.log('No decoration applier found');
-            }
+            this.afterParsingObj = obj;
         }
+
     }
     /**
      * Renders the decorator
@@ -253,9 +279,92 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
                 this.log('Could not select element with "' + this.config.selector + '"');
             }
         }
+        if(this.paramExist('fromStack')) {
+            if(this.paramExist('withId')) {
+                var dec;
+                if(dec = this.findById(this.config.fromStack)) {
+                    if(dec.name == 'LoadHTMLStack') {
+                        if(dec.htmlStore[this.config.withId]) {
+                            this.applyDecs(dec.htmlStore[this.config.withId]);
+                        } else {
+                            this.log('Cant find html page with id "' + this.config.withId + '" in LoadHTMLStack');
+                        }
+                    } else {
+                        this.log('Decorator with id "' + this.config.fromStack + '" needs to be from type LoadHTMLStack');
+                    }
+                } else {
+                    this.log('Cant find decorator with id "'+ this.config.fromStack + '"');
+                }
+            } else {
+                this.log('"fromStack" needs the "withId" parameter');
+            }
+        }
     }
 
     return LoadHTML;
+
+})(document, window);
+
+HTMLDecorators.StdDecorators.LoadHTMLStack = (function (document, window) {
+
+    /**
+     * Handles content of a navigation
+     *
+     * @decorator LoadHTMLStack
+     * @decNamespace std
+     * @decParam string id The id
+     * @decParam string id0-XXX The ids of the pages to load
+     * @decParam string path0-XXX The path to the pages to load
+     * @decParam string stateHandler The handler for the different states loading,finished
+     *
+     * @example loadhtmlstack
+     *
+     * @constructor
+     * @class HTMLDecorators.StdDecorators.LoadHTMLStack
+     * @extends HTMLDecorators.Decorator
+     */
+    function LoadHTMLStack() {
+        HTMLDecorators.Decorator.call(this);
+
+        /**
+         * Returns a map of pages
+         *
+         * @memberOf HTMLDecorators.StdDecorators.LoadHTMLStack
+         * @var htmlStore
+         * @type object
+         */
+        this.htmlStore = {};
+    }
+    HTMLDecorators.ExtendsClass(LoadHTMLStack, HTMLDecorators.Decorator);
+    /**
+     * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.LoadHTMLStack
+     * @method render
+     * @return void
+     */
+    LoadHTMLStack.prototype.render = async function () {
+        var i = 0,
+            len = 1000;
+        if(this.paramExist('stateHandler')) {
+            this.callFunction(this.config.stateHandler, 'loading');
+        }
+        for(i; i < len; ++i) {
+            if(this.paramExist('id'+ i) && this.paramExist('path'+ i)) {
+                var load = await fetch(this.config['path'+i]),
+                    loadedHTML = await load.text();
+                this.htmlStore[this.config['id'+i]] = loadedHTML;
+            } else {
+                break;
+            }
+        }
+        if(this.paramExist('stateHandler')) {
+            this.callFunction(this.config.stateHandler, 'finished');
+        }
+        decEventTrigger('LoadHTMLStackFinished', this);
+    }
+
+    return LoadHTMLStack;
 
 })(document, window);
 
@@ -424,6 +533,7 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
      *
      * @example foreach-id
      * @example foreach-data
+     * @example foreach-multiple-instances
      * @example foreach-sorthandler
      * @example foreach-filterhandler
      *
@@ -484,6 +594,7 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
      * @return void
      */
     ForEach.prototype.iteration = function (index, data, initialData) {
+
         if(typeof data == 'object') {
             var obj = Object.assign({
                     __index__ : index
@@ -585,6 +696,131 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
     }
 
     return ForEach;
+
+})(document, window);
+
+HTMLDecorators.StdDecorators.Component = (function (document, window) {
+
+    /**
+     * Sets a reference
+     *
+     * @decorator NumberFormat
+     * @decNamespace std
+     * @decParam string path The path to load
+     * @decParam string id The id
+     * @decParam string applyHandler The decoration applier function
+     * @decParam string selector The css selector to pull data from tag
+     * @decParam string data The data expression or @LoadData id
+     *
+     * @class HTMLDecorators.StdDecorators.Component
+     * @constructor
+     * @extends HTMLDecorators.Decorator
+     */
+    function Component() {
+        HTMLDecorators.Decorator.call(this,{
+            putInElement : 'false'
+        });
+
+        /**
+         * Returns a @LoadHTML decorator instance
+         *
+         * @var loadHTML
+         * @type HTMLDecorators.StdDecorators.LoadHTML
+         * @memberOf HTMLDecorators.StdDecorators.Component
+         */
+        this.loadHTML = null;
+
+        /**
+         * Returns a @Script decorator instance
+         *
+         * @var script
+         * @type HTMLDecorators.StdDecorators.Script
+         * @memberOf HTMLDecorators.StdDecorators.Component
+         */
+        this.script = null;
+    }
+    HTMLDecorators.ExtendsClass(Component, HTMLDecorators.Decorator);
+    /**
+     * Creates a @LoadHTML and @Script decorator inside
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Component
+     * @method initialized
+     * @return void
+     */
+    Component.prototype.initialized = function () {
+
+        this.loadHTML = this.createDecorator('LoadHTML', HTMLDecorators.StdDecorators.LoadHTML,this.config);
+
+        this.script = this.createDecorator('Script', HTMLDecorators.StdDecorators.Script,this.config);
+    }
+    /**
+     * Renders the decorator
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Component
+     * @method render
+     * @return void
+     */
+    Component.prototype.render = async function () {
+        await this.loadHTML.render();
+
+        this.element.innerHTML = this.loadHTML.afterParsingObj.html;
+
+        var template = this.element.querySelector('template'),
+            script = this.element.querySelector('script'),
+            style = this.element.querySelector('style'),
+            stylePath = document.querySelector('style[data-id="' + this.config.path + '"]'),
+            styleSelector = document.querySelector('style[data-id="' + this.config.selector + '"]');
+
+        if(!template) {
+            this.log('A component must atleast have a template tag with a single children as base.');
+            return;
+        }
+
+        if(style) {
+            // prevent adding multiple styles of components
+            if(!stylePath && !styleSelector) {
+                if(this.paramExist('path')) {
+                    style.dataset.id = this.config.path;
+                }
+                if(this.paramExist('selector')) {
+                    style.dataset.id = this.config.selector;
+                }
+                document.body.appendChild(style);
+            }
+        }
+
+        this.element.innerHTML = template.innerHTML;
+
+        var node = null,
+            i = 0,
+            len = this.element.childNodes.length;
+        for(i; i < len; ++i) {
+            node = this.element.childNodes[i];
+            if(node.nodeType != Node.TEXT_NODE) {
+                break;
+            }
+        }
+
+        if(!node) {
+            this.log('Inside of the template tag must be children.');
+            return;
+        }
+
+        // insert before main element
+        this.element.parentNode.insertBefore(node, this.element);
+        this.element.parentNode.removeChild(this.element);
+        this.element = node;
+
+        // execute the script
+        if(script) {
+            this.script.element = script;
+            this.script.render();
+        }
+
+        this.loadHTML.callApplyDecs(this.loadHTML.afterParsingObj);
+    }
+
+    return Component;
 
 })(document, window);
 

@@ -233,7 +233,7 @@
     <div class="container">
         <div class="header">
             <div class="col1">
-                <h1>htmldecorators Documentation v0.1.4</h1>
+                <h1>htmldecorators Documentation v0.1.5</h1>
             </div>
             <div class="col2">
                 <input id="search" type="search" placeholder="Search for classes, properties, methods and pages...">
@@ -243,7 +243,7 @@
             <div class="search-results"></div>
             <div class="content-inner">
                 <div class="breadcrumb-nav"><a href="index.html">Main</a> \ HTMLDecorators.StdDecorators.LoadHTML</div><p class="description">
-    Handles content of a navigation<br />
+    Handles loading of html pages<br />
 <br />
 Signature of applyHandler<br />
 void applyHandler(e, result:{html:string,decs:array<HTMLDecorators.DecoratorDef>})            <h6>Decorator</h6>
@@ -253,7 +253,9 @@ void applyHandler(e, result:{html:string,decs:array<HTMLDecorators.DecoratorDef>
 	applyHandler="string",
 	selector="string",
 	data="string",
-	skipRender="bool"
+	skipRender="bool",
+	fromStack="string",
+	withId="string"
 )
 </pre><table><tr>
                         <td>string</td>
@@ -279,6 +281,14 @@ void applyHandler(e, result:{html:string,decs:array<HTMLDecorators.DecoratorDef>
                         <td>bool</td>
                         <td>skipRender</td>
                         <td>Skips the rendering once if set to true</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>fromStack</td>
+                        <td>The @LoadHTMLStack id</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>withId</td>
+                        <td>The stack loaded page id</td>
                     </tr></table>        <div class="example"><h4>LoadHTML with path</h4>
 <p>With the <code>@LoadHTML</code> decorator you can parse external html containing decorators and variables.</p>
 <pre><code>&lt;div data-htmldec&gt;
@@ -309,6 +319,19 @@ window.data = {
 <table>
     <tr>
         <td>
+                            <span class="entry-attr">public {html:string;decs:HTMLDecorators.Decorator[]}</span> afterParsingObj                    </td>
+        <td>Returns the after parsing object</td>
+    </tr>
+    <tr>
+        <td>
+            <span class="entry-attr">public function</span>
+            <a href="class.HTMLDecorators.StdDecorators.LoadHTML.callApplyDecs.html">
+                callApplyDecs            </a>
+        </td>
+        <td>Calls the dec appliers...</td>
+    </tr>
+    <tr>
+        <td>
             <span class="entry-attr">public function</span>
             <a href="class.HTMLDecorators.StdDecorators.LoadHTML.applyDecs.html">
                 applyDecs            </a>
@@ -326,7 +349,7 @@ window.data = {
 </table>            </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/12/06 19:44:55        </div>
+           2021 © Hendrik Weiler | 2021/13/06 07:53:08        </div>
     </div>
 </body>
 </html>

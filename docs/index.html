@@ -233,7 +233,7 @@
     <div class="container">
         <div class="header">
             <div class="col1">
-                <h1>htmldecorators Documentation v0.1.4</h1>
+                <h1>htmldecorators Documentation v0.1.5</h1>
             </div>
             <div class="col2">
                 <input id="search" type="search" placeholder="Search for classes, properties, methods and pages...">
@@ -260,6 +260,15 @@
             </td>
             <td>
                 First steps            </td>
+        </tr>
+
+    
+        <tr>
+            <td>
+                <a href="page.2_components.html">Components</a>
+            </td>
+            <td>
+                How to build and use components            </td>
         </tr>
 
     </table>
@@ -299,6 +308,11 @@
         
     
                     <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.LoadHTMLStack.html">HTMLDecorators.StdDecorators.LoadHTMLStack</a></td>
+            </tr>
+        
+    
+                    <tr>
                 <td><a href="class.HTMLDecorators.StdDecorators.LoadData.html">HTMLDecorators.StdDecorators.LoadData</a></td>
             </tr>
         
@@ -315,6 +329,11 @@
     
                     <tr>
                 <td><a href="class.HTMLDecorators.StdDecorators.ForEach.html">HTMLDecorators.StdDecorators.ForEach</a></td>
+            </tr>
+        
+    
+                    <tr>
+                <td><a href="class.HTMLDecorators.StdDecorators.Component.html">HTMLDecorators.StdDecorators.Component</a></td>
             </tr>
         
     
@@ -551,7 +570,9 @@
 	applyHandler="string",
 	selector="string",
 	data="string",
-	skipRender="bool"
+	skipRender="bool",
+	fromStack="string",
+	withId="string"
 )
 </pre><table><tr>
                         <td>string</td>
@@ -577,6 +598,44 @@
                         <td>bool</td>
                         <td>skipRender</td>
                         <td>Skips the rendering once if set to true</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>fromStack</td>
+                        <td>The @LoadHTMLStack id</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>withId</td>
+                        <td>The stack loaded page id</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.LoadHTMLStack.html">
+                    LoadHTMLStack                                            [1 example(s)]
+                                    </a>
+                <br>
+                <pre class="decorator-preview">@LoadHTMLStack(
+	id="string",
+	id0-XXX="string",
+	path0-XXX="string",
+	stateHandler="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>id0-XXX</td>
+                        <td>The ids of the pages to load</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>path0-XXX</td>
+                        <td>The path to the pages to load</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>stateHandler</td>
+                        <td>The handler for the different states loading,finished</td>
                     </tr></table>            </td>
         </tr>
             <tr>
@@ -613,7 +672,7 @@
             <tr>
             <td>
                 <a href="class.HTMLDecorators.StdDecorators.ForEach.html">
-                    ForEach                                            [4 example(s)]
+                    ForEach                                            [5 example(s)]
                                     </a>
                 <br>
                 <pre class="decorator-preview">@ForEach(
@@ -643,6 +702,40 @@
                         <td>string</td>
                         <td>filterHandler</td>
                         <td>The filter function</td>
+                    </tr></table>            </td>
+        </tr>
+            <tr>
+            <td>
+                <a href="class.HTMLDecorators.StdDecorators.Component.html">
+                    NumberFormat                                    </a>
+                <br>
+                <pre class="decorator-preview">@NumberFormat(
+	path="string",
+	id="string",
+	applyHandler="string",
+	selector="string",
+	data="string"
+)
+</pre><table><tr>
+                        <td>string</td>
+                        <td>path</td>
+                        <td>The path to load</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>id</td>
+                        <td>The id</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>applyHandler</td>
+                        <td>The decoration applier function</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>selector</td>
+                        <td>The css selector to pull data from tag</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>data</td>
+                        <td>The data expression or @LoadData id</td>
                     </tr></table>            </td>
         </tr>
             <tr>
@@ -1210,7 +1303,7 @@
             </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/12/06 19:44:55        </div>
+           2021 © Hendrik Weiler | 2021/13/06 07:53:08        </div>
     </div>
 </body>
 </html>

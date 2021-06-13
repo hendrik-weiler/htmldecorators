@@ -1,13 +1,14 @@
-<div id="fselect${__uid__}" class="fileSelect">
-  <label for="fselectInput${__uid__}">
-    Select file
-    @Change(handler="fSelectChange${__uid__}")
-    <input id="fselectInput${__uid__}" type="file">
-  </label>
-  <span></span>
-</div>
+<template>
+  <div id="fselect${__uid__}" class="fileSelect">
+    <label for="fselectInput${__uid__}">
+      Select file
+      @Change(handler="fSelectChange${__uid__}")
+      <input id="fselectInput${__uid__}" type="file">
+    </label>
+    <span></span>
+  </div>
+</template>
 
-@Script
 <script>
   var  fSelect = document.getElementById('fselect${__uid__}'),
        fileNameElm = fSelect.querySelector('span'),
