@@ -1,6 +1,13 @@
 # htmldecorators
 
-This library parses html and adds decorators to html tags.
+This library parses html with decorators descriptions and executes the code behind them.
+
+### Table of contents
+
+1. [Files](#files)
+2. [Examples](#examples)
+3. [Troubleshooting](#troubleshooting)
+4. [Documentation](https://hendrik-weiler.github.io/htmldecorators/docs)
 
 ### Files
 

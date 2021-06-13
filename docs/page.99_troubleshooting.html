@@ -242,36 +242,18 @@
         <div class="content">
             <div class="search-results"></div>
             <div class="content-inner">
-                <div class="breadcrumb-nav"><a href="index.html">Main</a> \ <a href="class.HTMLDecorators.html">HTMLDecorators</a> \ Handler</div><p class="description">
-    Sets a handler<br />
-<br />
-Note: The function must have a name    </p>
-<h4>
-    <span class="class-attr">public function</span>
-    <span class="class-name">Handler</span>
-</h4>
-<table>
-    <tr class="tr-head">
-        <td colspan="2">Parameter</td>
-    </tr>
-            <tr>
-            <td>
-                func            </td>
-            <td>The function</td>
-        </tr>
-            <tr>
-            <td>
-                uid            </td>
-            <td>(optional) A unique identifier for the handler</td>
-        </tr>
-        <tr class="tr-head">
-        <td colspan="2">Returns</td>
-    </tr>
-    <tr>
-        <td colspan="2">
-                                                </td>
-    </tr>
-</table>            </div>
+                <div class="breadcrumb-nav"><a href="index.html">Main</a> \ Troubleshooting</div><div class="page">
+    <h4>The decorators are displayed as text</h4>
+<p>Its possible that you placed your decorators
+at a place where text is not expected.
+For example at the table tag between td and tr.</p>
+<h4>ForEach does not work</h4>
+<p>Inside of the decorated tag you need to write
+for decorators with @@ and variables with $$.
+Its possible that it dont work if theres just one @ or $.</p>
+<h4>No decoration applier found</h4>
+<p>If this message was shown in the log its possible
+you have to add @Init somewhere to enable internal decoration rendering.</p></div>            </div>
         </div>
         <div class="footer">
            2021 © Hendrik Weiler | 2021/13/06 08:19:46        </div>
