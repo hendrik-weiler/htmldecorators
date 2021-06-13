@@ -1,0 +1,3 @@
+@Component(path=examples/components/fileSelect.html)
+<span></span>
+<br><a href="docs/page.2_components.html">More information in documentation</a>
