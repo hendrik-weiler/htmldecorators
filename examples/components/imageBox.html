@@ -1,9 +1,14 @@
-<div id="${__uid__}" class="imageBox">
-  <img src="ajax-loader.gif" />
-  <p>${text}</p>
-</div>
+<template>
+  <div id="${__uid__}" class="imageBox">
+    <img src="ajax-loader.gif" />
+    <p>${text}</p>
+    @ForEach(data=${entries})
+    <ul>
+      <li>$${__entry__}</li>
+    </ul>
+  </div>
+</template>
 
-@Script
 <script>
   var box = document.getElementById('${__uid__}'),
       img = box.querySelector('img'),

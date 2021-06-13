@@ -54,6 +54,10 @@
       }
     }
 
+    decEventOn('decTagEvaluated', function (tag) {
+      console.log('evaled',tag)
+    });
+
     function navHashChange(decorator) {
       var hash = location.hash.replace('#','');
       hash = hash.split('/');
@@ -66,17 +70,23 @@
       location.hash = 'login';
     }
 
+    window.onload = function () {
+      HTMLDecorators.EvaluateHTMLDecs();
+    }
+
     ///////////////////////////////////////////////
 
-    window.onload = async function () {
-      pageInit = 'login';
-      //HTMLDecorators.EvaluateHTMLDecs(applyDecs);
-      HTMLDecorators.EvaluateHTMLDecs();
-      await applyPage('login.html');
-      await applyPage('app.html');
-      document.body.classList.add('body');
-      route();
-    }
+    decHandler(async function pageLoaderState(dec,state) {
+      console.log(state)
+      if(state == 'finished') {
+        pageInit = 'login';
+        //HTMLDecorators.EvaluateHTMLDecs(applyDecs);
+        await applyPage('login.html');
+        await applyPage('app.html');
+        document.body.classList.add('body');
+        route();
+      }
+    });
 
     window.addEventListener('hashchange', route, false);
   </script>
@@ -84,6 +94,12 @@
 <body>
   <template data-htmldec>
     @Init
+    @LoadHTMLStack(
+      id=appStack,
+      stateHandler=pageLoaderState,
+      id0=home,path0=pages/content/home.html,
+      id1=table,path1=pages/content/table.html
+    )
   </template>
   <div class="loading">Loading...</div>
   <div class="body"></div>

@@ -133,6 +133,28 @@
         </div>
     </ul>
 
+    <ul id="multipleRenderInOne" data-htmldec-render>
+        @ForEach(data=${__array__})
+        <ul class="multipleRenderInOne">
+            <li>
+                $${name}
+                @@ForEach(data=$${children})
+                <ul>
+                    <li>
+                        $$${name}
+                        @@@ForEach(data=$$${toys})
+                        <ul>
+                            @@@@Bold @@@@Click(
+                                handler=test
+                            ) @@@@Pointer
+                            <li>$$$${__entry__}</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </ul>
+
     <ul id="arrayTest" data-htmldec-render>
         <span>${__array__}</span>
         @ForEach(data=${__array__})
@@ -142,6 +164,9 @@
     </ul>
 
     <script>
+        decHandler(function test(e) {
+           console.log('click',e.currentTarget);
+        });
         window.onload = function () {
             var menu = decById('menu');
             menu.update([
@@ -149,28 +174,31 @@
                 {link:'Test',label:'Link 2'},
                 {link:'Test',label:'Link 3'}
             ]);
-            var stacktest = decById('stacktest');
-            stacktest.update([
-                {
-                    name:'Petra',age:'44',children:
-                        [
-                            {name:'Philipp',age:10,toys:['Lego','Toy car']}
-                        ]
-                },
-                {
-                    name:'Max',age:'32',children:
-                        [
-                            {name:'Paula',age:8,toys:[]},
-                            {name:'Felix',age:3,toys:[]}
-                        ]
-                },
-                {
-                    name:'Hans',age:'11',children:
-                        [
+            var stacktest = decById('stacktest'),
+                exampleData = [
+                    {
+                        name:'Petra',age:'44',children:
+                            [
+                                {name:'Philipp',age:10,toys:['Lego','Toy car']}
+                            ]
+                    },
+                    {
+                        name:'Max',age:'32',children:
+                            [
+                                {name:'Paula',age:8,toys:[]},
+                                {name:'Felix',age:3,toys:[]}
+                            ]
+                    },
+                    {
+                        name:'Hans',age:'11',children:
+                            [
 
-                        ]
-                }
-            ]);
+                            ]
+                    }
+                ];
+            stacktest.update(exampleData);
+
+            HTMLDecorators.EvaluateTag(document.querySelector('#multipleRenderInOne'),exampleData);
 
             HTMLDecorators.EvaluateTag(document.querySelector('#arrayTest'),[
                'Item 1', 'Item 2', 'Item 3'

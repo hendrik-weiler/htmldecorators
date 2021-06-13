@@ -7,9 +7,9 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Version: 0.1.4
+Version: 0.1.5
 
-Build: 2021-06-12 19:44:56
+Build: 2021-06-13 07:53:09
 */
 /**
  * The htmldecorators namespace
@@ -53,6 +53,77 @@ var HTMLDecorators = (function(document,window) {
     var GeneratedIdMap = {};
 
     /**
+     * The class for event handling
+     *
+     * @class HTMLDecorators.Event
+     * @memberOf HTMLDecorators
+     * @var Event
+     * @type Event
+     */
+    function Event() {
+
+        /**
+         * Returns the event objects where all events are registered
+         *
+         * @type object
+         * @public
+         */
+        this.events = {};
+    }
+
+    /**
+     * Removes all eventlisteners of a specific event
+     *
+     * @memberOf HTMLDecorators.Event
+     * @return void
+     * @method off
+     * @param eventName The name of the event
+     */
+    Event.prototype.off = function (eventName) {
+        if(this.events[eventName]) {
+            delete this.events[eventName];
+        }
+    }
+    /**
+     * Registers an event
+     *
+     * @memberOf HTMLDecorators.Event
+     * @return void
+     * @method on
+     * @param eventName The name of the event
+     * @param callback The event callback
+     */
+    Event.prototype.on = function (eventName, callback) {
+        if(!this.events[eventName]) {
+            this.events[eventName] = [];
+        }
+        this.events[eventName].push(callback);
+    }
+    /**
+     * Triggers an event
+     *
+     * @memberOf HTMLDecorators.Event
+     * @return void
+     * @method on
+     * @param eventName The name of the event
+     * @param obj Pass data to the event
+     */
+    Event.prototype.trigger = function (eventName, obj) {
+        if(this.events[eventName]) {
+            var i = 0,
+                len = this.events[eventName].length,
+                evt;
+            for(i ; i < len; ++i) {
+                evt = this.events[eventName][i];
+                evt(obj);
+            }
+        }
+    }
+
+    // create a event instance
+    var EventInst = new Event();
+
+    /**
      * Extends a class
      *
      * @param theClass The base class
@@ -82,6 +153,7 @@ var HTMLDecorators = (function(document,window) {
             i = 0,
             funcName = '',
             ch,
+            stringStack = '',
             afterFunction = false;
         for (i; i < fString.length; ++i) {
             ch = fString[i];
@@ -91,8 +163,10 @@ var HTMLDecorators = (function(document,window) {
                 } else {
                     funcName += ch;
                 }
-            } else if(ch == ' ') {
+            } else if(stringStack.substr(-8) == 'function') {
                 afterFunction = true;
+            } else {
+                stringStack += ch;
             }
         }
         window[funcName + uid] = func;
@@ -155,12 +229,12 @@ var HTMLDecorators = (function(document,window) {
      * @memberOf HTMLDecorators
      * @method EvaluateHTMLDecs
      */
-    function EvaluateHTMLDecs(data, cb) {
+    async function EvaluateHTMLDecs(data, cb) {
         if(!data) data = {};
         // if there no applier function
-        if(!cb) cb = function (e,data) {
+        if(!cb) cb = async function (e,data) {
             // apply std decorators
-            ApplyDecorators(data.decs);
+            await ApplyDecorators(data.decs);
         };
         var htmldecsNodes = document.querySelectorAll('[data-htmldec]'),
             len = htmldecsNodes.length,
@@ -173,11 +247,12 @@ var HTMLDecorators = (function(document,window) {
                 // override data with a custom value
                 var injectedData = new Function('window,document','return '
                     + htmldecsNode.dataset.inject)(window,document);
-                EvaluateTag(htmldecsNode,injectedData,cb);
+                await EvaluateTag(htmldecsNode,injectedData,cb);
             } else {
-                EvaluateTag(htmldecsNode,data,cb);
+                await EvaluateTag(htmldecsNode,data,cb);
             }
         }
+        EventInst.trigger('decHTMLDecsEvaluated');
     }
 
     /**
@@ -206,12 +281,12 @@ var HTMLDecorators = (function(document,window) {
      * @public
      * @method EvaluateTag
      */
-    function EvaluateTag(tag, data, cb) {
+    async function EvaluateTag(tag, data, cb) {
         if(!data) data = {};
         // if there no applier function
-        if(!cb) cb = function (e,data) {
+        if(!cb) cb = async function (e,data) {
             // apply std decorators
-            ApplyDecorators(data.decs);
+            await ApplyDecorators(data.decs);
         };
         if(tag.parentNode) {
             data.__data__ = data;
@@ -226,7 +301,8 @@ var HTMLDecorators = (function(document,window) {
             tag.innerHTML = result.html;
             tag.removeAttribute('data-htmldec');
             tag.removeAttribute('data-htmldec-render');
-            cb(window,result);
+            await cb(window,result);
+            EventInst.trigger('decTagEvaluated',tag);
 
         } else {
             console.log('The tag is invalid.');
@@ -296,75 +372,7 @@ var HTMLDecorators = (function(document,window) {
                     IdMap[decorator.config.id] = decorator;
                 }
             } else {
-                console.log('Namespace "' + decoratorNSName + '" is not defined.');
-            }
-        }
-    }
-
-    /**
-     * The class for event handling
-     *
-     * @class HTMLDecorators.Event
-     * @memberOf HTMLDecorators
-     * @var Event
-     * @type Event
-     */
-    function Event() {
-
-        /**
-         * Returns the event objects where all events are registered
-         *
-         * @type object
-         * @public
-         */
-        this.events = {};
-    }
-
-    /**
-     * Removes all eventlisteners of a specific event
-     *
-     * @memberOf HTMLDecorators.Event
-     * @return void
-     * @method off
-     * @param eventName The name of the event
-     */
-    Event.prototype.off = function (eventName) {
-        if(this.events[eventName]) {
-            delete this.events[eventName];
-        }
-    }
-    /**
-     * Registers an event
-     *
-     * @memberOf HTMLDecorators.Event
-     * @return void
-     * @method on
-     * @param eventName The name of the event
-     * @param callback The event callback
-     */
-    Event.prototype.on = function (eventName, callback) {
-        if(!this.events[eventName]) {
-            this.events[eventName] = [];
-        }
-        this.events[eventName].push(callback);
-    }
-    /**
-     * Triggers an event
-     *
-     * @memberOf HTMLDecorators.Event
-     * @return void
-     * @method on
-     * @param eventName The name of the event
-     * @param obj Pass data to the event
-     */
-    Event.prototype.trigger = function (eventName, obj) {
-        if(this.events[eventName]) {
-            var i = 0,
-                len = this.events[eventName].length,
-                evt;
-            for(i ; i < len; ++i) {
-                evt = this.events[eventName][i];
-                evt(obj);
+                console.log('Namespace "' + decoratorNSName + '" is not defined.',decoratorDef);
             }
         }
     }
@@ -518,10 +526,22 @@ var HTMLDecorators = (function(document,window) {
                     inVariableName += ch;
                 }
             } else if(!inVariableDefinition && ch == '$' && i+1 < len && value[i+1] == '{') {
-                if(value[i-1] != '$') {
-                    inVariableDefinition = true;
-                    inVariableName = '';
-                    i+=1;
+                var j = i - 1,
+                    dollorCh,
+                    moreThanOneDollar = false;
+                for(j; j > 0; --j) {
+                    dollorCh = value[j];
+                    if(dollorCh != '$') {
+                        if(moreThanOneDollar) {
+                            break;
+                        }
+                        inVariableDefinition = true;
+                        inVariableName = '';
+                        i+=1;
+                        break;
+                    } else {
+                        moreThanOneDollar = true;
+                    }
                 }
             } else if(!afterCloseTag && !afterDecoratorNodeConnection) {
                 if(ch == '@') {
@@ -629,8 +649,20 @@ var HTMLDecorators = (function(document,window) {
                     currentDecoratorParameterKey = ch;
                 }
             } else if(afterCloseTag && inDectoratorbeforeName) {
-                // if theres two @@ skip this decorator
-                if(inDecoratorInNameCounter == 0 && ch == '@') {
+                // if the char after the @ decorator is empty skip
+                if(inDecoratorInNameCounter == 0 && ch == ' ') {
+                    inDectoratorbeforeName = false;
+                // if theres multiple @ skip this decorator
+                } else if(inDecoratorInNameCounter == 0 && ch == '@') {
+                    for(j=i+1; j < len; ++j) {
+                        ch2 = value[j];
+                        if(ch2=='@') {
+                            afterParseValue += ch;
+                            i+=1;
+                        } else {
+                            break;
+                        }
+                    }
                     afterParseValue += ch;
                     inDectoratorbeforeName = false;
                 } else if(ch == '@' || i == len-1) {
@@ -896,11 +928,11 @@ var HTMLDecorators = (function(document,window) {
     Decorator.prototype.createDecorator = function (className, classObj, config) {
         if(!config) config = {};
         var instance = new classObj();
-        instance.define(Object.assign({
-            params : {},
+        instance.define({
+            params : config,
             id : this.id,
             name : className
-        },config));
+        });
         return instance;
     }
     /**
@@ -1006,7 +1038,7 @@ var HTMLDecorators = (function(document,window) {
         EvaluateTag : EvaluateTag,
         Handler : Handler,
         RegisterUniqueId : RegisterUniqueId,
-        Event : new Event()
+        Event : EventInst
     };
 
 })(document, window);

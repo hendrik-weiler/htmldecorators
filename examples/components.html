@@ -9,37 +9,74 @@
     <link rel="stylesheet" href="../lib/htmldecorators.css">
 </head>
 <body>
+
+    <template id="componenttest">
+        <template>
+            @ForEach(data=${__array__})
+            <table>
+                <tr>
+                    <td>
+                        @@Click(handler=click${__uid__} )
+                        <a href="#">$${name}</a>
+                    </td>
+                </tr>
+            </table>
+        </template>
+        <script>
+            decHandler(function click(e,dec) {
+                e.preventDefault();
+                console.log(e,dec);
+            },'${__uid__}');
+        </script>
+        <style>
+            .component {
+                background: yellow;
+            }
+        </style>
+    </template>
+
   <div id="app" data-htmldec-render>
     @Init
-    @LoadHTML(path=components/imageBox.html,data=${box})
+    @Component(path=components/imageBox.html,data=${box})
     <div class="boxes"></div>
     @ForEach(data="${boxes}")
     <div class="boxes">
-          @@LoadHTML(path=components/imageBox.html,data=$${__entry__})
+          @@Component(path=components/imageBox.html,data=$${__entry__})
           <span></span>
     </div>
       <br><br>
-      @LoadHTML(path=components/fileSelect.html)
+      @Component(path=components/fileSelect.html)
       <span></span>
       <br>
-      @LoadHTML(path=components/fileSelect.html)
+      @Component(path=components/fileSelect.html)
       <span></span>
+      <br><br><br>
+      @LoadData(
+          type=json,
+          id=mails,
+          path=mailapp-data.json
+      )
+      @Component(selector=#componenttest,data=mails,id=testcomponent)
+      <div></div>
   </div>
   <script>
     window.onload = function () {
       decEvalTag(document.querySelector('#app'),{
         box : {
-          src : 'http://finalfantasyradio.co/wp-content/uploads/2020/10/IMG_0331-768x1662.png',
-          text : 'Lorem ipsum manum'
+            src : 'http://finalfantasyradio.co/wp-content/uploads/2020/10/IMG_0331-768x1662.png',
+            text : 'Lorem ipsum manum',
+            entries : []
         },
           boxes : [
               {
                   src : 'http://finalfantasyradio.co/wp-content/uploads/2020/10/IMG_0331-768x1662.png',
-                  text : 'Lorem ipsum manum'
+                  text : 'Lorem ipsum manum',
+                  entries : ['entry 1','entry 2','entry 3']
               },
               {
                   src : 'https://www.google.de/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png',
-                  text : 'Manum ipsum lorem'
+                  text : 'Manum ipsum lorem',
+                  entries : ['entry 1','entry 2']
               }
           ]
       });
