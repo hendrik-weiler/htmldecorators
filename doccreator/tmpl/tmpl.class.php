@@ -25,7 +25,14 @@
                     <?php print $property['name'] ?>
                 </a>
             <?php else: ?>
-                <span class="entry-attr"><?php print $property['access'] . ' ' . $property['type'] ?></span> <?php print $property['name'] ?>
+                <span class="entry-attr"><?php print $property['access'] ?>
+                    <?php if($this->classExists($property['type'])): ?>
+                        <a href="class.<?php print $property['type'] ?>.html"><?php print $property['type'] ?></a>
+                    <?php else: ?>
+                        <?php print $property['type'] ?>
+                    <?php endif; ?>
+                </span>
+                <?php print $property['name'] ?>
             <?php endif; ?>
         </td>
         <td><?php print nl2br($property['description']) ?></td>

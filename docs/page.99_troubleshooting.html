@@ -233,7 +233,7 @@
     <div class="container">
         <div class="header">
             <div class="col1">
-                <h1>htmldecorators Documentation v0.1.5</h1>
+                <h1>htmldecorators Documentation v0.1.6</h1>
             </div>
             <div class="col2">
                 <input id="search" type="search" placeholder="Search for classes, properties, methods and pages...">
@@ -247,6 +247,54 @@
 <p>Its possible that you placed your decorators
 at a place where text is not expected.
 For example at the table tag between td and tr.</p>
+<h4>Table: The decorator was applied not inside but on the table</h4>
+<p>This happens when the text of the tag could not be read correctly (by an evalutation of a tag).
+Use instead of a normal tag a &lt;script type=&quot;template&quot;&gt; tag to be evaluated.</p>
+<pre><code>&lt;!-- 
+This reads the text incorrectly.
+It will result in &lt;table data-dec-id="..."&gt; instead
+of &lt;tbody data-dec-id=".."&gt;.
+ --&gt;
+&lt;div data-dechtml&gt;
+    &lt;table&gt;
+        @ForEach(data=${__array__})
+        &lt;tbody&gt;
+            &lt;tr&gt;
+                &lt;td&gt;$${__entry__}&lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/tbody&gt;
+        &lt;tfoot&gt;
+            &lt;tr&gt;
+                &lt;td&gt;No entries.&lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/tfoo&gt;
+    &lt;/table&gt;
+&lt;/div&gt;</code></pre>
+<p>Instead use a &lt;script type=&quot;template&quot;&gt; tag</p>
+<pre><code>&lt;!-- 
+This reads the correctly.
+The decorator will be applied to tbody.
+ --&gt;
+&lt;script type="template" id="mytablerender"&gt;
+    &lt;table&gt;
+        @ForEach(data=${__array__})
+        &lt;tbody&gt;
+            &lt;tr&gt;
+                &lt;td&gt;$${__entry__}&lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/tbody&gt;
+        &lt;tfoot&gt;
+            &lt;tr&gt;
+                &lt;td&gt;No entries.&lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/tfoo&gt;
+    &lt;/table&gt;
+&lt;/script&gt;
+&lt;div data-dechtml&gt;
+    &lt;!-- Since its a script tag the tag must be loaded --&gt;
+    @LoadHTML(selector=#mytablerender)
+    &lt;div&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
 <h4>ForEach does not work</h4>
 <p>Inside of the decorated tag you need to write
 for decorators with @@ and variables with $$.
@@ -256,7 +304,7 @@ Its possible that it dont work if theres just one @ or $.</p>
 you have to add @Init somewhere to enable internal decoration rendering.</p></div>            </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/13/06 08:19:46        </div>
+           2021 © Hendrik Weiler | 2021/14/06 18:16:56        </div>
     </div>
 </body>
 </html>
