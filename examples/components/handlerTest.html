@@ -1,0 +1,93 @@
+<script type="template">
+    <div class="handlerTest">
+        @Click(handler=change)
+        <button>Change</button>
+        <table>
+            @ForEach(data=${table},id=foreach)
+            @Table(
+                data=${table},
+                emptyTableSelector=tfoot,
+                rowClickHandler=rowClick
+            )
+            <tbody>
+                <tr>
+                    <td>$${name}</td>
+                    <td>$${age}</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2">No entries.</td>
+                </tr>
+            </tfoot>
+        </table>
+        @Component(path=components/fileSelect.html)
+        <span></span>
+        <br><br><br>
+        @Click(handler=broadcasthandler) @Pointer
+        <span>Broadcast event from component</span>
+    </div>
+</script>
+
+<script>
+    class HandlerTest extends decComponent {
+
+        broadcasthandler() {
+            this.broadcast('broadcasttest');
+        }
+
+        created() {
+            console.log('component id',this.id);
+            console.log('parent Component',this.parent, this);
+        }
+
+        updated() {
+            this.on('broadcasttest', function (a,sender) {
+                console.log('broadcast event received',this,sender);
+            }.bind(this));
+            this.on('fileSelectSelected', function (a,x,c) {
+                console.log(a,x,c);
+            });
+        }
+
+        initializeData() {
+            this.setData({
+                table : [
+                    {name:'Hannah',age:24},
+                    {name:'Paul',age:30}
+                ]
+            });
+        }
+
+        change() {
+            this.setData({
+                table : [
+                    {name:'Manuel',age:11},
+                    {name:'Dieter',age:55}
+                ]
+            });
+            this.render();
+        }
+
+        rowClick() {
+            this.IdMap.foreach.update({
+                table : []
+            });
+        }
+
+    }
+
+    decRegisterComponent('__uid__', HandlerTest);
+</script>
+
+<style>
+    .handlerTest {
+        border: 1px solid black;
+        padding: 20px;
+    }
+
+    .handlerTest table tr:hover td {
+        background: #efefef;
+        cursor: pointer;
+    }
+</style>

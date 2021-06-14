@@ -233,7 +233,7 @@
     <div class="container">
         <div class="header">
             <div class="col1">
-                <h1>htmldecorators Documentation v0.1.5</h1>
+                <h1>htmldecorators Documentation v0.1.6</h1>
             </div>
             <div class="col2">
                 <input id="search" type="search" placeholder="Search for classes, properties, methods and pages...">
@@ -244,34 +244,80 @@
             <div class="content-inner">
                 <div class="breadcrumb-nav"><a href="index.html">Main</a> \ Components</div><div class="page">
     <h1>Components</h1>
-<p><strong>There are 2 methods of creating a component</strong></p>
-<ol>
-<li>Inside the html directly</li>
-<li>Loaded through a file</li>
-</ol>
 <p>You load a component through the <code>@Component</code> decorator. It accepts similiar
 parameter as the <code>@LoadHTML</code> decorator like selector,path and data.
-A component uses a file or a tag with the required template tag for the html, a optional script and style tag.
-The <code>@Component</code> decorator will replace the main element with the template tags first element.</p>
+A component reads a file(path) or a tag(selector).</p>
+<p><strong>Structure of a component</strong></p>
+<ol>
+<li>&lt;template&gt; or &lt;script type=&quot;template&quot;&gt; tag (required)</li>
+<li>&lt;script&gt; tag with component class (required)</li>
+<li>&lt;style&gt; tag (optional)</li>
+</ol>
+<p>The <code>@Component</code> decorator will replace the main element with the template tags first element.</p>
+<h4>Notes</h4>
+<ol>
+<li>
+<p>Inside of the &lt;template&gt; or &lt;script type=&quot;template&quot;&gt; tag there should be one children as base.
+This children cant have decorators.</p>
+</li>
+<li>
+<p>If theres variable used in the &lt;template&gt; or &lt;script type=&quot;template&quot;&gt;
+tag and theres no <code>data</code> parameter set in the <code>@Component</code> tag an error will appear on rendering.</p>
+</li>
+<li>
+<p>All handlers from decorators will try to call the function inside the component class.
+The <code>decHandler</code> function will not work.</p>
+</li>
+</ol>
 <h4>Create a component inside the html directly</h4>
 <pre><code>&lt;!-- 
     Note the use of the __uid__ variable.
+    In the templating tag you have to access the variable
+    through ${__uid__}. In &lt;script&gt; and &lt;style&gt; tags 
+    the string __uid__ will be replaced.
     Each created component will have a unique id.
-    This should be used for identification for
-    interactions.
+    This can be used for identification purposes.
 --&gt;
 &lt;template id="componenttest"&gt;
     &lt;template&gt;
-        @Click(handler=click${__uid__})
-        &lt;div class="component" id="${__uid__}"&gt;Test&lt;/div&gt;
+        &lt;div class="componenttest"&gt;
+            @ForEach(data=${__array__},id=foreach)
+            &lt;table&gt;
+                &lt;tr&gt;
+                    &lt;td&gt;
+                        @@Click(handler=click)
+                        &lt;a href="#"&gt;$${src}&lt;/a&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            &lt;/table&gt;
+        &lt;/div&gt;
     &lt;/template&gt;
     &lt;script&gt;
-        decHandler(function click(e,dec) {
-            console.log(e,dec);
-        },'${__uid__}');
+        class ComponentTest extends decComponent {
+
+            // you can initialize your own data
+            // this will be called once before rendering
+            async initializeData() {
+                // fetch data
+                // var res = await fetch('data.json'),
+                //     data = await res.json();
+                // this.setData(data);
+            }
+
+            updated() {
+                // this will be called after the rendering is done
+                // you can use this to set events
+                // you can search for decorator instances
+                // with this.findById(id) 
+                // the id of decorators will be set to the component in "this.IdMap"
+                // if you want to find a decorator outside of components use the function decById(id)
+            }
+        }
+
+        decRegisterComponent('__uid__',ComponentTest);
     &lt;/script&gt;
     &lt;style&gt;
-        .component {
+        .componenttest {
             background: yellow;
         }
     &lt;/style&gt;
@@ -279,36 +325,87 @@ The <code>@Component</code> decorator will replace the main element with the tem
 ...
 &lt;!-- In html you call it like that --&gt;
 @Component(selector=#componenttest)
-&lt;div&gt;&lt;/div&gt;</code></pre>
+&lt;div&gt;&lt;/div&gt;
+&lt;!-- 
+You give the component data with the data parameter
+@@Component(selector=#componenttest,data=$${data})
+--&gt;</code></pre>
 <h4>Create a component in an external file</h4>
 <p>You create a file called <code>componenttest.html</code> and put in the following:</p>
 <pre><code>&lt;!-- 
     Note the use of the __uid__ variable.
+    In the templating tag you have to access the variable
+    through ${__uid__}. In &lt;script&gt; and &lt;style&gt; tags 
+    the string __uid__ will be replaced.
     Each created component will have a unique id.
-    This should be used for identification for
-    interactions.
+    This can be used for identification purposes.
 --&gt;
 &lt;template&gt;
-    @Click(handler=click${__uid__})
-    &lt;div class="component" id="${__uid__}"&gt;Test&lt;/div&gt;
+    &lt;div class="componenttest"&gt;
+        @ForEach(data=${__array__})
+        &lt;table&gt;
+            &lt;tr&gt;
+                &lt;td&gt;
+                    @@Click(handler=click)
+                    &lt;a href="#"&gt;$${src}&lt;/a&gt;
+                &lt;/td&gt;
+            &lt;/tr&gt;
+        &lt;/table&gt;
+    &lt;/div&gt;
 &lt;/template&gt;
 &lt;script&gt;
-    decHandler(function click(e,dec) {
-        console.log(e,dec);
-    },'${__uid__}');
+    class ComponentTest extends decComponent {
+        updated() {
+            // this will be called after the rendering is done
+            // you can use this to set events
+        }
+    }
+
+    decRegisterComponent('__uid__',ComponentTest);
 &lt;/script&gt;
 &lt;style&gt;
-    .component {
+    .componenttest {
         background: yellow;
     }
 &lt;/style&gt;
 ...
 &lt;!-- In html you call it like that --&gt;
 @Component(path=componenttest.html)
-&lt;div&gt;&lt;/div&gt;</code></pre></div>            </div>
+&lt;div&gt;&lt;/div&gt;</code></pre>
+<h4>Events</h4>
+<p>In components you have the ability to create and send events.
+They are several methods available:</p>
+<ol>
+<li><a href="class.HTMLDecorators.Component.on.html">on</a></li>
+<li><a href="class.HTMLDecorators.Component.emit.html">emit</a></li>
+<li><a href="class.HTMLDecorators.Component.broadcast.html">broadcast</a></li>
+</ol>
+<p>Note: The events will be reset after rendering. So you should register the events on the <code>updated</code>
+method.</p>
+<p>You create an event with the <code>on</code> method. </p>
+<pre><code>this.on('someEvent', function (file,sender) {
+  console.log('fileSelectSelected',file,sender);
+  // do stuff
+});</code></pre>
+<p>If you have nested components you can trigger events with <code>emit</code>.
+The event will be bubbling upwards to the initial component. </p>
+<pre><code>...
+var file = e.currentTarget.files[0];
+this.fileNameElm.innerText = file.name;
+
+this.emit('fileSelectSelected',file);
+...</code></pre>
+<p>If you want events from other components or global events to react you use
+the <code>broadcast</code> method. You use it like the <code>emit</code> method.</p>
+<pre><code>...
+var someData = {
+   state : 1
+};
+this.broadcast('someEvent',someData);
+...</code></pre></div>            </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/13/06 08:19:46        </div>
+           2021 © Hendrik Weiler | 2021/14/06 18:16:56        </div>
     </div>
 </body>
 </html>

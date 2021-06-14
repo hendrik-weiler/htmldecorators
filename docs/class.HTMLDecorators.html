@@ -233,7 +233,7 @@
     <div class="container">
         <div class="header">
             <div class="col1">
-                <h1>htmldecorators Documentation v0.1.5</h1>
+                <h1>htmldecorators Documentation v0.1.6</h1>
             </div>
             <div class="col2">
                 <input id="search" type="search" placeholder="Search for classes, properties, methods and pages...">
@@ -253,18 +253,27 @@ Contains the Parser and various helper functions        </p>
 <table>
     <tr>
         <td>
-                            <span class="entry-attr">public object</span> StdDecorators                    </td>
+                            <span class="entry-attr">public                                            object                                    </span>
+                StdDecorators                    </td>
         <td>Returns the namespace for the stsandard decorators</td>
     </tr>
     <tr>
         <td>
-                            <span class="entry-attr">public object</span> IdMap                    </td>
+                            <span class="entry-attr">public                                            object                                    </span>
+                IdMap                    </td>
         <td>Returns a map for decorators</td>
     </tr>
     <tr>
         <td>
-                            <span class="entry-attr">private object</span> GeneratedIdMap                    </td>
+                            <span class="entry-attr">private                                            object                                    </span>
+                GeneratedIdMap                    </td>
         <td>Returns a map of generated ids</td>
+    </tr>
+    <tr>
+        <td>
+                            <span class="entry-attr">private                                            object                                    </span>
+                ComponentMap                    </td>
+        <td>Returns a map of registered components</td>
     </tr>
     <tr>
         <td>
@@ -302,6 +311,22 @@ string id The id for the element after the decorator</td>
                     Decorator                </a>
                     </td>
         <td>The decorator class</td>
+    </tr>
+    <tr>
+        <td>
+                            <span class="entry-attr">public Component</span>
+                <a href="class.HTMLDecorators.Component.html">
+                    Component                </a>
+                    </td>
+        <td>The component class</td>
+    </tr>
+    <tr>
+        <td>
+            <span class="entry-attr">public function</span>
+            <a href="class.HTMLDecorators.RegisterComponent.html">
+                RegisterComponent            </a>
+        </td>
+        <td>Registers a component...</td>
     </tr>
     <tr>
         <td>
@@ -370,7 +395,7 @@ string id The id for the element after the decorator</td>
 </table>            </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/13/06 08:19:46        </div>
+           2021 © Hendrik Weiler | 2021/14/06 18:16:56        </div>
     </div>
 </body>
 </html>

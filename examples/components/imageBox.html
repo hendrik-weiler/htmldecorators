@@ -10,14 +10,19 @@
 </template>
 
 <script>
-  var box = document.getElementById('${__uid__}'),
-      img = box.querySelector('img'),
-      src = '${src}',
-      imgPreload = new Image;
-  imgPreload.onload = function (e) {
-    img.src = e.target.src;
+  class ImageBox extends HTMLDecorators.Component {
+    updated() {
+      var box = document.getElementById('__uid__'),
+              img = box.querySelector('img'),
+              imgPreload = new Image;
+      imgPreload.onload = function (e) {
+        img.src = e.target.src;
+      }
+      imgPreload.src = this.getData().src;
+    }
   }
-  imgPreload.src = src;
+
+  decRegisterComponent('__uid__', ImageBox);
 </script>
 
 <style>

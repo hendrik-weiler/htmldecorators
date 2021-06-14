@@ -6,60 +6,85 @@
     <script data-evalhtmldec src="../lib/htmldecorators.js"></script>
     <script src="../lib/stdDecorators/core.js"></script>
     <script src="../lib/stdDecorators/event.js"></script>
+    <script src="../lib/stdDecorators/style.js"></script>
+    <script src="../lib/stdDecorators/table.js"></script>
     <link rel="stylesheet" href="../lib/htmldecorators.css">
 </head>
 <body>
 
-    <template id="componenttest">
-        <template>
+<template id="componenttest">
+    <script type="template">
+        <div class="componenttest">
+            @Init(decimalFixed=2)
             @ForEach(data=${__array__})
             <table>
                 <tr>
                     <td>
-                        @@Click(handler=click${__uid__} )
-                        <a href="#">$${name}</a>
+                        @@Click(handler=click)
+                        <a href="#">$${src}</a>
                     </td>
                 </tr>
             </table>
-        </template>
-        <script>
-            decHandler(function click(e,dec) {
-                e.preventDefault();
-                console.log(e,dec);
-            },'${__uid__}');
-        </script>
-        <style>
-            .component {
-                background: yellow;
+            @Component(path=components/fileSelect.html)
+            <span></span>
+            @NumberFormat
+            <span>2.34475</span>
+        </div>
+    </script>
+    <script>
+        class ComponentTest extends HTMLDecorators.Component {
+
+            created() {
+
+                this.on('broadcasttest', function (a,sender) {
+                    console.log('broadcast event received',this,sender);
+                }.bind(this));
+
             }
-        </style>
-    </template>
+
+            updated() {
+                console.log('s')
+            }
+        }
+
+        decRegisterComponent('__uid__',ComponentTest);
+    </script>
+    <style>
+        .componenttest {
+            background: yellow;
+        }
+    </style>
+</template>
 
   <div id="app" data-htmldec-render>
-    @Init
-    @Component(path=components/imageBox.html,data=${box})
-    <div class="boxes"></div>
-    @ForEach(data="${boxes}")
-    <div class="boxes">
-          @@Component(path=components/imageBox.html,data=$${__entry__})
-          <span></span>
-    </div>
-      <br><br>
-      @Component(path=components/fileSelect.html)
-      <span></span>
-      <br>
-      @Component(path=components/fileSelect.html)
+    @Init(decimalFixed=5)
+      @Padding(value=20px)
+    @Component(path=components/handlerTest.html)
+    <span></span>
+      <br><br><br>
+      @Component(selector=#componenttest,data=${boxes})
       <span></span>
       <br><br><br>
-      @LoadData(
-          type=json,
-          id=mails,
-          path=mailapp-data.json
-      )
-      @Component(selector=#componenttest,data=mails,id=testcomponent)
-      <div></div>
+      @ForEach(data=${boxes})
+      <div>
+          @@Component(path=components/imageBox.html,data=$${__entry__})
+          <span></span>
+      </div>
+      @NumberFormat
+      <span>2.346745858</span>
+      @Click(handler=broadcast) @Pointer
+      <span>Broadcast event</span>
   </div>
   <script>
+
+      decEventOn('broadcasttest', function (a,sender) {
+          console.log('broadcast event received global',this,sender);
+      }.bind(this));
+
+      decHandler(function broadcast() {
+         HTMLDecorators.BroadcastEvent('broadcasttest',null,this);
+      });
+
     window.onload = function () {
       decEvalTag(document.querySelector('#app'),{
         box : {

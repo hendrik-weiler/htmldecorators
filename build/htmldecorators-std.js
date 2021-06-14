@@ -7,11 +7,26 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Version: 0.1.5
+Version: 0.1.6
 
-Build: 2021-06-13 07:53:09
+Build: 2021-06-14 18:17:04
 */
 HTMLDecorators.StdDecorators.Init = (function (document, window) {
+
+    /**
+     * The standard window object
+     *
+     * @class window
+     */
+
+    /**
+     * The alias property to the base component class
+     *
+     * @var decComponent
+     * @memberOf window
+     * @type HTMLDecorators.Component
+     */
+    window.decComponent = HTMLDecorators.Component;
 
     /**
      * Sets a handler
@@ -20,6 +35,8 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
      * Note: Alias to HTMLDecorators.Handler
      *
      * @function decHandler
+     * @method decHandler
+     * @memberOf window
      * @param func The handler function
      * @param uid (optional) A unique identifier for the handler
      * @return void
@@ -29,11 +46,44 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
     }
 
     /**
+     * Triggers an event to all component and global events
+     *
+     * Note: Alias to HTMLDecorators.BroadcastEvent
+     *
+     * @function decBroadcastEvent
+     * @method decBroadcastEvent
+     * @memberOf window
+     * @param eventName The event name
+     * @param obj Pass data to the event
+     * @param sender The sender obj
+     * @return void
+     */
+    window.decBroadcastEvent = function (eventName, obj, sender) {
+        HTMLDecorators.BroadcastEvent(eventName, obj, sender);
+    }
+
+    /**
+     * Registers a component
+     *
+     * @param uid A unique identifier for the handler
+     * @param componentClass The component class
+     * @function decRegisterComponent
+     * @method decRegisterComponent
+     * @memberOf window
+     * @return void
+     */
+    window.decRegisterComponent = function (uid, componentClass) {
+        HTMLDecorators.RegisterComponent(uid, componentClass);
+    }
+
+    /**
      * Creates an event
      *
      * @function decEventOn
+     * @method decEventOn
      * @param eventName The event name
      * @param callback The event callback
+     * @memberOf window
      * @return void
      */
     window.decEventOn = function (eventName, callback) {
@@ -44,6 +94,8 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
      * Removes an event completely
      *
      * @function decEventOff
+     * @method decEventOff
+     * @memberOf window
      * @param eventName The event name
      * @return void
      */
@@ -55,12 +107,15 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
      * Triggers an event
      *
      * @function decEventTrigger
+     * @method decEventTrigger
+     * @memberOf window
      * @param eventName The event name
      * @param obj Pass data to the event
+     * @param sender The sender obj
      * @return void
      */
-    window.decEventTrigger = function (eventName, obj) {
-        HTMLDecorators.Event.trigger(eventName, obj);
+    window.decEventTrigger = function (eventName, obj, sender) {
+        HTMLDecorators.Event.trigger(eventName, obj, sender);
     }
 
     /**
@@ -69,6 +124,8 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
      * @param data (optional) A key,value object
      * @param cb (optional) The decorator applier handler
      * @function decHTMLEval
+     * @method decHTMLEval
+     * @memberOf window
      * @return void
      */
     window.decHTMLEval = function (data, cb) {
@@ -82,6 +139,8 @@ HTMLDecorators.StdDecorators.Init = (function (document, window) {
      * @param data (optional) A key,value object
      * @param cb (optional) The decorator applier handler
      * @function decEvalTag
+     * @method decEvalTag
+     * @memberOf window
      * @return void
      */
     window.decEvalTag = function (tag, data, cb) {
@@ -165,8 +224,19 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
     function LoadHTML() {
         HTMLDecorators.Decorator.call(this,{
             putInElement : 'true',
-            applyHandler : ''
+            applyHandler : '',
+            dontParse : 'false',
+            selectOuterHTML : 'false'
         });
+
+        /**
+         * Returns the unique id for the execution
+         *
+         * @memberOf HTMLDecorators.StdDecorators.LoadHTML
+         * @var uid
+         * @type string
+         */
+        this.uid = HTMLDecorators.RegisterUniqueId();
 
         /**
          * Returns the after parsing object
@@ -176,6 +246,15 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
          * @type {html:string;decs:HTMLDecorators.Decorator[]}
          */
         this.afterParsingObj = null;
+
+        /**
+         * Returns the object before parsing
+         *
+         * @memberOf HTMLDecorators.StdDecorators.LoadHTML
+         * @var beforeParsingObj
+         * @type {html:string;data:object}
+         */
+        this.beforeParsingObj = null;
     }
     HTMLDecorators.ExtendsClass(LoadHTML, HTMLDecorators.Decorator);
     /**
@@ -196,7 +275,7 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
         } else {
             var dec;
             // if init was defined
-            if(dec = this.findById('stdInit')) {
+            if(dec = this.getStdInit()) {
                 // if a custom apply decorator handler was defined
                 if(dec.config.applyDecorationsHandler != '') {
                     this.callFunction(dec.config.applyDecorationsHandler, obj);
@@ -219,7 +298,7 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
      */
     LoadHTML.prototype.applyDecs = function (html) {
         var data = {};
-        data.__uid__ = HTMLDecorators.RegisterUniqueId();
+        data.__uid__ = this.uid;
         if(this.paramExist('data')) {
             var loadDataDec;
             if(loadDataDec = this.findById(this.config.data)) {
@@ -236,6 +315,16 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
             }
             data.__data__ = this.config.data;
         }
+
+        this.beforeParsingObj = {
+            html : html,
+            data : data
+        };
+
+        if(this.config.dontParse == 'true') {
+            return;
+        }
+
         var parser = new HTMLDecorators.Parser(),
             parsedHTML = parser.parse(html, data),
             obj = {
@@ -274,7 +363,11 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
         if(this.paramExist('selector')) {
             var selectedElm = document.querySelector(this.config.selector);
             if(selectedElm) {
-                this.applyDecs(selectedElm.innerHTML);
+                var html = selectedElm.innerHTML;
+                if(this.config.selectOuterHTML=='true') {
+                    html = selectedElm.outerHTML;
+                }
+                this.applyDecs(html);
             } else {
                 this.log('Could not select element with "' + this.config.selector + '"');
             }
@@ -655,7 +748,7 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
         } else {
             var dec;
             // if init was defined
-            if(dec = this.findById('stdInit')) {
+            if(dec = this.getStdInit()) {
                 // if a custom apply decorator handler was defined
                 if(dec.config.applyDecorationsHandler != '') {
                     this.callFunction(dec.config.applyDecorationsHandler, obj);
@@ -704,7 +797,7 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
     /**
      * Sets a reference
      *
-     * @decorator NumberFormat
+     * @decorator Component
      * @decNamespace std
      * @decParam string path The path to load
      * @decParam string id The id
@@ -712,13 +805,16 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
      * @decParam string selector The css selector to pull data from tag
      * @decParam string data The data expression or @LoadData id
      *
+     * @example component
+     *
      * @class HTMLDecorators.StdDecorators.Component
      * @constructor
      * @extends HTMLDecorators.Decorator
      */
     function Component() {
         HTMLDecorators.Decorator.call(this,{
-            putInElement : 'false'
+            putInElement : 'false',
+            dontParse : 'true'
         });
 
         /**
@@ -738,6 +834,10 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
          * @memberOf HTMLDecorators.StdDecorators.Component
          */
         this.script = null;
+
+        this.template = '';
+
+        this.appliedDecorators = {};
     }
     HTMLDecorators.ExtendsClass(Component, HTMLDecorators.Decorator);
     /**
@@ -763,20 +863,41 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
     Component.prototype.render = async function () {
         await this.loadHTML.render();
 
-        this.element.innerHTML = this.loadHTML.afterParsingObj.html;
+        this.element.innerHTML = this.loadHTML.beforeParsingObj.html;
 
         var template = this.element.querySelector('template'),
-            script = this.element.querySelector('script'),
+            scripts = this.element.querySelectorAll('script'),
+            script = scripts.length > 0 ? scripts[0] : null,
             style = this.element.querySelector('style'),
             stylePath = document.querySelector('style[data-id="' + this.config.path + '"]'),
-            styleSelector = document.querySelector('style[data-id="' + this.config.selector + '"]');
+            styleSelector = document.querySelector('style[data-id="' + this.config.selector + '"]'),
+            i = 0,
+            scriptsLen = scripts.length;
 
-        if(!template) {
-            this.log('A component must atleast have a template tag with a single children as base.');
-            return;
+        for(var key in this.element.decorators) {
+            if(this.element.decorators[key].name == 'Component') continue;
+            this.appliedDecorators[key] = this.element.decorators[key];
         }
 
+        if(!template) {
+            // check for type template scripts
+            for(i; i < scriptsLen;++i) {
+                if(scripts[i].getAttribute('type')=='template') {
+                    template = scripts[i];
+                } else {
+                    script = scripts[i];
+                }
+            }
+            if(!template) {
+                this.log('A component must atleast have a template tag with a single children as base.');
+                return;
+            }
+        }
+
+        this.template = template.innerHTML;
+
         if(style) {
+            style.innerHTML = style.innerHTML.replace(/__uid__/g,this.loadHTML.uid);
             // prevent adding multiple styles of components
             if(!stylePath && !styleSelector) {
                 if(this.paramExist('path')) {
@@ -789,35 +910,25 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
             }
         }
 
-        this.element.innerHTML = template.innerHTML;
-
-        var node = null,
-            i = 0,
-            len = this.element.childNodes.length;
-        for(i; i < len; ++i) {
-            node = this.element.childNodes[i];
-            if(node.nodeType != Node.TEXT_NODE) {
-                break;
-            }
-        }
-
-        if(!node) {
-            this.log('Inside of the template tag must be children.');
-            return;
-        }
-
-        // insert before main element
-        this.element.parentNode.insertBefore(node, this.element);
-        this.element.parentNode.removeChild(this.element);
-        this.element = node;
-
         // execute the script
         if(script) {
+            script.textContent = script.textContent.replace(/__uid__/g,this.loadHTML.uid);
             this.script.element = script;
             this.script.render();
-        }
 
-        this.loadHTML.callApplyDecs(this.loadHTML.afterParsingObj);
+            if(HTMLDecorators.ComponentMap[this.loadHTML.uid]) {
+                var component = HTMLDecorators.ComponentMap[this.loadHTML.uid];
+                component.id = this.loadHTML.uid;
+                component.parent = this.getComponent();
+                component.element = this.element;
+                component.decorator = this;
+                await component.initializeData();
+                await component.render();
+                await component.created();
+            } else {
+                this.log('Theres no component registered');
+            }
+        }
     }
 
     return Component;
@@ -886,7 +997,7 @@ HTMLDecorators.StdDecorators.NumberFormat = (function (document, window) {
      * @return void
      */
     NumberFormat.prototype.render = function () {
-        var dec = this.findById('stdInit');
+        var dec = this.getStdInit();
         if(this.paramExist('decimalSeperator') || this.paramExist('decimalFixed')) {
             var dS = this.decimalSeperator,
                 dF = this.decimalFixed;
@@ -983,7 +1094,7 @@ HTMLDecorators.StdDecorators.DateFormat = (function (document, window) {
      * @return void
      */
     DateFormat.prototype.render = function () {
-        var dec = this.findById('stdInit');
+        var dec = this.getStdInit();
         if(this.paramExist('format')) {
             this.element.innerText = this.format(this.config.format);
         } else {
@@ -1031,9 +1142,17 @@ HTMLDecorators.StdDecorators.DateFormat = (function (document, window) {
             this.log('"handler" is not defined.');
             return;
         }
-        var args = 'e, decorator',
-            body = 'return ' + this.config.handler + '(e, decorator)';
-        new Function(args, body)(e, this);
+
+        var component;
+        if(component = this.getComponent()) {
+            var args = 'component, e, decorator',
+                body = 'return component.' + this.config.handler + '(e, decorator)';
+            new Function(args, body)(component, e, this);
+        } else {
+            var args = 'e, decorator',
+                body = 'return ' + this.config.handler + '(e, decorator)';
+            new Function(args, body)(e, this);
+        }
     }
     /**
      * Renders the decorator
