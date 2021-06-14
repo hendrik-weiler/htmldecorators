@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Version: 0.1.6
 
-Build: 2021-06-14 19:02:14
+Build: 2021-06-14 19:16:24
 */
 /**
  * The htmldecorators namespace
@@ -509,8 +509,11 @@ var HTMLDecorators = (function(document,window) {
         }
         var result = new Function(keys.join(','),'try { return ' + variableContent + ' } catch(e) { return {error:true,message:e} }').apply(this, vars);
         if(result && result.error) {
-            console.warn(result.message);
+            console.warn(result.message, 'Possible variables: ' + keys.join(', '));
             return undefined;
+        }
+        if(!result) {
+            console.warn('Failed to evaluate: "' + variableContent + '". ', 'Possible variables: ' + keys.join(', '));
         }
         return result;
     }
