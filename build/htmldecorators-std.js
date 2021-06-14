@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Version: 0.1.6
 
-Build: 2021-06-14 18:17:04
+Build: 2021-06-14 19:02:14
 */
 HTMLDecorators.StdDecorators.Init = (function (document, window) {
 
@@ -772,6 +772,7 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
         this.template = (' ' + this.element.innerHTML).slice(1);
         this.element.innerHTML = '';
         if(this.paramExist('data')) {
+            if(typeof this.config.data == 'string') this.config.data = [];
             var data = this.config.data.map(function(elm){return elm});
             if(this.paramExist('filterHandler')) {
                 data = new Function('data','return data.filter(' + this.config.filterHandler + ')')
