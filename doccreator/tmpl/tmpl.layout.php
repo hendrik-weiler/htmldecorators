@@ -3,6 +3,9 @@
 <head>
     <title>Documentation</title>
     <meta charset="utf-8">
+    <meta http-equiv='cache-control' content='no-cache'>
+    <meta http-equiv='expires' content='0'>
+    <meta http-equiv='pragma' content='no-cache'>
     <style>
         :root {
             --font-color-light: #cecece;
