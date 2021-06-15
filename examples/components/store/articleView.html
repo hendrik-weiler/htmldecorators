@@ -1,0 +1,24 @@
+<template>
+  <div class="article-view">
+    ${product}
+  </div>
+</template>
+
+<script>
+  class ArticleView extends HTMLDecorators.Component {
+
+    updated() {
+      this.on('articleViewUpdate', function (data) {
+        this.setData(data);
+        this.render();
+      }.bind(this));
+    }
+
+  }
+  HTMLDecorators.RegisterComponent('__uid__', ArticleView);
+</script>
+
+<style>
+
+
+</style>

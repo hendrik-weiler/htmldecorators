@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Version: 0.1.6
 
-Build: 2021-06-14 19:16:24
+Build: 2021-06-15 18:03:01
 */
 /**
  * The htmldecorators namespace
@@ -114,7 +114,7 @@ var HTMLDecorators = (function(document,window) {
      *
      * @memberOf HTMLDecorators.Event
      * @return void
-     * @method on
+     * @method trigger
      * @param eventName The name of the event
      * @param obj Pass data to the event
      * @param sender The event sender
@@ -1085,12 +1085,14 @@ var HTMLDecorators = (function(document,window) {
      * Logs a message
      *
      * @param value A value to log
+     * @param value2 A second value to log
      * @public
      * @memberOf HTMLDecorators.Decorator
      * @method log
      */
-    Decorator.prototype.log = function (value) {
-        console.log(this.name + ': ', value);
+    Decorator.prototype.log = function (value, value2) {
+        if(!value2) value2 = '';
+        console.log(this.name + ': ', value, value2);
     }
     /**
      * Finds the next stdInit element

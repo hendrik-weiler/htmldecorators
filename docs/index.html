@@ -3,6 +3,9 @@
 <head>
     <title>Documentation</title>
     <meta charset="utf-8">
+    <meta http-equiv='cache-control' content='no-cache'>
+    <meta http-equiv='expires' content='0'>
+    <meta http-equiv='pragma' content='no-cache'>
     <style>
         :root {
             --font-color-light: #cecece;
@@ -748,7 +751,9 @@
 	id="string",
 	applyHandler="string",
 	selector="string",
-	data="string"
+	data="string",
+	fromStack="string",
+	withId="string"
 )
 </pre><table><tr>
                         <td>string</td>
@@ -770,6 +775,14 @@
                         <td>string</td>
                         <td>data</td>
                         <td>The data expression or @LoadData id</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>fromStack</td>
+                        <td>The @LoadHTMLStack id</td>
+                    </tr><tr>
+                        <td>string</td>
+                        <td>withId</td>
+                        <td>The stack loaded page id</td>
                     </tr></table>            </td>
         </tr>
             <tr>
@@ -1337,7 +1350,7 @@
             </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/14/06 18:16:56        </div>
+           2021 © Hendrik Weiler | 2021/15/06 18:03:02        </div>
     </div>
 </body>
 </html>
