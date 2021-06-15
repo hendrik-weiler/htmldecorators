@@ -1,0 +1,92 @@
+<template>
+  <div class="article">
+    <div class="image">
+      <span></span>
+    </div>
+    <div class="meta">
+      @Click(handler=toArticleView)
+      <h2>${product}</h2>
+      <div class="meta-content">
+        <p>
+          @NumberFormat
+          <span class="price">${price}</span>
+           € <br>
+          <span class="vat">incl. VAT</span>
+        </p>
+        @Show(if=${description.length>0})
+        <p>${description.substring(0,50)}...</p>
+        @Click(handler=toArticleView)
+        <a href="#">More</a>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  class Article extends HTMLDecorators.Component {
+
+    toArticleView() {
+      this.broadcast('articleViewUpdate',this.getData());
+      this.broadcast('goToArticleView');
+    }
+
+    updated() {
+
+    }
+
+  }
+  HTMLDecorators.RegisterComponent('__uid__', Article);
+</script>
+
+<style>
+
+  .article {
+    display: flex;
+    width: 100%;
+    border-bottom: 2px solid #efefef;
+    margin: 20px 0;
+    padding: 20px 0;
+  }
+
+  .article .image span {
+    width: 200px;
+    height: 300px;
+    display: block;
+    background: #0069d9;
+  }
+
+  .article .meta {
+    padding-left: 30px;
+    display: flex;
+    flex-flow: column;
+  }
+
+  .article .meta h2 {
+    cursor: pointer;
+  }
+
+  .article .meta .meta-content {
+    flex-grow: 1;
+    display: flex;
+    flex-flow: column;
+    justify-content: flex-end;
+  }
+
+  .article .meta .meta-content a {
+    color: black;
+  }
+
+  .article .meta h2:hover {
+    color: #666;
+    text-decoration: underline;
+  }
+
+  .article .meta .price {
+    font-size: 24px;
+  }
+
+  .article .meta .vat {
+    font-size: 12px;
+  }
+
+</style>

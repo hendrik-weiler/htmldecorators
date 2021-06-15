@@ -1,0 +1,60 @@
+<script type="template">
+    <div class="card-header">
+        @Click(handler=toCart)
+        <a href="#">
+            (<span>${entries}</span>)
+            <span>Einkaufswagen</span>
+        </a>
+    </div>
+</script>
+
+<script>
+    class CartHeader extends HTMLDecorators.Component {
+
+        initializeData() {
+            this.setData({
+                entries : 0
+            });
+        }
+
+        toCart() {
+            this.broadcast('goToCart');
+        }
+
+        updated() {
+            this.on('cart-header-update', function(number) {
+                this.setData({
+                    entries: number
+                });
+                this.render();
+            }.bind(this));
+        }
+
+    }
+    HTMLDecorators.RegisterComponent('__uid__', CartHeader);
+</script>
+
+<style>
+
+    .card-header {
+        padding: 5px;
+        border: 1px solid transparent;
+        cursor: pointer;
+    }
+
+    .card-header:hover {
+        border-color: #0069d9;
+    }
+
+    .card-header a {
+        text-decoration: none;
+        color: black;
+    }
+
+    .card-header span:first-child {
+        color: #0069d9;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+</style>

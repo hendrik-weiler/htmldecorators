@@ -6,8 +6,65 @@
   <script data-evalhtmldec src="../build/htmldecorators.js"></script>
   <script src="../build/htmldecorators-std.js"></script>
   <link rel="stylesheet" href="../build/htmldecorators.css">
+    <link rel="stylesheet" href="storeapp.css">
+    <script src="storeapp.js"></script>
 </head>
 <body>
-TODO
+<template data-htmldec>
+    @Init(decimalFixed=2)
+    @LoadData(type=json,path=store-data.json,id=mailappdata)
+    @LoadHTMLStack(
+        id=appStack,
+        stateHandler=pageLoaderState,
+        id0=article,path0=components/store/article.html,
+        id1=cartHeader,path1=components/store/cartHeader.html,
+        id2=cartCheckout,path2=components/store/cartCheckout.html,
+        id3=articleView,path3=components/store/articleView.html
+    )
+</template>
+<div class="loading">Loading...</div>
+<div class="body" data-htmldec-render>
+    <div class="header">
+        @Click(handler=toStore)
+        <div class="logo">
+            <span>store</span>
+            <span>.com</span>
+        </div>
+        <div class="searchfield">
+            <input placeholder="Search for articles..." type="search">
+        </div>
+        <div class="cart">
+            @Click(handler=toCart)
+            @Component(fromStack=appStack,withId=cartHeader)
+            <span></span>
+        </div>
+    </div>
+    @Navigation(id=nav,default=store)
+    <div class="content">
+        @Content(nav=nav,id=store)
+        <div class="articles">
+            <div class="articles-content">
+                @ForEach(data=mailappdata)
+                <div>
+                    @@Component(fromStack=appStack,withId=article,data=$${__entry__})
+                    <div></div>
+                </div>
+            </div>
+        </div>
+        @Content(nav=nav,id=cart)
+        <div class="cart">
+            @Component(fromStack=appStack,withId=cartCheckout)
+            <div></div>
+        </div>
+        @Content(nav=nav,id=articleview)
+        <div class="articleView">
+            @Component(fromStack=appStack,withId=articleView)
+            <div></div>
+        </div>
+    </div>
+    <div class="footer">
+        ${new Date().getFullYear()} © store.com
+    </div>
+</div>
 </body>
 </html>

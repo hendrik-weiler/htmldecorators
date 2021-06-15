@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Version: 0.1.6
 
-Build: 2021-06-14 19:16:24
+Build: 2021-06-15 18:03:01
 */
 HTMLDecorators.StdDecorators.Init = (function (document, window) {
 
@@ -772,8 +772,23 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
         this.template = (' ' + this.element.innerHTML).slice(1);
         this.element.innerHTML = '';
         if(this.paramExist('data')) {
+            var loadDataDec;
+            if(loadDataDec = this.findById(this.config.data)) {
+                if(loadDataDec.name == 'LoadData') {
+                    this.config.data = loadDataDec.responseData;
+                } else {
+                    this.log('"data" needs to point a @LoadData decorator');
+                }
+            }
             // if invalid value
-            if(typeof this.config.data == 'string') this.config.data = [];
+            if(typeof this.config.data == 'undefined') {
+                this.log('Data is undefined');
+                this.config.data = [];
+            }
+            if(!this.config.data.map) {
+                this.log('Invalid data as input', this.config.data);
+                this.config.data = [];
+            }
             var data = this.config.data.map(function(elm){return elm});
             if(this.paramExist('filterHandler')) {
                 data = new Function('data','return data.filter(' + this.config.filterHandler + ')')
@@ -806,6 +821,8 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
      * @decParam string applyHandler The decoration applier function
      * @decParam string selector The css selector to pull data from tag
      * @decParam string data The data expression or @LoadData id
+     * @decParam string fromStack The @LoadHTMLStack id
+     * @decParam string withId The stack loaded page id
      *
      * @example component
      *
@@ -873,6 +890,7 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
             style = this.element.querySelector('style'),
             stylePath = document.querySelector('style[data-id="' + this.config.path + '"]'),
             styleSelector = document.querySelector('style[data-id="' + this.config.selector + '"]'),
+            styleStack = document.querySelector('style[data-id="' + this.config.fromStack + '_' + this.config.withId + '"]'),
             i = 0,
             scriptsLen = scripts.length;
 
@@ -901,12 +919,15 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
         if(style) {
             style.innerHTML = style.innerHTML.replace(/__uid__/g,this.loadHTML.uid);
             // prevent adding multiple styles of components
-            if(!stylePath && !styleSelector) {
+            if(!stylePath && !styleSelector && !styleStack) {
                 if(this.paramExist('path')) {
                     style.dataset.id = this.config.path;
                 }
                 if(this.paramExist('selector')) {
                     style.dataset.id = this.config.selector;
+                }
+                if(this.paramExist('fromStack') && this.paramExist('withId')) {
+                    style.dataset.id = this.config.fromStack + '_' + this.config.withId;
                 }
                 document.body.appendChild(style);
             }
@@ -919,6 +940,11 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
             this.script.render();
 
             if(HTMLDecorators.ComponentMap[this.loadHTML.uid]) {
+                // if theres an id set
+                if(this.paramExist('id')) {
+                    // make a reference to component with the given id
+                    HTMLDecorators.ComponentMap[this.config.id] = HTMLDecorators.ComponentMap[this.loadHTML.uid];
+                }
                 var component = HTMLDecorators.ComponentMap[this.loadHTML.uid];
                 component.id = this.loadHTML.uid;
                 component.parent = this.getComponent();
