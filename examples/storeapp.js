@@ -16,10 +16,14 @@ decHandler(function toStore() {
 
 decEventOn('goToCart', function() {
     var nav = decById('nav');
-    nav.setActive('card');
+    nav.setActive('cart');
 });
 
 decEventOn('goToArticleView', function () {
     var nav = decById('nav');
     nav.setActive('articleview');
+});
+
+decHandler(function globalThis() {
+   console.log('test');
 });

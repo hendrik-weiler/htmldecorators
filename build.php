@@ -34,6 +34,8 @@ $htmlDecoratorsCSS = file_get_contents($libFolder. '/htmldecorators.css');
 
 file_put_contents($buildDir . '/htmldecorators.css', $licenseComment . PHP_EOL . $htmlDecoratorsCSS);
 
+print "Build 'htmldecorators.css'" . PHP_EOL;
+
 //// STD Decorators
 ///
 $content = '';

@@ -114,6 +114,13 @@ You create a file called ```componenttest.html``` and put in the following:
                 </td>
             </tr>
         </table>
+        <div>
+         ${__slot__}
+        </div>
+        <!-- 
+            The __slot__ will be replaced by the p-tag given in the decorator node.
+            Decorators or variables starting with @@ or $$ in __slot__ wont be parsed.
+            -->
     </div>
 </template>
 <script>
@@ -134,7 +141,9 @@ You create a file called ```componenttest.html``` and put in the following:
 ...
 <!-- In html you call it like that -->
 @Component(path=componenttest.html)
-<div></div>
+<div>
+   <p>Some paragraph to pass into the component</p>
+</div>
 ```
 
 #### Events

@@ -34,7 +34,7 @@
             <input placeholder="Search for articles..." type="search">
         </div>
         <div class="cart">
-            @Click(handler=toCart)
+            @Click(handler=$global.globalThis)
             @Component(fromStack=appStack,withId=cartHeader)
             <span></span>
         </div>
@@ -51,16 +51,12 @@
                 </div>
             </div>
         </div>
-        @Content(nav=nav,id=cart)
-        <div class="cart">
-            @Component(fromStack=appStack,withId=cartCheckout)
-            <div></div>
-        </div>
-        @Content(nav=nav,id=articleview)
-        <div class="articleView">
-            @Component(fromStack=appStack,withId=articleView)
-            <div></div>
-        </div>
+        @Content(nav=$global.nav,id=cart)
+        @Component(fromStack=appStack,withId=cartCheckout)
+        <div></div>
+        @Content(nav=$global.nav,id=articleview)
+        @Component(fromStack=appStack,withId=articleView)
+        <div></div>
     </div>
     <div class="footer">
         ${new Date().getFullYear()} © store.com

@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Version: 0.1.6
 
-Build: 2021-06-15 18:03:01
+Build: 2021-06-16 18:03:53
 */
 HTMLDecorators.StdDecorators.Init = (function (document, window) {
 
@@ -854,8 +854,31 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
          */
         this.script = null;
 
+        /**
+         * Returns the components template
+         *
+         * @var template
+         * @type string
+         * @memberOf HTMLDecorators.StdDecorators.Component
+         */
         this.template = '';
 
+        /**
+         * Returns the components slot template
+         *
+         * @var slotTemplate
+         * @type string
+         * @memberOf HTMLDecorators.StdDecorators.Component
+         */
+        this.slotTemplate = '';
+
+        /**
+         * Returns the component instances which need to be applied to the components node
+         *
+         * @var appliedDecorators
+         * @type string
+         * @memberOf HTMLDecorators.StdDecorators.Component
+         */
         this.appliedDecorators = {};
     }
     HTMLDecorators.ExtendsClass(Component, HTMLDecorators.Decorator);
@@ -881,6 +904,8 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
      */
     Component.prototype.render = async function () {
         await this.loadHTML.render();
+
+        this.slotTemplate = this.element.innerHTML;
 
         this.element.innerHTML = this.loadHTML.beforeParsingObj.html;
 
@@ -1141,6 +1166,10 @@ HTMLDecorators.StdDecorators.DateFormat = (function (document, window) {
     /**
      * Handles events
      *
+     * To force an event call in global
+     * you have to add "$global." to the
+     * id e.g. "$global.functionName"
+     *
      * @decorator Event
      * @decNamespace std
      * @decParam string id The id of the decorator
@@ -1171,14 +1200,20 @@ HTMLDecorators.StdDecorators.DateFormat = (function (document, window) {
             return;
         }
 
-        var component;
-        if(component = this.getComponent()) {
+        var component,
+            globalCall = false,
+            handler = this.config.handler;
+        if(/^\$global\./.test(handler)) {
+            globalCall = true;
+            handler = handler.replace(/\$global\./,'');
+        }
+        if((component = this.getComponent()) && !globalCall) {
             var args = 'component, e, decorator',
-                body = 'return component.' + this.config.handler + '(e, decorator)';
+                body = 'return component.' + handler + '(e, decorator)';
             new Function(args, body)(component, e, this);
         } else {
             var args = 'e, decorator',
-                body = 'return ' + this.config.handler + '(e, decorator)';
+                body = 'return ' + handler + '(e, decorator)';
             new Function(args, body)(e, this);
         }
     }
@@ -1424,13 +1459,13 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
         });
 
         /**
-         * Returns a list of registered HTMLDecorators.StdDecorators.Content instances
+         * Returns a map of registered HTMLDecorators.StdDecorators.Content instances
          *
-         * @var contents
+         * @var contentsMap
          * @memberOf HTMLDecorators.StdDecorators.Navigation
          * @type array
          */
-        this.contents = [];
+        this.contentsMap = {};
     }
     HTMLDecorators.ExtendsClass(Navigation, HTMLDecorators.Decorator);
     /**
@@ -1455,10 +1490,10 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
                 link.classList.add(this.config.activeClass);
             }
         }
-        for(j=0; j < this.contents.length; ++j) {
-            content = this.contents[j];
+        for(var contentId in this.contentsMap) {
+            content = this.contentsMap[contentId];
             content.visibility.hide();
-            if(content.config.id == id) {
+            if(contentId == id) {
                 content.visibility.show();
             }
         }
@@ -1559,10 +1594,14 @@ HTMLDecorators.StdDecorators.Content = (function (document, window) {
     Content.prototype.render = function () {
         this.visibility.hide();
 
+        // update references for when put with a @Component decorator
+        this.visibility.element = this.element;
+        this.visibility.id = this.id;
+
         var dec;
         if(dec = this.findById(this.config.nav)) {
             if(dec.name == 'Navigation') {
-                dec.contents.push(this);
+                dec.contentsMap[this.config.id] = this;
             } else {
                 this.log('Decorator must be from type "Navigation"');
             }

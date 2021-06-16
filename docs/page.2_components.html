@@ -354,6 +354,13 @@ You give the component data with the data parameter
                 &lt;/td&gt;
             &lt;/tr&gt;
         &lt;/table&gt;
+        &lt;div&gt;
+         ${__slot__}
+        &lt;/div&gt;
+        &lt;!-- 
+            The __slot__ will be replaced by the p-tag given in the decorator node.
+            Decorators or variables starting with @@ or $$ in __slot__ wont be parsed.
+            --&gt;
     &lt;/div&gt;
 &lt;/template&gt;
 &lt;script&gt;
@@ -374,7 +381,9 @@ You give the component data with the data parameter
 ...
 &lt;!-- In html you call it like that --&gt;
 @Component(path=componenttest.html)
-&lt;div&gt;&lt;/div&gt;</code></pre>
+&lt;div&gt;
+   &lt;p&gt;Some paragraph to pass into the component&lt;/p&gt;
+&lt;/div&gt;</code></pre>
 <h4>Events</h4>
 <p>In components you have the ability to create and send events.
 They are several methods available:</p>
@@ -408,7 +417,7 @@ this.broadcast('someEvent',someData);
 ...</code></pre></div>            </div>
         </div>
         <div class="footer">
-           2021 © Hendrik Weiler | 2021/15/06 18:03:03        </div>
+           2021 © Hendrik Weiler | 2021/16/06 18:03:58        </div>
     </div>
 </body>
 </html>

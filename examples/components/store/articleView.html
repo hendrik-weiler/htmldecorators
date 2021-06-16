@@ -1,11 +1,18 @@
 <template>
   <div class="article-view">
     ${product}
+
+    @Click(handler=addToCart)
+    <a href="#">Add to cart</a>
   </div>
 </template>
 
 <script>
   class ArticleView extends HTMLDecorators.Component {
+
+    addToCart() {
+      this.broadcast('cart-header-update',1);
+    }
 
     updated() {
       this.on('articleViewUpdate', function (data) {
