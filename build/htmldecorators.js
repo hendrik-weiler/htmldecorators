@@ -9,7 +9,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 Version: 0.1.6
 
-Build: 2021-06-15 18:03:01
+Build: 2021-06-16 18:03:53
 */
 /**
  * The htmldecorators namespace
@@ -512,7 +512,7 @@ var HTMLDecorators = (function(document,window) {
             console.warn(result.message, 'Possible variables: ' + keys.join(', '));
             return undefined;
         }
-        if(!result) {
+        if(typeof result == 'undefined') {
             console.warn('Failed to evaluate: "' + variableContent + '". ', 'Possible variables: ' + keys.join(', '));
         }
         return result;
@@ -588,7 +588,7 @@ var HTMLDecorators = (function(document,window) {
                     } else {
                         afterParseValue += '${' + inVariableName + ':not found' + '}';
                     }
-                    if(i+1 < value.length && value[i+1]==')') {
+                    if(i+1 < value.length && value[i+1]==')' && inParameterValue) {
                         inVariableDefinitionNextIsBracket = true;
                         i-=1;
                     }
@@ -976,6 +976,14 @@ var HTMLDecorators = (function(document,window) {
     /**
      * Finds a decorator by id
      *
+     * Searches first in
+     * 1. Component if found
+     * 2. Global
+     *
+     * To force a search in global
+     * you have to add "$global." to the
+     * id e.g. "$global.nav"
+     *
      * @param id The id of the decorator
      * @return {null|Decorator}
      * @public
@@ -983,9 +991,14 @@ var HTMLDecorators = (function(document,window) {
      * @method findById
      */
     Decorator.prototype.findById = function (id) {
-        var component;
+        var component,
+            globalCall = false;
+        if(/^\$global\./.test(id)) {
+            globalCall = true;
+            id = id.replace(/\$global\./,'');
+        }
         // search in component first if exist
-        if(component = this.getComponent()) {
+        if((component = this.getComponent()) && !globalCall) {
             return component.findById(id);
         } else {
             return FindById(id);
@@ -1018,6 +1031,10 @@ var HTMLDecorators = (function(document,window) {
      * Signature of cb:
      * void cb(mixed result)
      *
+     * To force a call in global
+     * you have to add "$global." to the
+     * id e.g. "$global.functionName"
+     *
      * @param expression The variable expression
      * @param obj The object
      * @param cb The callback function
@@ -1029,8 +1046,13 @@ var HTMLDecorators = (function(document,window) {
     Decorator.prototype.callFunction = function (expression, obj, cb) {
         if(!obj) obj = {};
         if(!cb) cb = new Function;
-        var component;
-        if(component = this.getComponent()) {
+        var component,
+            globalCall = false;
+        if(/^\$global\./.test(expression)) {
+            globalCall = true;
+            expression = expression.replace(/\$global\./,'');
+        }
+        if((component = this.getComponent()) && !globalCall) {
             var args = 'component, decorator, obj',
                 body = 'return component.' + expression + '(decorator, obj)',
                 result;
@@ -1074,6 +1096,16 @@ var HTMLDecorators = (function(document,window) {
         this.config = Object.assign(this.config, definition.params);
         this.id = definition.id;
         this.element = document.querySelector('[data-dec-id="' + definition.id + '"]');
+        // if a component replaced the initial node
+        if(!this.element) {
+            // get the correct node
+            // this will only work if decorators was put into the main node of the component
+            this.element = document.querySelector('[data-replaced-dec-id="' + definition.id + '"]');
+            if(this.element) {
+                // change the id to the actual id
+                this.id = this.element.getAttribute('data-dec-id');
+            }
+        }
         if(this.element && !noDecoratorRegistering) {
             if(!this.element.decorators) this.element.decorators = {};
             this.element.decorators[definition.name] = this;
@@ -1381,7 +1413,8 @@ var HTMLDecorators = (function(document,window) {
             if(!this.decorator.config.data) this.decorator.config.data = {};
             this.decorator.config.data = Object.assign(
                 this.decorator.config.data,{
-                    __uid__:this.decorator.loadHTML.uid
+                    __uid__:this.decorator.loadHTML.uid,
+                    __slot__ : this.decorator.slotTemplate
                 });
             var parsedHtml = this.parser.parse(this.decorator.template,this.decorator.config.data);
             this.element.innerHTML = parsedHtml;
@@ -1397,6 +1430,7 @@ var HTMLDecorators = (function(document,window) {
             }
 
             // insert before main element
+            node.setAttribute('data-replaced-dec-id', node.getAttribute('data-dec-id'));
             node.setAttribute('data-component-id',this.decorator.loadHTML.uid);
             node.setAttribute('data-dec-id',this.decorator.loadHTML.uid);
 
@@ -1425,6 +1459,7 @@ var HTMLDecorators = (function(document,window) {
 
             // apply parsed decorators
             await ApplyDecorators(this.parser.DecoratorList);
+
             this.updated();
         } else {
             this.log('Component decorator not found.');

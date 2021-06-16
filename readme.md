@@ -2,6 +2,10 @@
 
 This library parses html with decorators descriptions and executes the code behind them.
 
+Includes:
+* Templating
+* Components
+
 ### Table of contents
 
 1. [Files](#files)
@@ -175,4 +179,21 @@ var data = {
 document.body.innerHTML = data.html;
 // to apply the decorators call this function
 HTMLDecorators.ApplyDecorators(data.decs);
+```
+
+Its also possible to add data at the parsing step.
+```
+var variables = {
+    name : 'value',
+    othername : 'value2'
+};
+var parser = new HTMLDecorators.Parser();
+var data = {
+    // parse the input html
+    html : parser.parse(test1html,variables),
+    // get a list of all found decorators
+    decs : parser.DecoratorList
+};
+// all instances of ${name} or ${othername} will replaced
+// with the value
 ```
