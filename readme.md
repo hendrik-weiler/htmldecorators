@@ -1,6 +1,6 @@
 # htmldecorators
 
-This library parses html with decorators descriptions and executes the code behind them.
+This javascript library parses decorators annotations in html and executes the code behind them.
 
 Includes:
 * Templating
