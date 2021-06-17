@@ -1,3 +1,13 @@
 @Component(path=examples/components/fileSelect.html)
 <span></span>
-<br><a href="docs/page.2_components.html">More information in documentation</a>
+
+<br><br><br>
+
+@Component(path=examples/components/customSelect.html)
+<span>
+  <option value="0">Option 1</option>
+  <option value="1">Option 2</option>
+  <option value="2">Option 3</option>
+</span>
+
+<br><br><br><a href="docs/page.2_components.html">More information in the documentation</a>

@@ -13,6 +13,7 @@
         body {
             margin: 0;
             font-family: Arial;
+            height: 100vh;
         }
 
         * {
@@ -29,8 +30,7 @@
             width: 100%;
             background: #efefef;
             display: flex;
-            height: 100vh;
-            overflow: auto;
+            min-height: 100%;
             flex-flow: column;
             padding: 0 20px;
         }
@@ -47,6 +47,30 @@
 
         form .preview-container .output {
             border: 1px solid black;
+        }
+
+        .split-boxes {
+            display: flex;
+            gap: 10px; 
+        }
+
+        .split-boxes a {
+            width: 50%;
+            padding: 50px;
+            text-align: center;
+            border: 1px solid black;
+            text-decoration: none;
+            transition: 0.3s ease background-color;
+            background: transparent;
+        }
+
+        .split-boxes a:hover {
+            background: #cecece;
+        }
+
+        .split-boxes a h4 {
+            text-decoration: underline;
+            margin: 0;
         }
     </style>
     <script>
@@ -104,9 +128,17 @@
 <body>
     <div class="container">
         <h1>htmldecorators</h1>
-        <p>This library parses html with decorators descriptions and executes the code behind them.</p>
-        <a href="docs">Documentation</a><br>
-        <a href="https://github.com/hendrik-weiler/htmldecorators">Github</a>
+        <p>This javascript library parses decorators annotations in html and executes the code behind them.</p>
+        <div class="split-boxes">
+            <a href="docs">
+                <h4>Documentation</h4>
+                <p>Learn about using the library</p>
+            </a>
+            <a href="https://github.com/hendrik-weiler/htmldecorators">
+                <h4>Github</h4>
+                <p>Look at the source code</p>
+            </a>
+        </div>
         <br><br><br>
 
         <template data-htmldec>
@@ -123,7 +155,7 @@
             </select> <a id="sampleDataExposer" href="#">Expose sample data to console</a>
             <br><br>
             <div class="preview-container">
-                <textarea name="input" cols="30" rows="10"></textarea>
+                <textarea name="input" cols="30" rows="20"></textarea>
                 <div class="output"></div>
             </div>
         </form>
