@@ -8,6 +8,7 @@ Includes:
 
 Parser ports:
 * [c++](https://github.com/hendrik-weiler/htmldecoratorsparsercplusplus)
+* [php](https://github.com/hendrik-weiler/htmldecoratorsparserphp)
 
 ### Table of contents
 
