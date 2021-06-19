@@ -6,6 +6,10 @@ Includes:
 * Templating
 * Components
 
+Parser ports:
+* [c++](https://github.com/hendrik-weiler/htmldecoratorsparsercplusplus)
+* [php](https://github.com/hendrik-weiler/htmldecoratorsparserphp)
+
 ### Table of contents
 
 1. [Files](#files)
