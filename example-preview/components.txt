@@ -1,13 +1,26 @@
+@LoadHTMLStack(
+id=appStack,
+combined0=./build/htmldecorators-std-components.html
+)
 @Component(path=examples/components/fileSelect.html)
 <span></span>
 
 <br><br><br>
 
 @Component(path=examples/components/customSelect.html)
-<span>
+<select>
   <option value="0">Option 1</option>
   <option value="1">Option 2</option>
   <option value="2">Option 3</option>
-</span>
+</select>
+
+<br><br><br>
+
+@StdComponents.Select
+<select>
+  <option value="0">Option 1</option>
+  <option value="1">Option 2</option>
+  <option value="2">Option 3</option>
+</select>
 
 <br><br><br><a href="docs/page.2_components.html">More information in the documentation</a>
