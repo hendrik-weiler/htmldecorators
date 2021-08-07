@@ -1,0 +1,91 @@
+<template>
+  <div id="htmldec-fselect${__uid__}" class="htmldec-fileSelect">
+    <label for="htmldec-fselectInput${__uid__}">
+      Select file
+      @Change(handler="fSelectChange")
+      <input id="htmldec-fselectInput${__uid__}" type="file">
+    </label>
+    <span></span>
+  </div>
+</template>
+
+<script>
+  class FileSelect extends HTMLDecorators.Component {
+
+    noFileText = 'Please choose a file.';
+
+    updated() {
+      this.fSelect = document.getElementById('htmldec-fselect__uid__');
+      this.fileNameElm = this.fSelect.querySelector('span');
+
+      if(this.decorator.paramExist('multi') && this.decorator.config.multi == 'true') {
+        var input = document.getElementById('htmldec-fselectInput__uid__');
+        input.setAttribute('multiple','multiple');
+      }
+
+      this.fileNameElm.innerText = this.noFileText;
+    }
+
+    fSelectChange(e,dec) {
+      if(e.currentTarget.files.length == 0) {
+        return;
+      }
+
+      if(this.decorator.paramExist('multi') && this.decorator.config.multi == 'true') {
+
+        var files = e.currentTarget.files,
+            i = 0,
+            file,
+            names = [];
+        for(i; i < files.length; ++i) {
+          file = files[i];
+          names.push(file.name);
+        }
+        this.fileNameElm.innerText = names.join(', ');
+
+        this.emit('fileSelectSelected',files);
+
+      } else {
+        var file = e.currentTarget.files[0];
+        this.fileNameElm.innerText = file.name;
+
+        this.emit('fileSelectSelected',file);
+      }
+
+    }
+  }
+  HTMLDecorators.RegisterComponent('__uid__', FileSelect);
+</script>
+
+<style>
+
+  .htmldec-fileSelect {
+    border: 1px solid #cecece;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+  }
+
+  .htmldec-fileSelect span {
+    padding-left: 10px;
+  }
+
+  .htmldec-fileSelect label {
+    background: #0069d9;
+    border-radius: 5px;
+    padding: 10px 20px;
+    color: white;
+    display: inline-block;
+    font-family: Arial;
+    cursor: pointer;
+  }
+
+  .htmldec-fileSelect label:hover {
+    background: #007bff;
+  }
+
+  .htmldec-fileSelect input {
+    position: absolute;
+    left: -10000px;
+  }
+</style>

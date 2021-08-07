@@ -1,9 +1,24 @@
 <template>
   <div class="article-view">
-    ${product}
+    <div class="col-1">
+      <div class="product-image"></div>
+    </div>
+    <div class="col-2">
+      <h2>${product}</h2>
+      <p>${description}</p>
+      <p class="price">
+        @NumberFormat
+        <span class="amount">${price}</span> €<br>
+        <span class="vat">incl. VAT</span>
+      </p>
 
-    @Click(handler=addToCart)
-    <a href="#">Add to cart</a>
+      <div class="options">
+        @Click(handler=addToCart)
+        <a class="button" href="#">Add to cart</a>
+        @Click(handler=buyNow)
+        <a href="#" class="button">Buy now</a>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -11,7 +26,12 @@
   class ArticleView extends HTMLDecorators.Component {
 
     addToCart() {
-      this.broadcast('cart-header-update',1);
+      this.broadcast('cart-header-add',this.getData());
+    }
+
+    buyNow() {
+      this.broadcast('cart-header-add',this.getData());
+      this.broadcast('goToCart',true);
     }
 
     updated() {
@@ -26,6 +46,35 @@
 </script>
 
 <style>
+.article-view {
+  margin:auto;
+  width: 1280px;
+  display: flex;
+  margin-top: 20px;
+}
 
+.article-view .price .amount {
+  font-size: 24px;
+}
+
+.article-view .price .vat {
+  font-size: 12px;
+}
+
+.article-view .options {
+  border-top: 1px solid #cecece;
+  padding: 10px 0;
+}
+
+.article-view .col-1,
+.article-view .col-2 {
+  width: 50%;
+}
+
+.article-view .col-1 .product-image {
+  background: var(--primary-color);
+  width: 60%;
+  height: 600px;
+}
 
 </style>

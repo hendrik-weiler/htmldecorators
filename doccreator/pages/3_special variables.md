@@ -93,3 +93,5 @@ Example for \__slot__:
 HTMLDecorators.EvaluateTag(document.querySelector('#example'));
 </script>
 ```
+
+[Next Chapter](${page=troubleshooting})

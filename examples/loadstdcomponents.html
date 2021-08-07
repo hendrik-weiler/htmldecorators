@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LoadStdComponents</title>
+    <script data-evalhtmldec src="../lib/htmldecorators.js"></script>
+    <script src="../lib/stdDecorators/core.js"></script>
+    <script src="../lib/stdDecorators/event.js"></script>
+    <link rel="stylesheet" href="../lib/htmldecorators.css">
+    <script src="../lib/stdComponents/fileSelect.js"></script>
+    <script src="../lib/stdComponents/select.js"></script>
+    <style>
+        body .body {
+            display:none;
+        }
+        body.body .body {
+            display:inherit;
+        }
+        body.body .loading {
+            display:none;
+        }
+    </style>
+    <script>
+
+        window.data = {
+            list : {
+                1 : 'Value 11',
+                2 : 'Value 22',
+                3 : 'Value 33',
+                4 : 'Value 44'
+            }
+        }
+
+        decHandler(async function pageLoaderState(dec,state) {
+            console.log(state)
+            if(state == 'finished') {
+                document.body.classList.add('body');
+                decEvalTag(document.querySelector('body .body'), window.data);
+            }
+            if(state == 'loading') {
+                // in loading state
+            }
+        });
+    </script>
+</head>
+<body>
+<template data-htmldec>
+    @Init
+    @LoadHTMLStack(
+    id=appStack,
+    stateHandler=pageLoaderState,
+    combined0=../build/htmldecorators-std-components.html
+    )
+</template>
+<div class="loading">Loading...</div>
+<div class="body" data-htmldec-render>
+    <h1>Standard Components</h1>
+    <h4>Loaded through @Component</h4>
+    @Component(
+        fromStack=appStack,
+        withId=fileSelect,
+        multi=true
+    )
+    <div></div>
+    <h4>Loaded through @StdComponents.FileSelect</h4>
+    @StdComponents.FileSelect()
+    <div></div>
+    <h4>Loaded through @StdComponents.Select</h4>
+    @StdComponents.Select
+    <select>
+        <option value="1">Value 1</option>
+        <option value="2">Value 2</option>
+        <option value="3">Value 3</option>
+        <option value="4">Value 4</option>
+    </select>
+    <h4>Loaded through @StdComponents.Select with dynamic data</h4>
+    @StdComponents.Select(data=${list})
+    <div></div>
+</div>
+</body>
+</html>

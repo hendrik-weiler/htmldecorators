@@ -1,0 +1,238 @@
+/*
+Copyright 2021 Hendrik Weiler
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Version: 0.1.7
+
+Build: 2021-08-07 06:10:55
+*/
+--------------component=fileSelect
+<template>
+  <div id="htmldec-fselect${__uid__}" class="htmldec-fileSelect">
+    <label for="htmldec-fselectInput${__uid__}">
+      Select file
+      @Change(handler="fSelectChange")
+      <input id="htmldec-fselectInput${__uid__}" type="file">
+    </label>
+    <span></span>
+  </div>
+</template>
+
+<script>
+  class FileSelect extends HTMLDecorators.Component {
+
+    noFileText = 'Please choose a file.';
+
+    updated() {
+      this.fSelect = document.getElementById('htmldec-fselect__uid__');
+      this.fileNameElm = this.fSelect.querySelector('span');
+
+      if(this.decorator.paramExist('multi') && this.decorator.config.multi == 'true') {
+        var input = document.getElementById('htmldec-fselectInput__uid__');
+        input.setAttribute('multiple','multiple');
+      }
+
+      this.fileNameElm.innerText = this.noFileText;
+    }
+
+    fSelectChange(e,dec) {
+      if(e.currentTarget.files.length == 0) {
+        return;
+      }
+
+      if(this.decorator.paramExist('multi') && this.decorator.config.multi == 'true') {
+
+        var files = e.currentTarget.files,
+            i = 0,
+            file,
+            names = [];
+        for(i; i < files.length; ++i) {
+          file = files[i];
+          names.push(file.name);
+        }
+        this.fileNameElm.innerText = names.join(', ');
+
+        this.emit('fileSelectSelected',files);
+
+      } else {
+        var file = e.currentTarget.files[0];
+        this.fileNameElm.innerText = file.name;
+
+        this.emit('fileSelectSelected',file);
+      }
+
+    }
+  }
+  HTMLDecorators.RegisterComponent('__uid__', FileSelect);
+</script>
+
+<style>
+
+  .htmldec-fileSelect {
+    border: 1px solid #cecece;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+  }
+
+  .htmldec-fileSelect span {
+    padding-left: 10px;
+  }
+
+  .htmldec-fileSelect label {
+    background: #0069d9;
+    border-radius: 5px;
+    padding: 10px 20px;
+    color: white;
+    display: inline-block;
+    font-family: Arial;
+    cursor: pointer;
+  }
+
+  .htmldec-fileSelect label:hover {
+    background: #007bff;
+  }
+
+  .htmldec-fileSelect input {
+    position: absolute;
+    left: -10000px;
+  }
+</style>
+--------------component=select
+<script type="template">
+  @Click(handler=open)
+  <div id="htmldec-select${__uid__}" class="htmldec-select">
+    <span></span>
+    <select>${__slot__}</select>
+    <div class="htmldec-select-window"></div>
+  </div>
+</script>
+
+<script>
+  class Select extends HTMLDecorators.Component {
+
+    value = '';
+
+    open(e) {
+      this.broadcast('std-comp-select-hide-window');
+      var pos = e.currentTarget.getBoundingClientRect();
+      this.window.style.top = document.documentElement.scrollTop + pos.top + pos.height + 'px';
+      this.window.style.left = pos.left + 'px';
+      this.window.classList.add('show');
+    }
+
+    getValue() {
+      return this.value;
+    }
+
+    updated() {
+      this.selectContainer = document.getElementById('htmldec-select__uid__');
+      this.label = this.selectContainer.querySelector('span');
+      this.origSelect = this.selectContainer.querySelector('select');
+      this.window = this.selectContainer.querySelector('.htmldec-select-window');
+
+      this.window.innerHTML = '';
+
+      this.on('std-comp-select-hide-window', function () {
+        this.window.classList.remove('show');
+      }.bind(this));
+
+      document.documentElement.addEventListener('click', function (e) {
+        if(e.target.className != 'htmldec-select-window'
+            && e.target.className != 'htmldec-select'
+            && (e.target.tagName != 'span' && e.target.parentNode.className != 'htmldec-select')) {
+          this.broadcast('std-comp-select-hide-window');
+        }
+      }.bind(this),false);
+
+      var i = 0,
+          option,
+          options = this.origSelect.querySelectorAll('option'),
+          entry,
+          value;
+
+      if(this.decorator.paramExist('data') && !this.decorator.dataIsEmpty()) {
+        options = [];
+        for(var key in this.decorator.config.data) {
+          value = this.decorator.config.data[key];
+          if(!/^__/.test(key)) {
+            options.push({
+              value : key,
+              innerText : value
+            });
+          }
+        }
+      }
+
+      for(i; i < options.length; ++i) {
+        option = options[i];
+        entry = document.createElement('div');
+        entry.onclick = function (e) {
+          this.value = e.currentTarget.dataset.value;
+          this.label.innerText = e.currentTarget.innerText;
+        }.bind(this);
+        entry.dataset.value = option.value;
+        entry.innerText = option.innerText;
+        this.window.appendChild(entry);
+      }
+
+      if(options.length > 0) {
+        this.label.innerText = options[0].innerText;
+        this.value = options[0].value;
+      } else {
+        this.label.innerHTML = '&nbsp;';
+      }
+    }
+  }
+  HTMLDecorators.RegisterComponent('__uid__', Select);
+</script>
+
+<style>
+
+  .htmldec-select {
+    border: 1px solid #cecece;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    padding-right: 30px;
+    background-image: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjwhRE9DVFlQRSBzdmcgIFBVQkxJQyAnLS8vVzNDLy9EVEQgU1ZHIDEuMS8vRU4nICAnaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkJz48c3ZnIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDQ4IDQ4IiBoZWlnaHQ9IjQ4cHgiIGlkPSJMYXllcl8zIiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCA0OCA0OCIgd2lkdGg9IjQ4cHgiIHhtbDpzcGFjZT0icHJlc2VydmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPjxwb2x5Z29uIGZpbGw9IiMyNDFGMjAiIHBvaW50cz0iMCwxMi40MzggNDgsMTIuNDM4IDI0LDM1LjU2MiAiLz48L3N2Zz4=);
+    background-position: right 10px center;
+    background-size: 16px;
+    background-repeat: no-repeat;
+    cursor: pointer;
+  }
+
+  .htmldec-select select {
+    display: none;
+  }
+
+  .htmldec-select-window {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    background: white;
+    box-shadow: 0 0 10px rgba(0,0,0,0.25);
+    overflow: auto;
+    max-height: 300px;
+  }
+
+  .htmldec-select-window.show {
+    display: block;
+  }
+
+  .htmldec-select-window div {
+    padding: 10px;
+  }
+
+  .htmldec-select-window div:hover {
+    background: #cecece;
+    cursor: pointer;
+  }
+</style>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Navigation routes</title>
+    <script data-evalhtmldec src="../build/htmldecorators.js"></script>
+    <script src="../build/htmldecorators-std.js"></script>
+    <link rel="stylesheet" href="../build/htmldecorators.css">
+</head>
+<body>
+  <template data-htmldec>
+    @Init
+  </template>
+  <div data-htmldec>
+      @Navigation(
+          id=nav,
+          default=test/1,
+          hashChangeHandler=hashChange
+      )
+      <div>
+
+          <a data-id="test/1" href="">Test 1</a>
+          <a data-id="test/2" href="">Test 2</a>
+          <a data-id="test/3" href="">Test 3</a>
+
+          @Content(nav=nav,id=test/1)
+          <div>Test 1 body</div>
+          @Content(nav=nav,id=test/2)
+          <div>Test 2 body</div>
+          @Content(nav=nav,id=test/3)
+          <div>Test 3 body</div>
+      </div>
+  </div>
+  <script>
+      decHandler(function hashChange(nav) {
+          var hash = location.hash.replace('#','');
+          if(hash != '') {
+              nav.setActive(hash);
+          } else {
+              nav.setActive('test/1');
+          }
+      });
+  </script>
+  <style>
+      a.active {
+          color: red;
+      }
+  </style>
+</body>
+</html>

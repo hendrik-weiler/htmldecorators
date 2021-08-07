@@ -1,14 +1,417 @@
-<template>
+<script type="template">
+    @Navigation(id=nav,default=cart)
     <div class="cart-checkout">
-        cartcheckout
+        @Ref(id=checkoutBar)
+        <div class="checkout-bar">
+            <div>
+                <i></i>
+                <span>Cart</span>
+            </div>
+            <span></span>
+            <div>
+                <i></i>
+                <span>Delivery and payment</span>
+            </div>
+            <span></span>
+            <div>
+                <i></i>
+                <span>Finish</span>
+            </div>
+        </div>
+        @Content(nav=nav,id=cart)
+        <div>
+            <h2>Your cart</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th colspan="3" align="right">
+                            Price
+                        </th>
+                    </tr>
+                </thead>
+                @ForEach(data=${cartResult})
+                <tbody>
+                    <tr>
+                        <td width="100px">
+                            <div class="image"></div>
+                        </td>
+                        <td style="padding-left: 10px">
+                            <h4>$${product}</h4>
+                            <span>Amount </span>
+                            @@Change(handler=changeAmount,param=$${id})
+                            <input min="1" type="number" value="$${amount}">
+                            @@Click(handler=remove,param=$${id})
+                            <a href="javascript:">Delete</a>
+                        </td>
+                        <td align="right">
+                            @@NumberFormat
+                            <span>$${price * amount}</span> €
+                        </td>
+                    </tr>
+                </tbody>
+                @Show(if=${cartResult.length==0})
+                <tfoot>
+                    <tr>
+                        <td colspan="3">You have no items in the cart.</td>
+                    </tr>
+                </tfoot>
+                @Show(if=${cartResult.length > 0})
+                <tfoot>
+                    <tr>
+                        <td colspan="3" align="right">
+                            @NumberFormat
+                            <strong>${summaryPrice}</strong> €
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="line"></div>
+            @Show(if=${cartResult.length > 0})
+            @Click(handler=toCheckout)
+            <a href="javascript:" class="button">Go to checkout</a>
+        </div>
+        @Content(nav=nav,id=deliveryandpayment)
+        <div class="deliveryandpayment">
+            <form action="javascript:" name="deliveryandpayment">
+                <h2>Please enter the invoice address</h2>
+                <label for="company">
+                    <span>Company</span>
+                    <input name="company" type="text" id="company" />
+                </label>
+                <label for="name">
+                    <span>Name *</span>
+                    <input name="name" type="text" id="name" required />
+                </label>
+                <label for="prename">
+                    <span>Prename *</span>
+                    <input name="prename" type="text" id="prename" required />
+                </label>
+                <label for="street">
+                    <span>Street *</span>
+                    <input name="street" type="text" id="street" required />
+                </label>
+                <label for="zipcode">
+                    <span>Zipcode *</span>
+                    <input name="zipcode" type="text" id="zipcode" required />
+                </label>
+                <label for="city">
+                    <span>City *</span>
+                    <input name="city" type="text" id="city" required />
+                </label>
+                <label for="country">
+                    <span>Country *</span>
+                    <select name="country" id="country" required>
+                        <option value="DE">Germany</option>
+                        <option value="AT">Austria</option>
+                    </select>
+                </label>
+                <label for="isAlsoDelivery">
+                    @Change(handler=isAlsoDelivery)
+                    <input id="isAlsoDelivery" name="isAlsoDelivery" type="checkbox" value="1" checked>
+                    <span>Billing address also delivery address</span>
+                </label>
+                @Ref(id=delAddressArea)
+                @Hide
+                <div class="deladdress">
+                    <h2>Please enter the delivery address</h2>
+                    <label for="delivery_company">
+                        <span>Company</span>
+                        <input name="delivery_company" type="text" id="delivery_company" />
+                    </label>
+                    <label for="delivery_name">
+                        <span>Name *</span>
+                        <input name="delivery_name" type="text" id="delivery_name" />
+                    </label>
+                    <label for="delivery_prename">
+                        <span>Prename *</span>
+                        <input name="delivery_prename" type="text" id="delivery_prename" />
+                    </label>
+                    <label for="delivery_street">
+                        <span>Street *</span>
+                        <input name="delivery_street" type="text" id="delivery_street" />
+                    </label>
+                    <label for="delivery_zipcode">
+                        <span>Zipcode *</span>
+                        <input name="delivery_zipcode" type="text" id="delivery_zipcode" />
+                    </label>
+                    <label for="delivery_city">
+                        <span>City *</span>
+                        <input name="delivery_city" type="text" id="delivery_city" />
+                    </label>
+                    <label for="delivery_country">
+                        <span>Country *</span>
+                        <select name="delivery_country" id="delivery_country">
+                            <option value="DE">Germany</option>
+                            <option value="AT">Austria</option>
+                        </select>
+                    </label>
+                </div>
+                <h2>Please choose your payment method</h2>
+                <label class="pmethod" for="pmethod1">
+                    <input type="radio" name="pmethod" id="pmethod1" value="1" />
+                    <span>PayPal</span>
+                </label>
+                <br/>
+                <label class="pmethod" for="pmethod2">
+                    <input type="radio" name="pmethod" id="pmethod2" value="2" />
+                    <span>Pay on invoice</span>
+                </label>
+                <br><br><br>
+                @Click(handler=toFinish)
+                <a href="javascript:" class="button">Next step</a>
+            </form>
+        </div>
+        @Content(nav=nav,id=finish)
+        @Renderer(id=finishTmpl,data=${__data__})
+        <div class="finalize">
+            <div class="address-and-cart">
+                <div class="address">
+                    @@Show(if=$${addresses.isAlsoDelivery})
+                    <div>
+                        <h4>Delivery and invoice address</h4>
+                        <p>
+                            $${addresses.billingAddress.company}<br/>
+                            $${addresses.billingAddress.prename} $${addresses.billingAddress.name}<br/>
+                            $${addresses.billingAddress.street}<br/>
+                            $${addresses.billingAddress.zipcode} $${addresses.billingAddress.city}
+                        </p>
+                    </div>
+                    @@Show(if=$${!addresses.isAlsoDelivery})
+                    <div>
+                        <div style="display: flex;gap:20px;">
+                            <div>
+                                <h4>Invoice address</h4>
+                                <p>
+                                    $${addresses.billingAddress.company}<br/>
+                                    $${addresses.billingAddress.prename} $${addresses.billingAddress.name}<br/>
+                                    $${addresses.billingAddress.street}<br/>
+                                    $${addresses.billingAddress.zipcode} $${addresses.billingAddress.city}
+                                </p>
+                            </div>
+                            <div>
+                                <h4>Delivery address</h4>
+                                <p>
+                                    $${addresses.deliveryAddress.company}<br/>
+                                    $${addresses.deliveryAddress.prename} $${addresses.deliveryAddress.name}<br/>
+                                    $${addresses.deliveryAddress.street}<br/>
+                                    $${addresses.deliveryAddress.zipcode} $${addresses.deliveryAddress.city}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th colspan="3" align="right">
+                            Price
+                        </th>
+                    </tr>
+                    </thead>
+                    @@ForEach(data=$${cartResult})
+                    <tbody>
+                    <tr>
+                        <td width="100px">
+                            <div class="image"></div>
+                        </td>
+                        <td style="padding-left: 10px">
+                            <h4>$$${product}</h4>
+                            <span>Amount: $$${amount}</span>
+                        </td>
+                        <td align="right">
+                            @@@NumberFormat
+                            <span>$$${price * amount}</span> €
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="buybutton">
+                @@Click(handler=placeOrder)
+                <a href="javascript:" class="button">Place order</a>
+            </div>
+        </div>
+        @Content(nav=nav,id=ordered)
+        <div class="ordered">
+            <div>
+                <h1>You have successfully placed an order.</h1>
+                <p>Your package should arrive in several days.</p>
+                @Click(handler=$global.toStore)
+                <a href="javascript:" class="button">Buy more</a>
+            </div>
+        </div>
     </div>
-</template>
+</script>
 
 <script>
     class CartCheckout extends HTMLDecorators.Component {
 
-        updated() {
+        placeOrder() {
+            var nav = this.findById('nav');
+            nav.setActive('ordered');
 
+            var data = this.getData();
+            data.cart = [];
+            delete data.addresses;
+            delete data.cartResult;
+            this.broadcast('cart-header-update');
+        }
+
+        async toFinish() {
+            let form = document.forms.deliveryandpayment;
+            form.classList.add('handled');
+            if(!form.checkValidity()) {
+                this.broadcast('dialog-open',{
+                    text : 'The fields need to be filled out.',
+                    onClose : function (dec) {
+                        console.log(dec)
+                        return true;
+                    }
+                });
+                return;
+            }
+
+            // set variables for next page
+            var data = this.getData();
+            data.addresses = {
+                isAlsoDelivery : form.isAlsoDelivery.checked,
+                billingAddress : {
+                    company : form.company.value,
+                    prename : form.prename.value,
+                    name : form.name.value,
+                    street : form.street.value,
+                    zipcode : form.zipcode.value,
+                    city : form.city.value,
+                    country : form.country.value
+                },
+                deliveryAddress : {
+                    company : form.delivery_company.value,
+                    prename : form.delivery_prename.value,
+                    name : form.delivery_name.value,
+                    street : form.delivery_street.value,
+                    zipcode : form.delivery_zipcode.value,
+                    city : form.delivery_city.value,
+                    country : form.delivery_country.value
+                }
+            }
+
+            var nav = this.findById('nav');
+            nav.setActive('finish');
+            this.setStatus(3);
+
+            var finishTmpl = this.findById('finishTmpl');
+            finishTmpl.update();
+        }
+
+        setStatus(mode) {
+            var checkoutBar = this.findById('checkoutBar'),
+                divs = checkoutBar.element.getElementsByTagName('div'),
+                spans = checkoutBar.element.getElementsByTagName('span'),
+                i = 0;
+            for(i; i  < divs.length; ++i) {
+                divs[i].classList.remove('active');
+            }
+            for(i=0; i  < spans.length; ++i) {
+                spans[i].classList.remove('active');
+            }
+            switch (mode) {
+                case 1:
+                    divs[0].classList.add('active');
+                    break;
+                case 2:
+                    divs[0].classList.add('active');
+                    spans[1].classList.add('active');
+                    divs[1].classList.add('active');
+                    break;
+                case 3:
+                    divs[0].classList.add('active');
+                    spans[1].classList.add('active');
+                    divs[1].classList.add('active');
+                    spans[3].classList.add('active');
+                    divs[2].classList.add('active');
+                    break;
+            }
+        }
+
+        updated() {
+            document.forms.deliveryandpayment.pmethod.value = 1;
+            this.on('cartRefresh', async function () {
+                var data = this.getData(),
+                    cart = data.cart,
+                    items = data.items,
+                    i = 0,
+                    j,
+                    item,
+                    cartResult = [],
+                    summary = 0;
+                for(i; i < cart.length; ++i) {
+                    item = cart[i];
+                    for(j=0; j < items.length; ++j) {
+                        if(item.id == items[j].id) {
+                            var itemObj = Object.assign(items[j],{
+                                amount : item.amount
+                            });
+                            summary += itemObj.price * itemObj.amount;
+                            cartResult.push(itemObj);
+                        }
+                    }
+                }
+                data.summaryPrice = summary;
+                data.cartResult = cartResult;
+                await this.render();
+                await this.setStatus(1);
+            }.bind(this));
+        }
+
+        isAlsoDelivery(e) {
+            let area = this.findById('delAddressArea'),
+                inputs = area.element.querySelectorAll('input'),
+                i = 0;
+            for(i; i < inputs.length; ++i) {
+                inputs[i].removeAttribute('required');
+            }
+            if(e.currentTarget.checked) {
+                area.element.style.display = 'none';
+            } else {
+                area.element.style.display = '';
+                for(i=1; i < inputs.length; ++i) {
+                    inputs[i].setAttribute('required','required');
+                }
+            }
+        }
+
+        toCheckout() {
+            var nav = this.findById('nav');
+            nav.setActive('deliveryandpayment');
+            this.setStatus(2);
+        }
+
+        changeAmount(e,dec,param) {
+            var data = this.getData(),
+                cart = data.cart,
+                i = 0;
+            for(i; i < cart.length; ++i) {
+                if(cart[i].id == param) {
+                    cart[i].amount = e.currentTarget.value;
+                }
+            }
+            this.emit('cartRefresh');
+        }
+
+        remove(e,dec,param) {
+            var data = this.getData(),
+                cart = data.cart,
+                i = 0,
+                item,
+                newCart = [];
+            for(i; i < cart.length; ++i) {
+                item = cart[i];
+                if(item.id != param) {
+                    newCart.push(item);
+                }
+            }
+            data.cart = newCart;
+            this.emit('cartRefresh');
         }
 
     }
@@ -16,6 +419,119 @@
 </script>
 
 <style>
+.cart-checkout {
+    width: 1280px;
+    margin: auto;
+    margin-bottom: 100px;
+}
 
+.cart-checkout table .image {
+    background: var(--primary-color);
+    width: 100%;
+    height: 100px;
+}
+
+.cart-checkout table {
+    width: 100%;
+}
+
+.cart-checkout table h4 {
+    margin: 0;
+}
+
+.cart-checkout .line {
+    border: 1px solid var(--border-light-grey);
+    margin: 10px 0;
+}
+
+.deliveryandpayment .pmethod {
+    padding: 8px;
+    padding-left: 0;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.deliveryandpayment .pmethod input {
+    position: absolute;
+    top: -10000px;
+}
+
+.deliveryandpayment .pmethod input:checked + span {
+    background: var(--primary-color);
+    border-radius: 5px;
+    padding: 8px;
+    color: var(--white);
+}
+
+.checkout-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+}
+
+.checkout-bar > span {
+    border-top: 2px solid var(--border-light-grey);
+    width: 80%;
+}
+
+.checkout-bar > span.active {
+    border-color: var(--primary-color);
+}
+
+.checkout-bar > div {
+    display: flex;
+    width: 500px;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.checkout-bar > div > span {
+    margin: 10px 0;
+}
+
+.checkout-bar > div > i {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: var(--border-light-grey);
+}
+
+.checkout-bar > div.active > i {
+    background-color: var(--primary-color);
+}
+
+.finalize {
+    display: flex;
+    gap: 20px;
+}
+
+.finalize .address-and-cart {
+    display: flex;
+    flex-flow: column;
+    flex-grow: 1;
+}
+
+.finalize .buybutton {
+    display: flex;
+    flex-flow: column;
+    background: var(--border-light-grey);
+    padding: 20px;
+}
+
+.finalize .address {
+    border: 1px solid var(--border-light-grey);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.ordered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+    flex-flow: column;
+}
 
 </style>

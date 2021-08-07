@@ -189,3 +189,30 @@ var someData = {
 this.broadcast('someEvent',someData);
 ...
 ```
+After creating a component you can wrap your component into a decorator.
+```
+var mynamespace = {};
+class Test extends HTMLDecorators.Decorator {
+
+   // add this to the decorator
+   compWrapper = true;
+   
+   initialized() {
+        this.component = this.createDecorator('Component', HTMLDecorators.StdDecorators.Component,Object.assign({
+            fromStack : 'appStack',
+            withId : 'fileSelect'
+        }, this.config));
+   }
+
+   async render() {
+      await this.component.render();
+   }
+
+}
+mynamespace.Test = Test;
+...
+Now you should be able to call component by using
+@mynamespace.Test
+```
+
+[Next Chapter](${page=special_variables})

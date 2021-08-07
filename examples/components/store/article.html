@@ -26,8 +26,8 @@
   class Article extends HTMLDecorators.Component {
 
     toArticleView() {
-      this.broadcast('articleViewUpdate',this.getData());
-      this.broadcast('goToArticleView');
+      var data = this.getData();
+      location.hash = 'articleview/' + data.id;
     }
 
     updated() {
@@ -52,7 +52,7 @@
     width: 200px;
     height: 300px;
     display: block;
-    background: #0069d9;
+    background: var(--primary-color);
   }
 
   .article .meta {
