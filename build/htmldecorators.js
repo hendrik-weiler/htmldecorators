@@ -7,9 +7,9 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Version: 0.1.6
+Version: 0.1.7
 
-Build: 2021-06-16 18:03:53
+Build: 2021-08-07 06:10:55
 */
 /**
  * The htmldecorators namespace
@@ -1005,6 +1005,24 @@ var HTMLDecorators = (function(document,window) {
         }
     }
     /**
+     * Checks if the data parameter is empty or not
+     *
+     * @return {boolean}
+     * @public
+     * @memberOf HTMLDecorators.Decorator
+     * @method dataIsEmpty
+     */
+    Decorator.prototype.dataIsEmpty = function () {
+        var isEmpty = true;
+        for(var key in this.config.data) {
+            if(!/^__/.test(key)) {
+                isEmpty = false;
+                break;
+            }
+        }
+        return isEmpty;
+    }
+    /**
      * Creates a decorator to the base decorator element and returns it
      *
      * @param className The class name
@@ -1414,11 +1432,12 @@ var HTMLDecorators = (function(document,window) {
             this.decorator.config.data = Object.assign(
                 this.decorator.config.data,{
                     __uid__:this.decorator.loadHTML.uid,
-                    __slot__ : this.decorator.slotTemplate
+                    __slot__ : this.decorator.slotTemplate,
+                    __data__ : this.decorator.config.data
                 });
             var parsedHtml = this.parser.parse(this.decorator.template,this.decorator.config.data);
-            this.element.innerHTML = parsedHtml;
 
+            this.element.innerHTML = parsedHtml;
             var node = null,
                 i = 0,
                 len = this.element.childNodes.length;
@@ -1428,7 +1447,6 @@ var HTMLDecorators = (function(document,window) {
                     break;
                 }
             }
-
             // insert before main element
             node.setAttribute('data-replaced-dec-id', node.getAttribute('data-dec-id'));
             node.setAttribute('data-component-id',this.decorator.loadHTML.uid);
@@ -1451,7 +1469,9 @@ var HTMLDecorators = (function(document,window) {
             for(var key in this.decorator.appliedDecorators) {
                 this.decorator.appliedDecorators[key].element = this.element;
                 this.decorator.appliedDecorators[key].id = this.decorator.loadHTML.uid;
-                await this.decorator.appliedDecorators[key].render();
+                if(typeof this.decorator.appliedDecorators[key].compWrapper == 'undefined') {
+                    await this.decorator.appliedDecorators[key].render();
+                }
             }
 
             // recreate the events

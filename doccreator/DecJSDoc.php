@@ -338,6 +338,10 @@ class DecJSDoc
             file_put_contents($this->buildDir . '/' . $pageFileName, $pagesHTML);
         }
         file_put_contents($this->buildDir . '/search.data.js', "fillSearchData('" . base64_encode(json_encode($searchList)) . "')");
+
+        // copy css,js
+        file_put_contents($this->buildDir . '/script.js', file_get_contents($this->tmplDir . '/tmpl.script.js'));
+        file_put_contents($this->buildDir . '/style.css', file_get_contents($this->tmplDir . '/tmpl.style.css'));
     }
 
     /**

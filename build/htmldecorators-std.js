@@ -7,9 +7,9 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-Version: 0.1.6
+Version: 0.1.7
 
-Build: 2021-06-16 18:03:53
+Build: 2021-08-07 06:10:55
 */
 HTMLDecorators.StdDecorators.Init = (function (document, window) {
 
@@ -270,7 +270,7 @@ HTMLDecorators.StdDecorators.LoadHTML = (function (document, window) {
      */
     LoadHTML.prototype.callApplyDecs = function (obj) {
         // use internal cb property
-        if(this.config.applyHandler != '') {
+        if(this.paramExist(this.config.applyHandler)) {
             this.callFunction(this.config.applyHandler, obj);
         } else {
             var dec;
@@ -409,8 +409,10 @@ HTMLDecorators.StdDecorators.LoadHTMLStack = (function (document, window) {
      * @decParam string id0-XXX The ids of the pages to load
      * @decParam string path0-XXX The path to the pages to load
      * @decParam string stateHandler The handler for the different states loading,finished
+     * @decParam string combined0-XXX The path to the file with multiple components
      *
      * @example loadhtmlstack
+     * @example loadhtmlstack-combined
      *
      * @constructor
      * @class HTMLDecorators.StdDecorators.LoadHTMLStack
@@ -430,6 +432,28 @@ HTMLDecorators.StdDecorators.LoadHTMLStack = (function (document, window) {
     }
     HTMLDecorators.ExtendsClass(LoadHTMLStack, HTMLDecorators.Decorator);
     /**
+     * Parses a html file with multiple components
+     *
+     * @param text The text to parse
+     * @memberOf HTMLDecorators.StdDecorators.LoadHTMLStack
+     * @method render
+     * @return void
+     */
+    LoadHTMLStack.prototype.parseCombined = function (text) {
+        var split = text.split('--------------component='),
+            i = 0,
+            j,
+            name,
+            html;
+        for(i; i < split.length; ++i) {
+            html = split[i];
+            if(/^\/\*/.test(html)) continue;
+            split2 = html.split("\n");
+            name = split2.shift();
+            this.htmlStore[name] = split2.join("\n");
+        }
+    }
+    /**
      * Renders the decorator
      *
      * @memberOf HTMLDecorators.StdDecorators.LoadHTMLStack
@@ -447,6 +471,15 @@ HTMLDecorators.StdDecorators.LoadHTMLStack = (function (document, window) {
                 var load = await fetch(this.config['path'+i]),
                     loadedHTML = await load.text();
                 this.htmlStore[this.config['id'+i]] = loadedHTML;
+            } else {
+                break;
+            }
+        }
+        for(i=0; i < len; ++i) {
+            if(this.paramExist('combined'+ i)) {
+                var load = await fetch(this.config['combined'+i]),
+                    combinedHTML = await load.text();
+                this.parseCombined(combinedHTML);
             } else {
                 break;
             }
@@ -474,7 +507,7 @@ HTMLDecorators.StdDecorators.LoadData = (function (document, window) {
      * @decParam string path The path to load
      * @decParam string id The id to the @Navigations a[data-id] attribute
      * @decParam string type The data type e.g json,text
-     *
+     * @decParam string handler The handler function after retrieving data
      *
      * @constructor
      * @class HTMLDecorators.StdDecorators.LoadData
@@ -513,6 +546,9 @@ HTMLDecorators.StdDecorators.LoadData = (function (document, window) {
                     break;
             }
             this.responseData = output;
+            if(this.paramExist('handler')) {
+                this.callFunction(this.config.handler, this.responseData);
+            }
         } else {
             this.log('"type" and "path" needs to be defined');
         }
@@ -526,6 +562,9 @@ HTMLDecorators.StdDecorators.Script = (function (document, window) {
 
     /**
      * Executes a script
+     *
+     * Note: This should be used when html was loaded from an exernal source.
+     * The tag will not be executed when inserting it into the dom.
      *
      * @decorator Script
      * @decNamespace std
@@ -594,7 +633,7 @@ HTMLDecorators.StdDecorators.Ref = (function (document, window) {
     /**
      * Sets a reference
      *
-     * @decorator
+     * @decorator Ref
      * @decNamespace std
      * @decParam string id The id
      *
@@ -608,6 +647,65 @@ HTMLDecorators.StdDecorators.Ref = (function (document, window) {
     HTMLDecorators.ExtendsClass(Ref, HTMLDecorators.Decorator);
 
     return Ref;
+
+})(document, window);
+
+HTMLDecorators.StdDecorators.Renderer = (function (document, window) {
+
+    /**
+     * Be able to rerender its tags content with data
+     *
+     * @decorator Renderer
+     * @decNamespace std
+     * @decParam string id The id
+     * @decParam object data The data for rendering
+     *
+     * @class HTMLDecorators.StdDecorators.Renderer
+     * @extends HTMLDecorators.Decorator
+     * @constructor
+     */
+    function Renderer() {
+        HTMLDecorators.Decorator.call(this);
+
+        this.template = null;
+    }
+    HTMLDecorators.ExtendsClass(Renderer, HTMLDecorators.Decorator);
+    Renderer.prototype.update = function () {
+        var data = !this.paramExist('data') ? {} : this.config.data,
+            parser = new HTMLDecorators.Parser(),
+            parsedHTML = parser.parse(this.template, data);
+
+        var obj = {
+            html : parsedHTML,
+            decs : parser.DecoratorList
+        }
+        this.element.innerHTML = obj.html;
+
+        // use internal cb property
+        if(this.paramExist(this.config.applyHandler)) {
+            this.callFunction(this.config.applyHandler, obj);
+        } else {
+            var dec;
+            // if init was defined
+            if(dec = this.getStdInit()) {
+                // if a custom apply decorator handler was defined
+                if(dec.config.applyDecorationsHandler != '') {
+                    this.callFunction(dec.config.applyDecorationsHandler, obj);
+                } else {
+                    // use internal apply decorator handler
+                    dec.internalApplyDecoration(null, obj);
+                }
+            } else {
+                this.log('No decoration applier found');
+            }
+        }
+    }
+    Renderer.prototype.render = function () {
+        this.template = (' ' + this.element.innerHTML).slice(1);
+        this.element.innerHTML = '';
+    }
+
+    return Renderer;
 
 })(document, window);
 
@@ -743,7 +841,7 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
         this.element.innerHTML = obj.html;
 
         // use internal cb property
-        if(this.config.applyHandler != '') {
+        if(this.paramExist(this.config.applyHandler)) {
             this.callFunction(this.config.applyHandler, obj);
         } else {
             var dec;
@@ -769,7 +867,10 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
      * @return void
      */
     ForEach.prototype.render = function () {
-        this.template = (' ' + this.element.innerHTML).slice(1);
+        // only set the template if its empty
+        if(this.template == '') {
+            this.template = (' ' + this.element.innerHTML).slice(1);
+        }
         this.element.innerHTML = '';
         if(this.paramExist('data')) {
             var loadDataDec;
@@ -777,7 +878,7 @@ HTMLDecorators.StdDecorators.ForEach = (function (document, window) {
                 if(loadDataDec.name == 'LoadData') {
                     this.config.data = loadDataDec.responseData;
                 } else {
-                    this.log('"data" needs to point a @LoadData decorator');
+                    this.log('"data" needs to point to a @LoadData decorator');
                 }
             }
             // if invalid value
@@ -906,6 +1007,14 @@ HTMLDecorators.StdDecorators.Component = (function (document, window) {
         await this.loadHTML.render();
 
         this.slotTemplate = this.element.innerHTML;
+
+        // create a replacement for allowing setting any html later on
+        var nodeReplace = document.createElement('div'),
+            decorators = this.element.decorators;
+        this.element.parentNode.insertBefore(nodeReplace, this.element);
+        this.element.parentNode.removeChild(this.element);
+        this.element = nodeReplace;
+        this.element.decorators = decorators;
 
         this.element.innerHTML = this.loadHTML.beforeParsingObj.html;
 
@@ -1175,6 +1284,7 @@ HTMLDecorators.StdDecorators.DateFormat = (function (document, window) {
      * @decParam string id The id of the decorator
      * @decParam string type The event type e.g. 'click','submit' ...
      * @decParam string handler The handler function name
+     * @decParam string param A parameter for the event function
      *
      * @example event
      *
@@ -1200,6 +1310,8 @@ HTMLDecorators.StdDecorators.DateFormat = (function (document, window) {
             return;
         }
 
+        e.preventDefault();
+
         var component,
             globalCall = false,
             handler = this.config.handler;
@@ -1208,13 +1320,13 @@ HTMLDecorators.StdDecorators.DateFormat = (function (document, window) {
             handler = handler.replace(/\$global\./,'');
         }
         if((component = this.getComponent()) && !globalCall) {
-            var args = 'component, e, decorator',
-                body = 'return component.' + handler + '(e, decorator)';
-            new Function(args, body)(component, e, this);
+            var args = 'component, e, decorator, param',
+                body = 'return component.' + handler + '(e, decorator, param)';
+            new Function(args, body)(component, e, this, this.config.param);
         } else {
-            var args = 'e, decorator',
-                body = 'return ' + handler + '(e, decorator)';
-            new Function(args, body)(e, this);
+            var args = 'e, decorator, param',
+                body = 'return ' + handler + '(e, decorator, param)';
+            new Function(args, body)(e, this, this.config.param);
         }
     }
     /**
@@ -1445,6 +1557,7 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
      * @decParam string activeClass The active classname for the links
      * @decParam string hashHandler The handler function for hash detection
      * @decParam string default The id of a @Content decorator to set active as default
+     * @decParam boolean routes If routes are used or not
      *
      * @example navigation-content
      * @example navigation-hashhandler
@@ -1481,8 +1594,8 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
             i = 0,
             len = links.length,
             link,
-            j,
             content;
+
         for(i; i < len; ++i) {
             link = links[i];
             link.classList.remove(this.config.activeClass);
@@ -1490,6 +1603,7 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
                 link.classList.add(this.config.activeClass);
             }
         }
+
         for(var contentId in this.contentsMap) {
             content = this.contentsMap[contentId];
             content.visibility.hide();
@@ -1497,6 +1611,24 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
                 content.visibility.show();
             }
         }
+    }
+    /**
+     * Routes to the default content
+     *
+     * @memberOf HTMLDecorators.StdDecorators.Navigation
+     * @method toDefault
+     * @return void
+     */
+    Navigation.prototype.toDefault = function () {
+        var dec;
+        // timeout to wait till the decators have been rendered
+        setTimeout(function() {
+            if(dec = this.findById(this.config.default)) {
+                this.setActive(this.config.default);
+            } else {
+                this.log('Cant find @Content with id "' + this.config.default + '"');
+            }
+        }.bind(this),0);
     }
     /**
      * Renders the decorator
@@ -1525,28 +1657,21 @@ HTMLDecorators.StdDecorators.KeyPress = (function (document, window) {
                 }
                 if(dec = this.findById(dataset.id)) {
                     this.setActive(dataset.id);
+                    location.hash = dataset.id;
                 } else {
                     this.log('Decorator with ID "' + dataset.id + '" does not exist');
                 }
             }.bind(this);
         }
 
+        if(this.paramExist('default')) {
+            this.toDefault();
+        }
         if(this.paramExist('hashChangeHandler')) {
             window.addEventListener('hashchange', function (e) {
                 this.callFunction(this.config.hashChangeHandler);
             }.bind(this),false);
             this.callFunction(this.config.hashChangeHandler);
-        }
-        if(this.paramExist('default')) {
-            var dec;
-            // timeout to wait till the decators have been rendered
-            setTimeout(function() {
-                if(dec = this.findById(this.config.default)) {
-                    this.setActive(this.config.default);
-                } else {
-                    this.log('Cant find @Content with id "' + this.config.default + '"');
-                }
-            }.bind(this),0);
         }
     }
 

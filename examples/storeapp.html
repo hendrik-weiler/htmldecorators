@@ -11,15 +11,18 @@
 </head>
 <body>
 <template data-htmldec>
-    @Init(decimalFixed=2)
-    @LoadData(type=json,path=store-data.json,id=mailappdata)
+    @Init(
+        decimalFixed=2
+    )
+    @LoadData(type=json,path=store-data.json,id=mailappdata,handler=dataLoaded)
     @LoadHTMLStack(
         id=appStack,
         stateHandler=pageLoaderState,
         id0=article,path0=components/store/article.html,
         id1=cartHeader,path1=components/store/cartHeader.html,
         id2=cartCheckout,path2=components/store/cartCheckout.html,
-        id3=articleView,path3=components/store/articleView.html
+        id3=articleView,path3=components/store/articleView.html,
+        id4=dialog,path4=components/store/dialog.html
     )
 </template>
 <div class="loading">Loading...</div>
@@ -31,20 +34,25 @@
             <span>.com</span>
         </div>
         <div class="searchfield">
+            @KeyUp(handler=search)
             <input placeholder="Search for articles..." type="search">
         </div>
         <div class="cart">
             @Click(handler=$global.globalThis)
-            @Component(fromStack=appStack,withId=cartHeader)
+            @Component(fromStack=appStack,withId=cartHeader,data=${window.app})
             <span></span>
         </div>
     </div>
-    @Navigation(id=nav,default=store)
+    @Navigation(id=nav,default=store,hashChangeHandler=navHashChange)
     <div class="content">
         @Content(nav=nav,id=store)
         <div class="articles">
             <div class="articles-content">
-                @ForEach(data=mailappdata)
+                @ForEach(
+                    id=articles,
+                    data=mailappdata,
+                    filterHandler=articleFilter
+                )
                 <div>
                     @@Component(fromStack=appStack,withId=article,data=$${__entry__})
                     <div></div>
@@ -52,7 +60,7 @@
             </div>
         </div>
         @Content(nav=$global.nav,id=cart)
-        @Component(fromStack=appStack,withId=cartCheckout)
+        @Component(fromStack=appStack,withId=cartCheckout,data=${window.app})
         <div></div>
         @Content(nav=$global.nav,id=articleview)
         @Component(fromStack=appStack,withId=articleView)
@@ -61,6 +69,8 @@
     <div class="footer">
         ${new Date().getFullYear()} © store.com
     </div>
+    @Component(fromStack=appStack,withId=dialog)
+    <div></div>
 </div>
 </body>
 </html>

@@ -10,6 +10,7 @@ $license = file_get_contents('license.md');
 $buildDir = 'build';
 $libFolder = 'lib';
 $stdDecoratorFolder = $libFolder . '/stdDecorators';
+$stdComponentsFolder = $libFolder . '/stdComponents';
 if(file_exists($buildDir)) {
     foreach(glob($buildDir . '/*') as $file) {
         unlink($file);
@@ -48,4 +49,30 @@ foreach(glob($stdDecoratorFolder . '/*.js') as $file) {
 file_put_contents($buildDir . '/htmldecorators-std.js', $content);
 
 print "Build 'htmldecorators-std.js'" . PHP_EOL;
+
+//// STD Components
+///
+$content = '';
+$content .= $licenseComment . PHP_EOL;
+foreach(glob($stdComponentsFolder . '/*.html') as $file) {
+    $fileContent = file_get_contents($file);
+    $content .= '--------------component=' . basename($file,'.html') . PHP_EOL;
+    $content .= $fileContent . PHP_EOL;
+}
+
+file_put_contents($buildDir . '/htmldecorators-std-components.html', $content);
+
+print "Build 'htmldecorators-std-components.html'" . PHP_EOL;
+
+$content = '';
+$content .= $licenseComment . PHP_EOL;
+foreach(glob($stdComponentsFolder . '/*.js') as $file) {
+    $fileContent = file_get_contents($file);
+    $content .= $fileContent;
+}
+
+file_put_contents($buildDir . '/htmldecorators-std-components.js', $content);
+
+print "Build 'htmldecorators-std-components.js'" . PHP_EOL;
+
 print "Build finished" . PHP_EOL;

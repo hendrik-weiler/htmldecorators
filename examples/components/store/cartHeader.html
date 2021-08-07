@@ -2,7 +2,7 @@
     @Click(handler=toCart)
     <div class="card-header">
         <a href="#">
-            <span>(${entries})</span>
+            <span>(${cart.length})</span>
             <span>Cart</span>
         </a>
     </div>
@@ -12,9 +12,7 @@
     class CartHeader extends HTMLDecorators.Component {
 
         initializeData() {
-            this.setData({
-                entries : 0
-            });
+
         }
 
         toCart() {
@@ -22,10 +20,29 @@
         }
 
         updated() {
-            this.on('cart-header-update', function(number) {
-                this.setData({
-                    entries: number
-                });
+            this.on('cart-header-update', function () {
+                this.render();
+            }.bind(this));
+            this.on('cart-header-add', function(item) {
+                var data = this.getData(),
+                    i = 0,
+                    len = data.cart.length,
+                    itemObj,
+                    isInCart = false;
+                for(i; i < len; ++i) {
+                    itemObj = data.cart[i];
+                    if(itemObj.id == item.id) {
+                        itemObj.amount += 1;
+                        isInCart = true;
+                        break;
+                    }
+                }
+                if(!isInCart) {
+                    data.cart.push({
+                        id : item.id,
+                        amount : 1
+                    });
+                }
                 this.render();
             }.bind(this));
         }
@@ -43,7 +60,7 @@
     }
 
     .card-header:hover {
-        border-color: #0069d9;
+        border-color: var(--primary-color);
     }
 
     .card-header a {

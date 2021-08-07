@@ -49,4 +49,9 @@
         <td><?php print $method['description_fl'] ?>...</td>
     </tr>
 <?php endforeach; ?>
+    <?php if(count($data['properties']) == 0 && count($data['methods']) == 0): ?>
+        <tr>
+            <td colspan="2">This class has no properties or methods.</td>
+        </tr>
+    <?php endif; ?>
 </table>
